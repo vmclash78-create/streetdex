@@ -16,7 +16,35 @@ interface StoreHeaderProps {
 
 const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: StoreHeaderProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
   const isMobile = useIsMobile();
+  const { user, isAdmin, signIn, signUp, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setAuthLoading(true);
+    const result = isLoginMode ? await signIn(email, password) : await signUp(email, password);
+    if (result.error) {
+      setError(result.error.message);
+    } else if (!isLoginMode) {
+      setSuccess("Conta criada! Você já pode fazer login.");
+      setIsLoginMode(true);
+    } else {
+      setLoginOpen(false);
+      setEmail("");
+      setPassword("");
+    }
+    setAuthLoading(false);
+  };
 
   return (
     <>
