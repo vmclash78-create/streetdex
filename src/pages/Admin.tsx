@@ -5,6 +5,7 @@ import {
   Crown, Search, Bell, BarChart3,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
 
 // ─── TYPES ───
 type AdminView = "dashboard" | "products" | "orders" | "customers" | "settings";
