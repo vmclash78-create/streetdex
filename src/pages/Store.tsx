@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
 import HeroCarousel from "@/components/store/HeroCarousel";
 import ProductCard from "@/components/store/ProductCard";
@@ -28,6 +29,7 @@ const Store = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: dbProducts, isLoading } = useProducts();
+  const isMobile = useIsMobile();
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
