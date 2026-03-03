@@ -70,7 +70,6 @@ const Store = () => {
     dbProducts.forEach((p) => { if (p.category && p.status === "active") cats.add(p.category); });
     return Array.from(cats).sort();
   }, [dbProducts]);
-  };
 
   const filteredProducts = useMemo(() => {
     if (!dbProducts) return [];
