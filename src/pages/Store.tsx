@@ -139,6 +139,9 @@ const Store = () => {
           </div>
         </div>
       )}
+
+      <HeroCarousel />
+
       {/* Ticker */}
       <div className="py-2 overflow-hidden whitespace-nowrap bg-primary">
         <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-wide">
