@@ -221,16 +221,6 @@ export const useCreateSale = () => {
 
       // Decrease stock for each item
       for (const item of payload.items) {
-        const { error: stockError } = await supabase.rpc("has_role", { _user_id: saleData.id, _role: "admin" }).then(() => 
-          supabase
-            .from("products")
-            .update({ stock: undefined }) // We'll handle this differently
-            .eq("id", item.product_id)
-        );
-      }
-
-      // Actually decrease stock properly
-      for (const item of payload.items) {
         const { data: prod } = await supabase
           .from("products")
           .select("stock")
