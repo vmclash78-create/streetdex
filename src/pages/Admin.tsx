@@ -447,6 +447,175 @@ const ProductsView = () => {
   );
 };
 
+// ─── BANNERS ───
+const BannersView = () => {
+  const { data: banners, isLoading } = useAdminBanners();
+  const upsertBanner = useUpsertBanner();
+  const deleteBanner = useDeleteBanner();
+  const { data: products } = useAdminProducts();
+  const [editing, setEditing] = useState<Partial<DBBanner> | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [useProduct, setUseProduct] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
+
+  const openNew = () => {
+    setEditing({ img: "", cta: "Ver mais", active: true, sort_order: (banners?.length || 0) + 1 });
+    setUseProduct(false);
+    setSelectedProductId("");
+  };
+
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProductId(productId);
+    const product = products?.find((p) => p.id === productId);
+    if (product) {
+      setEditing((prev) => prev ? { ...prev, img: product.img } : prev);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!editing?.img) return;
+    await upsertBanner.mutateAsync(editing as any);
+    setEditing(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteBanner.mutateAsync(id);
+    setDeleteConfirm(null);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Banners do Carrossel</h1>
+        <button onClick={openNew} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+          <Plus size={16} /> Novo Banner
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
+      ) : !banners || banners.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground text-sm">Nenhum banner cadastrado</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {banners.map((b) => (
+            <div key={b.id} className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="aspect-[16/9] relative">
+                <img src={b.img} alt="Banner" className="w-full h-full object-cover" />
+                {!b.active && (
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[0.6rem] font-bold">Inativo</div>
+                )}
+                {b.active && (
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-green-500/20 text-green-600 dark:text-green-400 text-[0.6rem] font-bold">Ativo</div>
+                )}
+              </div>
+              <div className="p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">CTA: <span className="text-foreground font-semibold">{b.cta || "—"}</span></p>
+                  <p className="text-xs text-muted-foreground">Ordem: {b.sort_order}</p>
+                </div>
+                <div className="flex gap-1">
+                  <button onClick={() => { setEditing({ ...b }); setUseProduct(false); setSelectedProductId(""); }} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><Edit2 size={15} /></button>
+                  <button onClick={() => setDeleteConfirm(b.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={15} /></button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-card border border-border rounded-xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <p className="text-foreground text-sm mb-4">Tem certeza que deseja excluir este banner?</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm rounded-lg border border-border text-foreground hover:bg-muted transition-colors">Cancelar</button>
+              <button onClick={() => handleDelete(deleteConfirm)} className="px-4 py-2 text-sm rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">Excluir</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit/Create modal */}
+      {editing && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" onClick={() => setEditing(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-foreground font-bold">{editing.id ? "Editar Banner" : "Novo Banner"}</h3>
+              <button onClick={() => setEditing(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
+            </div>
+            <div className="space-y-4">
+              {/* Option to use product image */}
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={useProduct} onChange={(e) => setUseProduct(e.target.checked)} className="rounded border-border" />
+                <label className="text-sm text-foreground">Usar imagem de um produto</label>
+              </div>
+
+              {useProduct && products && (
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">Selecionar Produto</label>
+                  <select value={selectedProductId} onChange={(e) => handleSelectProduct(e.target.value)}
+                    className="w-full rounded-lg px-3 py-2 text-sm text-foreground border border-border bg-muted focus:border-primary outline-none transition-colors">
+                    <option value="">Selecione...</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">URL da Imagem *</label>
+                <input value={editing.img || ""} onChange={(e) => setEditing({ ...editing, img: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full rounded-lg px-3 py-2 text-sm text-foreground border border-border bg-muted focus:border-primary outline-none transition-colors" />
+              </div>
+
+              {editing.img && (
+                <div className="rounded-lg border border-border overflow-hidden aspect-[16/9]">
+                  <img src={editing.img} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">Texto do Botão (CTA)</label>
+                  <input value={editing.cta || ""} onChange={(e) => setEditing({ ...editing, cta: e.target.value })}
+                    placeholder="Ver mais"
+                    className="w-full rounded-lg px-3 py-2 text-sm text-foreground border border-border bg-muted focus:border-primary outline-none transition-colors" />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">Ordem</label>
+                  <input type="number" value={editing.sort_order ?? 0} onChange={(e) => setEditing({ ...editing, sort_order: parseInt(e.target.value) || 0 })}
+                    className="w-full rounded-lg px-3 py-2 text-sm text-foreground border border-border bg-muted focus:border-primary outline-none transition-colors" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={editing.active ?? true} onChange={(e) => setEditing({ ...editing, active: e.target.checked })}
+                  className="rounded border-border" />
+                <label className="text-sm text-foreground">Ativo (visível na loja)</label>
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm rounded-lg border border-border text-foreground hover:bg-muted transition-colors">Cancelar</button>
+                <button onClick={handleSave} disabled={upsertBanner.isPending || !editing.img}
+                  className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-1 disabled:opacity-50">
+                  {upsertBanner.isPending && <Loader2 size={14} className="animate-spin" />}
+                  <Save size={14} /> Salvar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── SALES ───
 const SalesView = () => {
   const { data: products } = useAdminProducts();
