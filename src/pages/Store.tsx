@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
 import HeroCarousel from "@/components/store/HeroCarousel";
 import ProductCard from "@/components/store/ProductCard";
@@ -28,6 +29,7 @@ const Store = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: dbProducts, isLoading } = useProducts();
+  const isMobile = useIsMobile();
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
@@ -105,12 +107,10 @@ const Store = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <StoreHeader cartCount={cartCount} searchQuery={searchQuery} onSearchChange={setSearchQuery} onCartClick={() => setView("cart")} />
+      <StoreHeader cartCount={cartCount} searchQuery={searchQuery} onSearchChange={setSearchQuery} onCartClick={() => setView("cart")} categories={categories} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
 
-      <HeroCarousel />
-
-      {/* Category filter bar */}
-      {categories.length > 0 && (
+      {/* Mobile category filter */}
+      {isMobile && categories.length > 0 && (
         <div className="bg-card border-b border-border">
           <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
             <button
@@ -139,6 +139,9 @@ const Store = () => {
           </div>
         </div>
       )}
+
+      <HeroCarousel />
+
       {/* Ticker */}
       <div className="py-2 overflow-hidden whitespace-nowrap bg-primary">
         <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-wide">
