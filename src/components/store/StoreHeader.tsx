@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { ShoppingCart, Search, Menu, X, MessageCircle, Truck, Heart, ChevronDown } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, MessageCircle, Truck, Heart, ChevronDown, User, LogOut, Lock, Mail, Loader2, Crown } from "lucide-react";
 import DuarttLogo from "./DuarttLogo";
 import ThemeToggle from "./ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { navLinks, WHATSAPP } from "./storeData";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface StoreHeaderProps {
   cartCount: number;
