@@ -24,6 +24,7 @@ const Store = () => {
   const [selectedProduct, setSelectedProduct] = useState<DBProduct | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: dbProducts, isLoading } = useProducts();
@@ -62,12 +63,23 @@ const Store = () => {
     setSelectedSizes((prev) => prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]);
   };
 
+  // Extract unique categories from products
+  const categories = useMemo(() => {
+    if (!dbProducts) return [];
+    const cats = new Set<string>();
+    dbProducts.forEach((p) => { if (p.category && p.status === "active") cats.add(p.category); });
+    return Array.from(cats).sort();
+  }, [dbProducts]);
+
   const filteredProducts = useMemo(() => {
     if (!dbProducts) return [];
     let result = dbProducts.filter((p) => p.status === "active");
 
     if (searchQuery) {
       result = result.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+    if (selectedCategory) {
+      result = result.filter((p) => p.category === selectedCategory);
     }
     if (selectedSizes.length > 0) {
       result = result.filter((p) => p.sizes.some((s) => selectedSizes.includes(s)));
@@ -77,13 +89,14 @@ const Store = () => {
       result = result.filter((p) => Number(p.price) >= range.min && Number(p.price) < range.max);
     }
     return result;
-  }, [dbProducts, searchQuery, selectedSizes, selectedPriceRange]);
+  }, [dbProducts, searchQuery, selectedCategory, selectedSizes, selectedPriceRange]);
 
-  const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null;
+  const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null || selectedCategory !== null;
 
   const clearFilters = () => {
     setSelectedSizes([]);
     setSelectedPriceRange(null);
+    setSelectedCategory(null);
   };
 
   if (view === "cart") {
@@ -96,6 +109,36 @@ const Store = () => {
 
       <HeroCarousel />
 
+      {/* Category filter bar */}
+      {categories.length > 0 && (
+        <div className="bg-card border-b border-border">
+          <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                selectedCategory === null
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-foreground hover:bg-muted"
+              }`}
+            >
+              Todos
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  selectedCategory === cat
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-foreground hover:bg-muted"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Ticker */}
       <div className="py-2 overflow-hidden whitespace-nowrap bg-primary">
         <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-wide">
@@ -167,6 +210,12 @@ const Store = () => {
               <button onClick={() => toggleSize(s)}><X size={12} /></button>
             </span>
           ))}
+          {selectedCategory && (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+              {selectedCategory}
+              <button onClick={() => setSelectedCategory(null)}><X size={12} /></button>
+            </span>
+          )}
           {selectedPriceRange !== null && (
             <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
               {PRICE_RANGES[selectedPriceRange].label}

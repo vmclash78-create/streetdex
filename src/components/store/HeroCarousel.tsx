@@ -2,9 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { heroBanners } from "./storeData";
+import { useHeroBanners } from "@/hooks/useStoreData";
+import { heroBanners as fallbackBanners } from "./storeData";
 
 const HeroCarousel = () => {
+  const { data: dbBanners } = useHeroBanners();
+  const banners = dbBanners && dbBanners.length > 0
+    ? dbBanners.filter((b) => b.active)
+    : fallbackBanners;
+
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000, stopOnInteraction: false })]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -19,11 +25,13 @@ const HeroCarousel = () => {
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi]);
 
+  if (banners.length === 0) return null;
+
   return (
     <div className="relative">
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">
-          {heroBanners.map((banner, i) => (
+          {banners.map((banner, i) => (
             <div key={i} className="flex-[0_0_100%] min-w-0 relative bg-foreground/5">
               <img
                 src={banner.img}
@@ -49,7 +57,7 @@ const HeroCarousel = () => {
         <ChevronRight size={20} />
       </button>
       <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-        {heroBanners.map((_, i) => (
+        {banners.map((_, i) => (
           <button
             key={i}
             onClick={() => emblaApi?.scrollTo(i)}
