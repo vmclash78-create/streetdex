@@ -110,6 +110,36 @@ const Store = () => {
 
       <HeroCarousel />
 
+      {/* Category filter bar */}
+      {categories.length > 0 && (
+        <div className="bg-card border-b border-border">
+          <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                selectedCategory === null
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-foreground hover:bg-muted"
+              }`}
+            >
+              Todos
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  selectedCategory === cat
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-foreground hover:bg-muted"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Ticker */}
       <div className="py-2 overflow-hidden whitespace-nowrap bg-primary">
         <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-wide">
