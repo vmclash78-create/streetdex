@@ -105,12 +105,10 @@ const Store = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <StoreHeader cartCount={cartCount} searchQuery={searchQuery} onSearchChange={setSearchQuery} onCartClick={() => setView("cart")} />
+      <StoreHeader cartCount={cartCount} searchQuery={searchQuery} onSearchChange={setSearchQuery} onCartClick={() => setView("cart")} categories={categories} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
 
-      <HeroCarousel />
-
-      {/* Category filter bar */}
-      {categories.length > 0 && (
+      {/* Mobile category filter */}
+      {isMobile && categories.length > 0 && (
         <div className="bg-card border-b border-border">
           <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
             <button
