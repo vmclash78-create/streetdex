@@ -63,12 +63,24 @@ const Store = () => {
     setSelectedSizes((prev) => prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]);
   };
 
+  // Extract unique categories from products
+  const categories = useMemo(() => {
+    if (!dbProducts) return [];
+    const cats = new Set<string>();
+    dbProducts.forEach((p) => { if (p.category && p.status === "active") cats.add(p.category); });
+    return Array.from(cats).sort();
+  }, [dbProducts]);
+  };
+
   const filteredProducts = useMemo(() => {
     if (!dbProducts) return [];
     let result = dbProducts.filter((p) => p.status === "active");
 
     if (searchQuery) {
       result = result.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+    if (selectedCategory) {
+      result = result.filter((p) => p.category === selectedCategory);
     }
     if (selectedSizes.length > 0) {
       result = result.filter((p) => p.sizes.some((s) => selectedSizes.includes(s)));
@@ -78,7 +90,7 @@ const Store = () => {
       result = result.filter((p) => Number(p.price) >= range.min && Number(p.price) < range.max);
     }
     return result;
-  }, [dbProducts, searchQuery, selectedSizes, selectedPriceRange]);
+  }, [dbProducts, searchQuery, selectedCategory, selectedSizes, selectedPriceRange]);
 
   const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null;
 
