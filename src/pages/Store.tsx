@@ -24,6 +24,7 @@ const Store = () => {
   const [selectedProduct, setSelectedProduct] = useState<DBProduct | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: dbProducts, isLoading } = useProducts();
