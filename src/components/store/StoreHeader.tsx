@@ -85,8 +85,24 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: St
             />
           </div>
 
-          {/* Right: theme + cart */}
+          {/* Right: user + theme + cart */}
           <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+            {user ? (
+              <div className="flex items-center gap-1">
+                {isAdmin && (
+                  <button onClick={() => navigate("/admin")} className="text-foreground w-9 h-9 flex items-center justify-center hover:text-primary transition-colors" title="Painel Admin">
+                    <Crown size={18} strokeWidth={1.5} />
+                  </button>
+                )}
+                <button onClick={signOut} className="text-foreground w-9 h-9 flex items-center justify-center hover:text-destructive transition-colors" title="Sair">
+                  <LogOut size={18} strokeWidth={1.5} />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => { setLoginOpen(true); setError(""); setSuccess(""); }} className="text-foreground w-9 h-9 flex items-center justify-center hover:text-primary transition-colors" title="Entrar">
+                <User size={20} strokeWidth={1.5} />
+              </button>
+            )}
             <ThemeToggle />
             <button onClick={onCartClick} className="relative text-foreground w-9 h-9 flex items-center justify-center">
               <ShoppingCart size={20} strokeWidth={1.5} />
