@@ -5,6 +5,7 @@ import {
   Crown, Search, Bell, BarChart3,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
 
 // ─── TYPES ───
 type AdminView = "dashboard" | "products" | "orders" | "customers" | "settings";
@@ -58,6 +59,7 @@ const statusLabels: Record<string, string> = {
 const Admin = () => {
   const [view, setView] = useState<AdminView>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { user, signOut } = useAuth();
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
@@ -94,6 +96,10 @@ const Admin = () => {
             <LogOut size={18} className="flex-shrink-0" />
             {!sidebarCollapsed && <span>Voltar à Loja</span>}
           </a>
+          <button onClick={signOut} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-destructive hover:text-destructive/80 transition-colors">
+            <LogOut size={18} className="flex-shrink-0" />
+            {!sidebarCollapsed && <span>Sair</span>}
+          </button>
         </div>
       </aside>
 
