@@ -10,9 +10,12 @@ interface StoreHeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onCartClick: () => void;
+  categories?: string[];
+  selectedCategory: string | null;
+  onCategoryChange: (cat: string | null) => void;
 }
 
-const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: StoreHeaderProps) => {
+const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, categories = [], selectedCategory, onCategoryChange }: StoreHeaderProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
@@ -82,6 +85,34 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: St
             />
           </div>
         </div>
+        {/* Desktop category nav */}
+        {!isMobile && categories.length > 0 && (
+          <div className="max-w-[1200px] mx-auto px-3 pb-2 flex items-center gap-1 overflow-x-auto">
+            <button
+              onClick={() => onCategoryChange(null)}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-[0.7rem] font-semibold border transition-colors ${
+                selectedCategory === null
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-foreground hover:bg-muted"
+              }`}
+            >
+              Todos
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
+                className={`flex-shrink-0 px-3 py-1 rounded-full text-[0.7rem] font-semibold border transition-colors ${
+                  selectedCategory === cat
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border text-foreground hover:bg-muted"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Sidebar drawer */}
