@@ -6,6 +6,7 @@ export type DBProduct = {
   name: string;
   price: number;
   old_price: number | null;
+  cost: number;
   img: string;
   img2: string | null;
   sizes: string[];
@@ -19,6 +20,40 @@ export type DBProduct = {
   updated_at: string;
 };
 
+export type DBSale = {
+  id: string;
+  customer_name: string | null;
+  payment_method: string;
+  discount: number;
+  total: number;
+  sale_date: string;
+  notes: string | null;
+  created_at: string;
+};
+
+export type DBSaleItem = {
+  id: string;
+  sale_id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  unit_cost: number;
+  size: string | null;
+  created_at: string;
+};
+
+export type DBExpense = {
+  id: string;
+  name: string;
+  amount: number;
+  category: string;
+  expense_date: string;
+  notes: string | null;
+  created_at: string;
+};
+
+// ─── PRODUCTS ───
 export const useProducts = () => {
   return useQuery({
     queryKey: ["products"],
@@ -80,6 +115,7 @@ export const useDeleteProduct = () => {
   });
 };
 
+// ─── HERO BANNERS ───
 export const useHeroBanners = () => {
   return useQuery({
     queryKey: ["hero-banners"],
@@ -94,6 +130,7 @@ export const useHeroBanners = () => {
   });
 };
 
+// ─── STORE SETTINGS ───
 export const useStoreSettings = () => {
   return useQuery({
     queryKey: ["store-settings"],
@@ -115,5 +152,146 @@ export const useUpdateSetting = () => {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["store-settings"] }),
+  });
+};
+
+// ─── SALES ───
+export const useSales = () => {
+  return useQuery({
+    queryKey: ["sales"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("*")
+        .order("sale_date", { ascending: false });
+      if (error) throw error;
+      return data as DBSale[];
+    },
+  });
+};
+
+export const useSaleItems = (saleId?: string) => {
+  return useQuery({
+    queryKey: ["sale-items", saleId],
+    enabled: !!saleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sale_items")
+        .select("*")
+        .eq("sale_id", saleId!);
+      if (error) throw error;
+      return data as DBSaleItem[];
+    },
+  });
+};
+
+export const useAllSaleItems = () => {
+  return useQuery({
+    queryKey: ["all-sale-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("sale_items").select("*");
+      if (error) throw error;
+      return data as DBSaleItem[];
+    },
+  });
+};
+
+export const useCreateSale = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      sale: Omit<DBSale, "id" | "created_at">;
+      items: Omit<DBSaleItem, "id" | "sale_id" | "created_at">[];
+    }) => {
+      // Insert sale
+      const { data: saleData, error: saleError } = await supabase
+        .from("sales")
+        .insert(payload.sale)
+        .select()
+        .single();
+      if (saleError) throw saleError;
+
+      // Insert items
+      const itemsWithSaleId = payload.items.map((item) => ({
+        ...item,
+        sale_id: saleData.id,
+      }));
+      const { error: itemsError } = await supabase.from("sale_items").insert(itemsWithSaleId);
+      if (itemsError) throw itemsError;
+
+      // Decrease stock for each item
+      for (const item of payload.items) {
+        const { data: prod } = await supabase
+          .from("products")
+          .select("stock")
+          .eq("id", item.product_id)
+          .single();
+        if (prod) {
+          await supabase
+            .from("products")
+            .update({ stock: Math.max(0, (prod.stock ?? 0) - item.quantity) })
+            .eq("id", item.product_id);
+        }
+      }
+
+      return saleData;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sales"] });
+      qc.invalidateQueries({ queryKey: ["all-sale-items"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+    },
+  });
+};
+
+export const useDeleteSale = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("sales").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sales"] });
+      qc.invalidateQueries({ queryKey: ["all-sale-items"] });
+    },
+  });
+};
+
+// ─── EXPENSES ───
+export const useExpenses = () => {
+  return useQuery({
+    queryKey: ["expenses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("expenses")
+        .select("*")
+        .order("expense_date", { ascending: false });
+      if (error) throw error;
+      return data as DBExpense[];
+    },
+  });
+};
+
+export const useCreateExpense = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (expense: Omit<DBExpense, "id" | "created_at">) => {
+      const { error } = await supabase.from("expenses").insert(expense);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["expenses"] }),
+  });
+};
+
+export const useDeleteExpense = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("expenses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["expenses"] }),
   });
 };
