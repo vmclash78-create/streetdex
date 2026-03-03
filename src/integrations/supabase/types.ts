@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      expenses: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string
+          expense_date: string
+          id: string
+          name: string
+          notes: string | null
+        }
+        Insert: {
+          amount: number
+          category?: string | null
+          created_at?: string
+          expense_date?: string
+          id?: string
+          name: string
+          notes?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string
+          expense_date?: string
+          id?: string
+          name?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
       hero_banners: {
         Row: {
           active: boolean | null
@@ -45,6 +75,7 @@ export type Database = {
         Row: {
           category: string | null
           colors: string[] | null
+          cost: number | null
           created_at: string
           free_shipping: boolean | null
           id: string
@@ -62,6 +93,7 @@ export type Database = {
         Insert: {
           category?: string | null
           colors?: string[] | null
+          cost?: number | null
           created_at?: string
           free_shipping?: boolean | null
           id?: string
@@ -79,6 +111,7 @@ export type Database = {
         Update: {
           category?: string | null
           colors?: string[] | null
+          cost?: number | null
           created_at?: string
           free_shipping?: boolean | null
           id?: string
@@ -119,6 +152,90 @@ export type Database = {
           id?: string
           last_name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sale_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          sale_id: string
+          size: string | null
+          unit_cost: number | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          product_name: string
+          quantity?: number
+          sale_id: string
+          size?: string | null
+          unit_cost?: number | null
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          sale_id?: string
+          size?: string | null
+          unit_cost?: number | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          created_at: string
+          customer_name: string | null
+          discount: number | null
+          id: string
+          notes: string | null
+          payment_method: string
+          sale_date: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string | null
+          discount?: number | null
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          sale_date?: string
+          total?: number
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string | null
+          discount?: number | null
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          sale_date?: string
+          total?: number
         }
         Relationships: []
       }
