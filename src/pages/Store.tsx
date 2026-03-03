@@ -92,11 +92,12 @@ const Store = () => {
     return result;
   }, [dbProducts, searchQuery, selectedCategory, selectedSizes, selectedPriceRange]);
 
-  const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null;
+  const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null || selectedCategory !== null;
 
   const clearFilters = () => {
     setSelectedSizes([]);
     setSelectedPriceRange(null);
+    setSelectedCategory(null);
   };
 
   if (view === "cart") {
