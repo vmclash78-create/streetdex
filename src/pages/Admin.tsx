@@ -45,6 +45,7 @@ const Admin = () => {
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
     { icon: Package, label: "Produtos", key: "products" },
+    { icon: Image, label: "Banners", key: "banners" },
     { icon: ShoppingCart, label: "Vendas", key: "sales" },
     { icon: Wallet, label: "Finanças", key: "finances" },
     { icon: Settings, label: "Configurações", key: "settings" },
@@ -109,6 +110,7 @@ const Admin = () => {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
+          {view === "banners" && <BannersView />}
           {view === "sales" && <SalesView />}
           {view === "finances" && <FinancesView />}
           {view === "settings" && <SettingsView />}
