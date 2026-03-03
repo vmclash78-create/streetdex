@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ShoppingCart, MessageCircle, X } from "lucide-react";
-import DuarttLogo from "./DuarttLogo";
+import { MessageCircle, X } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 
 interface ProductDetailProps {
@@ -19,7 +18,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
   return (
     <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onClick={onBack}>
       <div
-        className="bg-card rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative"
+        className="bg-card rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative transition-colors duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -29,9 +28,9 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
         {/* Content: side-by-side on desktop */}
         <div className="flex flex-col md:flex-row">
-          {/* Image section */}
+          {/* Image section with dark mode container */}
           <div className="md:w-1/2 p-4">
-            <div className="rounded-xl overflow-hidden bg-muted max-w-[500px] mx-auto aspect-[3/4]">
+            <div className="rounded-xl overflow-hidden bg-muted dark:bg-secondary dark:border dark:border-primary/20 max-w-[500px] mx-auto aspect-[3/4] transition-colors duration-300">
               <img
                 src={images[imgIndex]}
                 alt={product.name}
@@ -59,8 +58,8 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
             {/* Badges */}
             <div className="flex gap-1.5 mb-3">
-              {product.freeShipping && <span className="text-[0.65rem] font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">Frete grátis</span>}
-              {product.oldPrice && <span className="text-[0.65rem] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded-full">{discountPct(product.oldPrice, product.price)}% OFF</span>}
+              {product.freeShipping && <span className="text-[0.65rem] font-semibold bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Frete grátis</span>}
+              {product.oldPrice && <span className="text-[0.65rem] font-bold bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">{discountPct(product.oldPrice, product.price)}% OFF</span>}
             </div>
 
             {/* Price */}
@@ -106,7 +105,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </button>
 
             {/* WhatsApp */}
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2.5">
+            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2.5 transition-colors">
               <MessageCircle size={18} className="text-green-600 flex-shrink-0" />
               <p className="text-sm text-foreground">Dúvidas? <span className="text-green-600 font-semibold">WhatsApp</span></p>
             </a>
