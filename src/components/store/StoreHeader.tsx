@@ -180,6 +180,53 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: St
           </div>
         </div>
       )}
+
+      {/* Login modal */}
+      {loginOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" onClick={() => setLoginOpen(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-card border border-border rounded-xl p-6 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setLoginOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
+              <X size={18} />
+            </button>
+            <div className="flex flex-col items-center mb-5">
+              <Crown size={22} className="text-primary mb-1" strokeWidth={1.5} />
+              <span className="text-2xl font-light tracking-tight text-foreground font-serif">duartt</span>
+            </div>
+            <h2 className="text-base font-semibold text-foreground mb-4 text-center">
+              {isLoginMode ? "Entrar" : "Criar conta"}
+            </h2>
+            <form onSubmit={handleAuthSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">Email</label>
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required className="w-full h-9 pl-9 pr-3 rounded-lg border border-border bg-muted text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">Senha</label>
+                <div className="relative">
+                  <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="w-full h-9 pl-9 pr-3 rounded-lg border border-border bg-muted text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors" />
+                </div>
+              </div>
+              {error && <p className="text-destructive text-xs">{error}</p>}
+              {success && <p className="text-green-600 dark:text-green-400 text-xs">{success}</p>}
+              <button type="submit" disabled={authLoading} className="w-full h-9 bg-primary text-primary-foreground font-semibold rounded-lg text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {authLoading && <Loader2 size={15} className="animate-spin" />}
+                {isLoginMode ? "Entrar" : "Criar conta"}
+              </button>
+            </form>
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              {isLoginMode ? "Não tem conta?" : "Já tem conta?"}{" "}
+              <button onClick={() => { setIsLoginMode(!isLoginMode); setError(""); setSuccess(""); }} className="text-primary font-semibold hover:underline">
+                {isLoginMode ? "Criar conta" : "Entrar"}
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };
