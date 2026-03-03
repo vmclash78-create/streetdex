@@ -14,11 +14,11 @@ const ProductCard = ({ product, onClick }: ProductCardProps) => {
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group bg-card border border-border overflow-hidden cursor-pointer relative flex flex-col rounded-lg"
+      className="group bg-card border border-border overflow-hidden cursor-pointer relative flex flex-col rounded-lg transition-colors duration-300"
     >
-      {/* Image */}
-      <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
-        <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-0.5">
+      {/* Image with dark mode container */}
+      <div className="w-full aspect-[3/4] overflow-hidden bg-muted dark:bg-secondary relative p-1 dark:p-2 dark:border-b dark:border-primary/20 transition-all duration-300">
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-0.5">
           {product.oldPrice && (
             <span className="text-[0.55rem] font-bold bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded-sm">
               {discountPct(product.oldPrice, product.price)}% OFF
@@ -34,7 +34,7 @@ const ProductCard = ({ product, onClick }: ProductCardProps) => {
         <img
           src={hovered && product.img2 ? product.img2 : product.img}
           alt={product.name}
-          className="w-full h-full object-cover product-img-zoom transition-opacity duration-300"
+          className="w-full h-full object-cover product-img-zoom transition-opacity duration-300 rounded"
           onError={(e) => { (e.target as HTMLImageElement).src = fallbackImg; }}
         />
 
@@ -42,7 +42,7 @@ const ProductCard = ({ product, onClick }: ProductCardProps) => {
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex flex-col items-center justify-end pb-2 gap-1.5 opacity-0 group-hover:opacity-100">
           <div className="flex flex-wrap gap-0.5 justify-center px-1.5 mb-0.5">
             {product.sizes.map((s) => (
-              <span key={s} className="bg-card text-foreground text-[0.55rem] font-semibold px-1.5 py-0.5 rounded border border-border hover:bg-foreground hover:text-background transition-colors cursor-pointer"
+              <span key={s} className="bg-card text-foreground text-[0.55rem] font-semibold px-1.5 py-0.5 rounded border border-border hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
                 onClick={(e) => e.stopPropagation()}>
                 {s}
               </span>

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ShoppingCart, Search, Menu, X, MessageCircle, Headphones, Truck, Heart, ChevronDown } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, MessageCircle, Truck, Heart, ChevronDown } from "lucide-react";
 import DuarttLogo from "./DuarttLogo";
 import ThemeToggle from "./ThemeToggle";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { navLinks, WHATSAPP } from "./storeData";
 
 interface StoreHeaderProps {
@@ -13,6 +14,7 @@ interface StoreHeaderProps {
 
 const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: StoreHeaderProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <>
@@ -24,12 +26,21 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick }: St
       {/* Fixed header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-[1200px] mx-auto flex items-center gap-3 px-3 h-14">
-          {/* Left: hamburger + logo */}
-          <button onClick={() => setSidebarOpen(true)} className="text-foreground md:hidden flex-shrink-0">
-            <Menu size={20} />
-          </button>
+          {/* Left: logo (clickable on mobile to open menu) */}
           <div className="flex-shrink-0">
-            <DuarttLogo size="sm" />
+            {isMobile ? (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center gap-1 cursor-pointer"
+                role="button"
+                aria-label="Abrir menu de navegação"
+              >
+                <DuarttLogo size="sm" />
+                <ChevronDown size={14} className="text-muted-foreground" />
+              </button>
+            ) : (
+              <DuarttLogo size="sm" />
+            )}
           </div>
 
           {/* Center: search */}
