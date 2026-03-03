@@ -5,6 +5,7 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
+  Image,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,11 +14,12 @@ import {
   useStoreSettings, useUpdateSetting,
   useSales, useAllSaleItems, useCreateSale, useDeleteSale,
   useExpenses, useCreateExpense, useDeleteExpense,
-  type DBProduct, type DBSale, type DBSaleItem, type DBExpense,
+  useAdminBanners, useUpsertBanner, useDeleteBanner,
+  type DBProduct, type DBSale, type DBSaleItem, type DBExpense, type DBBanner,
 } from "@/hooks/useStoreData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
-type AdminView = "dashboard" | "products" | "sales" | "finances" | "settings";
+type AdminView = "dashboard" | "products" | "banners" | "sales" | "finances" | "settings";
 
 const formatPrice = (v: number) => `R$${Number(v).toFixed(2).replace(".", ",")}`;
 const formatDate = (d: string) => {
