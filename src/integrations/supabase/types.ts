@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      hero_banners: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          cta: string | null
+          id: string
+          img: string
+          sort_order: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          cta?: string | null
+          id?: string
+          img: string
+          sort_order?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          cta?: string | null
+          id?: string
+          img?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          colors: string[] | null
+          created_at: string
+          free_shipping: boolean | null
+          id: string
+          img: string
+          img2: string | null
+          name: string
+          old_price: number | null
+          price: number
+          sizes: string[]
+          sort_order: number | null
+          status: string | null
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          colors?: string[] | null
+          created_at?: string
+          free_shipping?: boolean | null
+          id?: string
+          img: string
+          img2?: string | null
+          name: string
+          old_price?: number | null
+          price: number
+          sizes?: string[]
+          sort_order?: number | null
+          status?: string | null
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          colors?: string[] | null
+          created_at?: string
+          free_shipping?: boolean | null
+          id?: string
+          img?: string
+          img2?: string | null
+          name?: string
+          old_price?: number | null
+          price?: number
+          sizes?: string[]
+          sort_order?: number | null
+          status?: string | null
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +119,27 @@ export type Database = {
           id?: string
           last_name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
