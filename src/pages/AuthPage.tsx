@@ -1,10 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Crown, Mail, Lock, Loader2 } from "lucide-react";
-import ThemeToggle from "@/components/store/ThemeToggle";
 
 const AuthPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to home - login is now handled via modal in the header
+    navigate("/", { replace: true });
+  }, [navigate]);
+
+  return null;
+};
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
