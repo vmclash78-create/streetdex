@@ -211,6 +211,12 @@ const Store = () => {
               <button onClick={() => toggleSize(s)}><X size={12} /></button>
             </span>
           ))}
+          {selectedCategory && (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+              {selectedCategory}
+              <button onClick={() => setSelectedCategory(null)}><X size={12} /></button>
+            </span>
+          )}
           {selectedPriceRange !== null && (
             <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
               {PRICE_RANGES[selectedPriceRange].label}
