@@ -150,8 +150,8 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
               <div className="border-t border-border my-2 mx-4" />
               <div className="px-4 py-2">
                 <p className="text-[0.6rem] uppercase font-bold text-muted-foreground tracking-widest mb-1.5">Categorias</p>
-                {["Camisas Personalizadas", "Camisas Casais", "Camisas Jogadores", "Camisas Olhar Apaixonado"].map((cat) => (
-                  <button key={cat} onClick={() => setSidebarOpen(false)} className="block w-full text-left py-1.5 text-sm text-foreground hover:text-primary transition-colors">
+              {categories.map((cat) => (
+                  <button key={cat} onClick={() => { onCategoryChange(selectedCategory === cat ? null : cat); setSidebarOpen(false); }} className={`block w-full text-left py-1.5 text-sm transition-colors ${selectedCategory === cat ? "text-primary font-semibold" : "text-foreground hover:text-primary"}`}>
                     {cat}
                   </button>
                 ))}
