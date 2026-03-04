@@ -29,21 +29,16 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
       {/* Fixed header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-[1200px] mx-auto flex items-center gap-3 px-3 h-14">
-          {/* Left: logo */}
-          <div className="flex-shrink-0">
-            {isMobile ? (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="flex items-center gap-1 cursor-pointer"
-                role="button"
-                aria-label="Abrir menu de navegação"
-              >
-                <DuarttLogo size="sm" />
-                <ChevronDown size={14} className="text-muted-foreground" />
-              </button>
-            ) : (
-              <DuarttLogo size="sm" />
-            )}
+          {/* Left: hamburger + logo */}
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center justify-center w-9 h-9 cursor-pointer text-foreground"
+              aria-label="Abrir menu de navegação"
+            >
+              <Menu size={20} strokeWidth={1.5} />
+            </button>
+            <DuarttLogo size="sm" />
           </div>
 
           {/* Center: search */}
