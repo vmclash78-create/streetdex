@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
+import OrderTracking from "./pages/OrderTracking";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/pedido/:id" element={<OrderTracking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

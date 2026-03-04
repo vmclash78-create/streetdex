@@ -6,6 +6,8 @@ import HeroCarousel from "@/components/store/HeroCarousel";
 import ProductCard from "@/components/store/ProductCard";
 import ProductDetail from "@/components/store/ProductDetail";
 import CartView from "@/components/store/CartView";
+import CheckoutView from "@/components/store/CheckoutView";
+import OrderSuccessView from "@/components/store/OrderSuccessView";
 import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
 import { type CartItem, type AppView, WHATSAPP, infoStripImg, formatPrice } from "@/components/store/storeData";
@@ -27,6 +29,7 @@ const Store = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [completedOrder, setCompletedOrder] = useState<{ id: string; number: number } | null>(null);
 
   const { data: dbProducts, isLoading } = useProducts();
   const isMobile = useIsMobile();
@@ -102,7 +105,31 @@ const Store = () => {
   };
 
   if (view === "cart") {
-    return <CartView cartItems={cartItems} onBack={() => setView("store")} onUpdateQty={updateQty} onRemove={removeItem} onClearAll={() => setCartItems([])} />;
+    return <CartView cartItems={cartItems} onBack={() => setView("store")} onUpdateQty={updateQty} onRemove={removeItem} onClearAll={() => setCartItems([])} onCheckout={() => setView("checkout")} />;
+  }
+
+  if (view === "checkout") {
+    return (
+      <CheckoutView
+        cartItems={cartItems}
+        onBack={() => setView("cart")}
+        onOrderComplete={(id, num) => {
+          setCompletedOrder({ id, number: num });
+          setCartItems([]);
+          setView("order-success");
+        }}
+      />
+    );
+  }
+
+  if (view === "order-success" && completedOrder) {
+    return (
+      <OrderSuccessView
+        orderId={completedOrder.id}
+        orderNumber={completedOrder.number}
+        onBackToStore={() => { setCompletedOrder(null); setView("store"); }}
+      />
+    );
   }
 
   return (

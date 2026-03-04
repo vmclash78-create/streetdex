@@ -36,7 +36,7 @@ export type Product = {
 };
 
 export type CartItem = { cartId: string; product: Product; size: string; qty: number };
-export type AppView = "store" | "cart" | "product";
+export type AppView = "store" | "cart" | "product" | "checkout" | "order-success";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 export const formatPrice = (v: number) => `R$${v.toFixed(2).replace(".", ",")}`;
