@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
@@ -70,6 +94,119 @@ export type Database = {
           sort_order?: number | null
         }
         Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          price: number
+          product_id: string | null
+          product_img: string | null
+          product_name: string
+          quantity: number
+          size: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          price: number
+          product_id?: string | null
+          product_img?: string | null
+          product_name: string
+          quantity?: number
+          size?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          price?: number
+          product_id?: string | null
+          product_img?: string | null
+          product_name?: string
+          quantity?: number
+          size?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address_cep: string | null
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_street: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          notes: string | null
+          order_number: number
+          payment_method: string
+          status: Database["public"]["Enums"]["order_status"]
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          address_cep?: string | null
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_street?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          payment_method?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          address_cep?: string | null
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_street?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          notes?: string | null
+          order_number?: number
+          payment_method?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -293,6 +430,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      order_status:
+        | "aguardando_pagamento"
+        | "pago"
+        | "preparando"
+        | "enviado"
+        | "entregue"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -421,6 +564,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      order_status: [
+        "aguardando_pagamento",
+        "pago",
+        "preparando",
+        "enviado",
+        "entregue",
+      ],
     },
   },
 } as const
