@@ -10,6 +10,7 @@ import Admin from "./pages/Admin";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import OrderTracking from "./pages/OrderTracking";
+import TrackOrder from "./pages/TrackOrder";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<AuthPage />} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/rastrear" element={<TrackOrder />} />
               <Route path="/pedido/:id" element={<OrderTracking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
