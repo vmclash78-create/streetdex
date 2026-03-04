@@ -5,7 +5,7 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image,
+  Image, ClipboardList, Eye, ChevronRight,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +19,7 @@ import {
 } from "@/hooks/useStoreData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
-type AdminView = "dashboard" | "products" | "banners" | "sales" | "finances" | "settings";
+type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "finances" | "settings";
 
 const formatPrice = (v: number) => `R$${Number(v).toFixed(2).replace(".", ",")}`;
 const formatDate = (d: string) => {
@@ -46,6 +46,7 @@ const Admin = () => {
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
     { icon: Package, label: "Produtos", key: "products" },
     { icon: Image, label: "Banners", key: "banners" },
+    { icon: ClipboardList, label: "Pedidos", key: "orders" },
     { icon: ShoppingCart, label: "Vendas", key: "sales" },
     { icon: Wallet, label: "Finanças", key: "finances" },
     { icon: Settings, label: "Configurações", key: "settings" },
@@ -111,6 +112,7 @@ const Admin = () => {
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
           {view === "banners" && <BannersView />}
+          {view === "orders" && <OrdersAdminView />}
           {view === "sales" && <SalesView />}
           {view === "finances" && <FinancesView />}
           {view === "settings" && <SettingsView />}
