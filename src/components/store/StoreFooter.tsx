@@ -37,7 +37,7 @@ const StoreFooter = ({ onNavigateHome }: StoreFooterProps) => (
         <MessageCircle size={16} /> Falar no WhatsApp
       </a>
       <div className="border-t border-border pt-3">
-        <p className="text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Duartt. Todos os direitos reservados.</p>
+        <p className="text-center text-xs text-muted-foreground">© {new Date().getFullYear()} OppsEvo SaaS. Todos os direitos reservados.</p>
       </div>
     </div>
   </footer>
