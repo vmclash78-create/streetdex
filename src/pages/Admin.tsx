@@ -1149,4 +1149,171 @@ const SettingsView = () => {
   );
 };
 
+// ─── ORDERS ADMIN ───
+const OrdersAdminView = () => {
+  const { data: orders, isLoading } = useOrders();
+  const updateStatus = useUpdateOrderStatus();
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const { data: orderItems } = useOrderItems(selectedOrderId || undefined);
+
+  const selectedOrder = orders?.find((o) => o.id === selectedOrderId);
+
+  const handleStatusChange = async (orderId: string, status: string) => {
+    await updateStatus.mutateAsync({ id: orderId, status });
+  };
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Pedidos</h1>
+
+      {isLoading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
+      ) : !orders || orders.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground text-sm">Nenhum pedido registrado</div>
+      ) : (
+        <div className="rounded-xl border border-border overflow-x-auto bg-card">
+          <table className="w-full min-w-[800px]">
+            <thead>
+              <tr className="bg-muted">
+                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Pedido</th>
+                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Cliente</th>
+                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Valor</th>
+                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Pagamento</th>
+                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Status</th>
+                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Data</th>
+                <th className="text-right text-xs font-semibold text-muted-foreground px-4 py-3">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => {
+                const statusInfo = getStatusInfo(order.status);
+                return (
+                  <tr key={order.id} className="border-t border-border hover:bg-muted/50 transition-colors">
+                    <td className="px-4 py-3 text-sm font-semibold text-foreground">#{order.order_number}</td>
+                    <td className="px-4 py-3">
+                      <p className="text-sm text-foreground">{order.customers?.name}</p>
+                      <p className="text-xs text-muted-foreground">{order.customers?.phone}</p>
+                    </td>
+                    <td className="px-4 py-3 text-sm font-semibold text-foreground">{formatPrice(Number(order.total))}</td>
+                    <td className="px-4 py-3 text-sm text-foreground capitalize">{order.payment_method}</td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        className={`text-xs px-2 py-1 rounded-full font-semibold border-0 outline-none cursor-pointer ${statusInfo.color}`}
+                      >
+                        {ORDER_STATUSES.map((s) => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
+                      {new Date(order.created_at).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => setSelectedOrderId(order.id)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                          <Eye size={15} />
+                        </button>
+                        <a href={`/pedido/${order.id}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                          <ChevronRight size={15} />
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Order detail modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" onClick={() => setSelectedOrderId(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-foreground font-bold">Pedido #{selectedOrder.order_number}</h3>
+              <button onClick={() => setSelectedOrderId(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Customer */}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Cliente</p>
+                <p className="text-sm font-semibold text-foreground">{selectedOrder.customers?.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedOrder.customers?.phone}</p>
+                {selectedOrder.customers?.email && <p className="text-sm text-muted-foreground">{selectedOrder.customers?.email}</p>}
+              </div>
+
+              {/* Address */}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Endereço</p>
+                <p className="text-sm text-foreground">{selectedOrder.address_street}, {selectedOrder.address_number}</p>
+                <p className="text-sm text-muted-foreground">{selectedOrder.address_neighborhood} - {selectedOrder.address_city}</p>
+                <p className="text-sm text-muted-foreground">CEP: {selectedOrder.address_cep}</p>
+                {selectedOrder.address_complement && <p className="text-sm text-muted-foreground">{selectedOrder.address_complement}</p>}
+              </div>
+
+              {/* Items */}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Produtos</p>
+                {orderItems ? (
+                  <div className="space-y-2">
+                    {orderItems.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 py-1">
+                        {item.product_img && <img src={item.product_img} alt="" className="w-8 h-8 rounded object-cover" />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground truncate">{item.product_name}</p>
+                          <p className="text-xs text-muted-foreground">{item.size && `${item.size} • `}{item.quantity}x</p>
+                        </div>
+                        <p className="text-sm font-semibold text-foreground">{formatPrice(Number(item.price) * item.quantity)}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Loader2 size={16} className="animate-spin text-primary" />
+                )}
+              </div>
+
+              {/* Payment & total */}
+              <div className="border-t border-border pt-3">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-muted-foreground">Pagamento</span>
+                  <span className="text-sm text-foreground capitalize">{selectedOrder.payment_method}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-bold text-foreground">Total</span>
+                  <span className="text-lg font-bold text-foreground">{formatPrice(Number(selectedOrder.total))}</span>
+                </div>
+              </div>
+
+              {selectedOrder.notes && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Observação</p>
+                  <p className="text-sm text-foreground">{selectedOrder.notes}</p>
+                </div>
+              )}
+
+              {/* Status change */}
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Alterar Status</p>
+                <div className="flex flex-wrap gap-2">
+                  {ORDER_STATUSES.map((s) => (
+                    <button key={s.value} onClick={() => handleStatusChange(selectedOrder.id, s.value)}
+                      className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-colors ${selectedOrder.status === s.value ? s.color : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default Admin;
