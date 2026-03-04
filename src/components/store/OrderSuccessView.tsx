@@ -1,4 +1,5 @@
-import { Check, ShoppingBag, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { Check, ExternalLink, Copy, CheckCheck } from "lucide-react";
 import DuarttLogo from "./DuarttLogo";
 import { Link } from "react-router-dom";
 
@@ -9,6 +10,14 @@ interface OrderSuccessViewProps {
 }
 
 const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessViewProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const copyOrderNumber = () => {
+    navigator.clipboard.writeText(String(orderNumber));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-2xl mx-auto">
       <header className="bg-card border-b border-border sticky top-0 z-50 flex items-center justify-center px-4 h-14">
@@ -24,6 +33,13 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
           Seu pedido <span className="font-semibold text-foreground">#{orderNumber}</span> foi registrado com sucesso. 
           Você será notificado sobre atualizações do status.
         </p>
+        <button
+          onClick={copyOrderNumber}
+          className="flex items-center gap-2 text-sm font-medium border border-border rounded-lg px-4 py-2 hover:bg-muted transition-colors"
+        >
+          {copied ? <CheckCheck size={16} className="text-green-600" /> : <Copy size={16} className="text-muted-foreground" />}
+          {copied ? "Copiado!" : `Copiar nº do pedido: #${orderNumber}`}
+        </button>
         <Link to={`/pedido/${orderId}`} className="flex items-center gap-2 text-primary font-semibold text-sm hover:underline">
           <ExternalLink size={16} /> Acompanhar pedido
         </Link>

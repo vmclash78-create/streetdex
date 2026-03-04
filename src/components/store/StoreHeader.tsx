@@ -139,10 +139,10 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
                 <MessageCircle size={16} className="text-green-600" />
                 <span className="text-sm text-foreground">WhatsApp</span>
               </a>
-              <button className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted w-full text-left">
+              <a href="/rastrear" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted w-full text-left">
                 <Truck size={16} className="text-foreground" />
                 <span className="text-sm text-foreground">Rastrear pedido</span>
-              </button>
+              </a>
               <button className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted w-full text-left">
                 <Heart size={16} className="text-foreground" />
                 <span className="text-sm text-foreground">Lista de desejos</span>
