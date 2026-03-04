@@ -9,9 +9,10 @@ interface CartViewProps {
   onUpdateQty: (id: string, q: number) => void;
   onRemove: (id: string) => void;
   onClearAll: () => void;
+  onCheckout: () => void;
 }
 
-const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll }: CartViewProps) => {
+const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onCheckout }: CartViewProps) => {
   const [note, setNote] = useState("");
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
 
@@ -90,10 +91,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll }: Cart
           <span className="text-lg font-bold text-foreground">{formatPrice(total)}</span>
         </div>
         <p className="text-xs text-green-600 text-right mb-1.5">{pixPrice(total)} com Pix</p>
-        <button onClick={() => {
-          const msg = cartItems.map((i) => `• ${i.product.name} (${i.size}) x${i.qty} — ${formatPrice(i.product.price * i.qty)}`).join("\n");
-          window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Olá! Quero finalizar meu pedido:\n\n${msg}\n\nTotal: ${formatPrice(total)}\n\n${note ? `Obs: ${note}` : ""}`)}`, "_blank");
-        }} className="w-full bg-primary text-primary-foreground font-semibold py-3 rounded-xl text-base hover:bg-primary/90 transition-colors">Finalizar pelo WhatsApp</button>
+        <button onClick={onCheckout} className="w-full bg-primary text-primary-foreground font-semibold py-3 rounded-xl text-base hover:bg-primary/90 transition-colors">Finalizar Pedido</button>
       </div>
     </div>
   );
