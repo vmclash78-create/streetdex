@@ -1,25 +1,5 @@
-import {
-  ShoppingCart,
-  Search,
-  ChevronRight,
-  ChevronLeft,
-  X,
-  Trash2,
-  MessageCircle,
-  Minus,
-  Plus,
-  Menu,
-  User,
-  Truck,
-  Percent,
-  Headphones,
-  Heart,
-  ChevronDown,
-  Crown,
-} from "lucide-react";
-
 // ─── CDN BASE ────────────────────────────────────────────────────────────────
-export const CDN = "https://acdn-us.mitiendanube.com/stores/005/091/071";
+const CDN = "https://acdn-us.mitiendanube.com/stores/005/091/071";
 export const WHATSAPP = "5585992783973";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
@@ -63,26 +43,6 @@ export const navLinks = [
   { label: "Camisas Jogadores", key: "Camisas Jogadores" },
   { label: "Camisas Casais", key: "Camisas Casais" },
   { label: "Perguntas Frequentes", key: "FAQ" },
-];
-
-// ─── PRODUCTS ────────────────────────────────────────────────────────────────
-export const products: Product[] = [
-  { id: 1, name: "KIT PRINCESA E PRINCIPE CLASH ROYALE", price: 169.99, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true },
-  { id: 2, name: "CAMISA OLHAR + TIME", price: 84.99, oldPrice: 99.90, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#000", "#fff", "#888"] },
-  { id: 3, name: "CAMISA OLHAR APAIXONADO", price: 84.99, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["PP", "P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#000", "#fff"] },
-  { id: 4, name: "CAMISA ERICK PULGAR 2.0", price: 84.99, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["PP", "P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#c00", "#000", "#fff"] },
-  { id: 5, name: "KIT ENROLADOS RAPUNZEL E JOSÉ", price: 169.99, oldPrice: 199.00, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true },
-  { id: 6, name: "CAMISA OROCHI 4.0", price: 85.00, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#c00", "#000", "#fff"] },
-  { id: 7, name: "CAMISA ERICK PULGAR", price: 84.99, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#000", "#fff"] },
-  { id: 8, name: "CAMISA BACO EXU DO BLUES", price: 84.95, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#000", "#fff", "#d2b48c", "#c00"] },
-  { id: 9, name: "CAMISA NEYMAR JR", price: 85.00, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#d2b48c", "#fff", "#000"] },
-  { id: 10, name: "CAMISA OROCHI 3.0", price: 90.00, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#000", "#fff", "#c00"] },
-  { id: 11, name: "CAMISA FILIPE RET", price: 92.00, oldPrice: 100.00, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true },
-  { id: 12, name: "KIT CAMISAS GOTEN E TRUNKS DRAGON BALL", price: 169.98, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#fff", "#000"] },
-  { id: 13, name: "CAMISA CRISTIANO R. Cr7", price: 85.00, oldPrice: 95.00, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true, colors: ["#fff", "#000", "#d2b48c"] },
-  { id: 14, name: "KIT CARROS CASAL Mcqueen e Sally", price: 170.00, oldPrice: 180.00, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true },
-  { id: 15, name: "CAMISA BACO RED", price: 85.00, img: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, img2: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true },
-  { id: 16, name: "CAMISA LOVE BACO", price: 85.00, img: `${CDN}/products/img_9527-2ebc70b83bd40ca1a617644287083362-480-0.webp`, img2: `${CDN}/products/img_9528-d32d6c557c60b13ed517644287165775-480-0.webp`, sizes: ["P", "M", "G", "GG", "XG"], freeShipping: true },
 ];
 
 export const heroBanners = [

@@ -226,21 +226,6 @@ export const useSales = () => {
   });
 };
 
-export const useSaleItems = (saleId?: string) => {
-  return useQuery({
-    queryKey: ["sale-items", saleId],
-    enabled: !!saleId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sale_items")
-        .select("*")
-        .eq("sale_id", saleId!);
-      if (error) throw error;
-      return data as DBSaleItem[];
-    },
-  });
-};
-
 export const useAllSaleItems = () => {
   return useQuery({
     queryKey: ["all-sale-items"],
