@@ -10,8 +10,8 @@ import CheckoutView from "@/components/store/CheckoutView";
 import OrderSuccessView from "@/components/store/OrderSuccessView";
 import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
-import { type CartItem, type AppView, WHATSAPP, infoStripImg, formatPrice } from "@/components/store/storeData";
-import { useProducts, type DBProduct } from "@/hooks/useStoreData";
+import { type CartItem, type AppView, infoStripImg, formatPrice } from "@/components/store/storeData";
+import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
 
 const ALL_SIZES = ["PP", "P", "M", "G", "GG", "XG"];
 const PRICE_RANGES = [
@@ -32,11 +32,18 @@ const Store = () => {
   const [completedOrder, setCompletedOrder] = useState<{ id: string; number: number } | null>(null);
 
   const { data: dbProducts, isLoading } = useProducts();
+  const { data: settings } = useStoreSettings();
   const isMobile = useIsMobile();
+
+  // Read settings from DB
+  const whatsapp = settings?.whatsapp || "5585992783973";
+  const storeName = settings?.store_name || "Street Dex";
+  const announcementText = settings?.announcement_text || "";
+  const couponCode = settings?.coupon_code || "PRIMEIRACOMPRA";
+  const couponDiscount = settings?.coupon_discount || "5";
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
-  // Convert DBProduct to Product for cart/detail compatibility — memoized to prevent unnecessary re-renders
   const toProduct = useCallback((p: DBProduct) => ({
     id: parseInt(p.id.slice(0, 8), 16),
     name: p.name,
@@ -68,7 +75,6 @@ const Store = () => {
     setSelectedSizes((prev) => prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]);
   };
 
-  // Extract unique categories from products
   const categories = useMemo(() => {
     if (!dbProducts) return [];
     const cats = new Set<string>();
@@ -134,14 +140,22 @@ const Store = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <StoreHeader cartCount={cartCount} searchQuery={searchQuery} onSearchChange={setSearchQuery} onCartClick={() => setView("cart")} categories={categories} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
+      <StoreHeader
+        cartCount={cartCount}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onCartClick={() => setView("cart")}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        whatsapp={whatsapp}
+        announcementText={announcementText}
+      />
 
       {/* Mobile category filter */}
       {isMobile && categories.length > 0 && (
         <div className="bg-card border-b border-border relative">
-          {/* Left fade */}
           <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-card to-transparent z-10 pointer-events-none" />
-          {/* Right fade */}
           <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
           <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
             <button
@@ -176,15 +190,15 @@ const Store = () => {
       {/* Ticker */}
       <div className="py-2 overflow-hidden whitespace-nowrap bg-primary">
         <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-wide">
-          <span className="mx-6">Cupom: PRIMEIRACOMPRA &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
-          <span className="mx-6">Cupom: PRIMEIRACOMPRA &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
+          <span className="mx-6">Cupom: {couponCode} &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
+          <span className="mx-6">Cupom: {couponCode} &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
         </div>
       </div>
 
       {/* Info strip */}
       <div className="bg-card border-b border-border">
         <div className="max-w-[1200px] mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5">
+          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full border-2 border-foreground/20 flex items-center justify-center flex-shrink-0">
               <MessageCircle size={18} className="text-foreground" />
             </div>
@@ -198,11 +212,11 @@ const Store = () => {
               <Percent size={18} className="text-foreground" />
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground">CUPOM • Até 5% OFF</p>
-              <p className="text-[0.65rem] text-muted-foreground font-mono">PRIMEIRACOMPRA</p>
+              <p className="text-xs font-bold text-foreground">CUPOM • Até {couponDiscount}% OFF</p>
+              <p className="text-[0.65rem] text-muted-foreground font-mono">{couponCode}</p>
             </div>
           </div>
-          <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5">
+          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               <img src={infoStripImg} alt="Estampa diferente" className="w-full h-full object-cover" />
             </div>
@@ -237,7 +251,6 @@ const Store = () => {
             {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
           </button>
 
-          {/* Active filter tags */}
           {selectedSizes.map((s) => (
             <span key={s} className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
               {s}
@@ -311,15 +324,15 @@ const Store = () => {
         )}
       </main>
 
-      <StoreFooter onNavigateHome={() => setView("store")} />
+      <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsapp} storeName={storeName} />
 
-      <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer"
+      <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
         className="fixed bottom-5 right-5 z-50 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-colors">
         <MessageCircle size={22} className="text-white" />
       </a>
 
       <div className="fixed bottom-5 left-5 z-50 w-12 h-12 bg-destructive rounded-full flex flex-col items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform">
-        <span className="text-destructive-foreground text-[0.6rem] font-bold leading-none">5%</span>
+        <span className="text-destructive-foreground text-[0.6rem] font-bold leading-none">{couponDiscount}%</span>
         <span className="text-destructive-foreground text-[0.45rem] font-bold leading-none">OFF</span>
       </div>
 

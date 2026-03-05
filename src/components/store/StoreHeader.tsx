@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ShoppingCart, Search, Menu, X, MessageCircle, Truck, Heart, ChevronDown } from "lucide-react";
-import DuarttLogo from "./DuarttLogo";
+import { ShoppingCart, Search, Menu, X, MessageCircle, Truck, Heart } from "lucide-react";
+import StreetDexLogo from "./StreetDexLogo";
 import ThemeToggle from "./ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { navLinks, WHATSAPP } from "./storeData";
+import { navLinks } from "./storeData";
 
 interface StoreHeaderProps {
   cartCount: number;
@@ -13,17 +13,22 @@ interface StoreHeaderProps {
   categories?: string[];
   selectedCategory: string | null;
   onCategoryChange: (cat: string | null) => void;
+  whatsapp?: string;
+  announcementText?: string;
 }
 
-const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, categories = [], selectedCategory, onCategoryChange }: StoreHeaderProps) => {
+const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, categories = [], selectedCategory, onCategoryChange, whatsapp, announcementText }: StoreHeaderProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  const whatsappNumber = whatsapp || "5585992783973";
+  const announcement = announcementText || "ENVIO COM 5 DIAS ÚTEIS | CUPOM: HAPPY | ❤️ FRETE GRÁTIS A PARTIR DE R$399,99";
 
   return (
     <>
       {/* Announcement bar */}
       <div className="bg-primary text-primary-foreground text-center py-1 text-[0.65rem] font-medium tracking-wide">
-        ENVIO COM 5 DIAS ÚTEIS | CUPOM: HAPPY | ❤️ FRETE GRÁTIS A PARTIR DE R$399,99
+        {announcement}
       </div>
 
       {/* Fixed header */}
@@ -38,7 +43,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
             >
               <Menu size={20} strokeWidth={1.5} />
             </button>
-            <DuarttLogo size="sm" />
+            <StreetDexLogo size="sm" />
           </div>
 
           {/* Center: search */}
@@ -119,7 +124,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-border">
-              <DuarttLogo size="sm" />
+              <StreetDexLogo size="sm" />
               <button onClick={() => setSidebarOpen(false)}>
                 <X size={18} className="text-muted-foreground" />
               </button>
@@ -135,7 +140,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
                 </button>
               ))}
               <div className="border-t border-border my-2 mx-4" />
-              <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted">
+              <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted">
                 <MessageCircle size={16} className="text-green-600" />
                 <span className="text-sm text-foreground">WhatsApp</span>
               </a>

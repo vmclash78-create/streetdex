@@ -57,8 +57,8 @@ const Admin = () => {
     <div className="flex h-screen bg-background transition-colors duration-300">
       <aside className={`${sidebarCollapsed ? "w-16" : "w-60"} transition-all duration-200 flex flex-col border-r border-border bg-card hidden md:flex`}>
         <div className="flex items-center gap-2 px-4 py-5 border-b border-border">
-          <Crown size={18} className="text-primary flex-shrink-0" />
-          {!sidebarCollapsed && <span className="text-lg font-light tracking-tight text-foreground font-serif">duartt</span>}
+          <span className="text-lg font-bold tracking-tight text-primary flex-shrink-0">SD</span>
+          {!sidebarCollapsed && <span className="text-lg font-light tracking-tight text-foreground">Street Dex</span>}
         </div>
         <nav className="flex-1 py-3">
           {navItems.map((item) => (
