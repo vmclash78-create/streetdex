@@ -6,8 +6,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
     <img
       src={streetdexLogo}
       alt="Street Dex"
-      className={`${imgSize} w-auto object-contain brightness-0 invert dark:invert`}
-      style={{ filter: "brightness(0) invert(1)" }}
+      className={`${imgSize} w-auto object-contain dark:brightness-100 brightness-0`}
     />
   );
 };
