@@ -34,8 +34,15 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
   const finalTotal = paymentMethod === "pix" ? total * 0.98 : total;
 
-  const validateStep1 = () => customer.name.trim().length >= 2 && customer.phone.trim().length >= 10;
-  const validateStep2 = () => address.cep.trim().length >= 8 && address.street.trim() && address.number.trim() && address.neighborhood.trim() && address.city.trim();
+  const validateStep1 = () => {
+    const name = customer.name.trim();
+    const phone = customer.phone.trim().replace(/\D/g, "");
+    return name.length >= 2 && name.length <= 100 && phone.length >= 10 && phone.length <= 11;
+  };
+  const validateStep2 = () => {
+    const cep = address.cep.trim().replace(/\D/g, "");
+    return cep.length === 8 && address.street.trim().length > 0 && address.street.trim().length <= 200 && address.number.trim().length > 0 && address.neighborhood.trim().length > 0 && address.city.trim().length > 0;
+  };
 
   const handleFinalize = async () => {
     try {
