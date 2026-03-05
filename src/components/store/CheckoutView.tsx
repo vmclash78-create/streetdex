@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy } from "lucide-react";
-import DuarttLogo from "./DuarttLogo";
+import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, formatPrice, pixPrice, fallbackImg, WHATSAPP } from "./storeData";
 import { useCreateOrder } from "@/hooks/useOrders";
 import { useToast } from "@/hooks/use-toast";
@@ -88,7 +88,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         <button onClick={step === 1 ? onBack : () => setStep((s) => (s - 1) as Step)}>
           <ChevronLeft size={20} className="text-foreground" />
         </button>
-        <div className="flex-1 flex justify-center"><DuarttLogo size="sm" /></div>
+        <div className="flex-1 flex justify-center"><StreetDexLogo size="sm" /></div>
         <div className="w-8" />
       </header>
 
