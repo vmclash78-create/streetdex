@@ -138,8 +138,12 @@ const Store = () => {
 
       {/* Mobile category filter */}
       {isMobile && categories.length > 0 && (
-        <div className="bg-card border-b border-border">
-          <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
+        <div className="bg-card border-b border-border relative">
+          {/* Left fade */}
+          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-card to-transparent z-10 pointer-events-none" />
+          {/* Right fade */}
+          <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
+          <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
             <button
               onClick={() => setSelectedCategory(null)}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
