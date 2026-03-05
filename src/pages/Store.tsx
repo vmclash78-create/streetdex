@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
@@ -36,8 +36,8 @@ const Store = () => {
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
-  // Convert DBProduct to Product for cart/detail compatibility
-  const toProduct = (p: DBProduct) => ({
+  // Convert DBProduct to Product for cart/detail compatibility — memoized to prevent unnecessary re-renders
+  const toProduct = useCallback((p: DBProduct) => ({
     id: parseInt(p.id.slice(0, 8), 16),
     name: p.name,
     price: Number(p.price),
@@ -47,7 +47,7 @@ const Store = () => {
     sizes: p.sizes,
     freeShipping: p.free_shipping,
     colors: p.colors || undefined,
-  });
+  }), []);
 
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {

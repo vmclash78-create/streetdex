@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Crown, Mail, Lock, Loader2 } from "lucide-react";
@@ -11,11 +11,12 @@ const AuthPage = () => {
   const { user, isAdmin, loading, signIn } = useAuth();
   const navigate = useNavigate();
 
-  // If already logged in as admin, redirect to admin
-  if (!loading && user && isAdmin) {
-    navigate("/admin", { replace: true });
-    return null;
-  }
+  // Redirect if already logged in as admin (useEffect prevents render-loop)
+  useEffect(() => {
+    if (!loading && user && isAdmin) {
+      navigate("/admin", { replace: true });
+    }
+  }, [loading, user, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

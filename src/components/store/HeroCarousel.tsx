@@ -36,6 +36,7 @@ const HeroCarousel = () => {
               <img
                 src={banner.img}
                 alt={`Carrossel ${i + 1}`}
+                loading={i === 0 ? "eager" : "lazy"}
                 className="w-full object-cover object-center"
                 style={{ maxHeight: "70vh" }}
               />

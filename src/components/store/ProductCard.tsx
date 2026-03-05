@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { type Product, formatPrice, pixPrice, discountPct, fallbackImg } from "./storeData";
 
 interface ProductCardProps {
@@ -6,7 +6,7 @@ interface ProductCardProps {
   onClick: () => void;
 }
 
-const ProductCard = ({ product, onClick }: ProductCardProps) => {
+const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -34,6 +34,7 @@ const ProductCard = ({ product, onClick }: ProductCardProps) => {
         <img
           src={hovered && product.img2 ? product.img2 : product.img}
           alt={product.name}
+          loading="lazy"
           className="w-full h-full object-cover product-img-zoom transition-opacity duration-300 rounded"
           onError={(e) => { (e.target as HTMLImageElement).src = fallbackImg; }}
         />
@@ -78,6 +79,8 @@ const ProductCard = ({ product, onClick }: ProductCardProps) => {
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;
