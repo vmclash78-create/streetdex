@@ -8,7 +8,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
       <img
         src={streetdexLogo}
         alt="Street Dex"
-        className={`${imgSize} w-auto object-contain dark:hidden brightness-0`}
+        className={`${imgSize} w-auto object-contain dark:hidden`}
       />
       <img
         src={streetdexLogoDark}
