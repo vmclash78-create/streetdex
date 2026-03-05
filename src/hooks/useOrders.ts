@@ -86,11 +86,11 @@ export const useOrderById = (orderId?: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, customers(*), order_items(*)")
+        .select("*, order_items(*)")
         .eq("id", orderId!)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as DBOrder & { customers: DBCustomer; order_items: DBOrderItem[] };
+      return data as (DBOrder & { order_items: DBOrderItem[] }) | null;
     },
   });
 };
@@ -127,31 +127,24 @@ export const useCreateOrder = () => {
       };
       items: { product_id?: string; product_name: string; product_img?: string; size?: string; quantity: number; price: number }[];
     }) => {
-      // Insert customer
-      const { data: customer, error: custErr } = await supabase
-        .from("customers")
-        .insert({ name: payload.customer.name, phone: payload.customer.phone, email: payload.customer.email || null })
-        .select()
-        .single();
-      if (custErr) throw custErr;
-
-      // Insert order
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert({ ...payload.order, customer_id: customer.id } as any)
-        .select()
-        .single();
-      if (orderErr) throw orderErr;
-
-      // Insert items
-      const items = payload.items.map((item) => ({
-        ...item,
-        order_id: order.id,
-      }));
-      const { error: itemsErr } = await supabase.from("order_items").insert(items);
-      if (itemsErr) throw itemsErr;
-
-      return order as DBOrder;
+      const { data, error } = await supabase.rpc("create_storefront_order", {
+        p_customer_name: payload.customer.name,
+        p_customer_phone: payload.customer.phone,
+        p_customer_email: payload.customer.email || "",
+        p_total: payload.order.total,
+        p_payment_method: payload.order.payment_method,
+        p_address_cep: payload.order.address_cep || "",
+        p_address_street: payload.order.address_street || "",
+        p_address_number: payload.order.address_number || "",
+        p_address_neighborhood: payload.order.address_neighborhood || "",
+        p_address_city: payload.order.address_city || "",
+        p_address_complement: payload.order.address_complement || "",
+        p_notes: payload.order.notes || "",
+        p_items: JSON.stringify(payload.items),
+      });
+      if (error) throw error;
+      const result = data as unknown as { id: string; order_number: number };
+      return { id: result.id, order_number: result.order_number } as DBOrder;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
