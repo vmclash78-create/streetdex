@@ -615,7 +615,7 @@ const SalesView = () => {
       return { product_id: l.productId, product_name: p.name, unit_price: Number(p.price), unit_cost: Number(p.cost) || 0, quantity: l.quantity, size: l.size || null };
     });
     if (items.length === 0) return;
-    await createSale.mutateAsync({ sale_date: saleDate, customer_name: customerName || null, payment_method: paymentMethod, discount, total, items });
+    await createSale.mutateAsync({ sale: { sale_date: saleDate, customer_name: customerName || null, payment_method: paymentMethod, discount, total, notes: null }, items });
     setShowForm(false);
     setCartLines([{ productId: "", quantity: 1, size: "" }]);
     setCustomerName("");
