@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Crown, Mail, Lock, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -11,7 +16,6 @@ const AuthPage = () => {
   const { user, isAdmin, loading, signIn } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in as admin (useEffect prevents render-loop)
   useEffect(() => {
     if (!loading && user && isAdmin) {
       navigate("/admin", { replace: true });
@@ -26,7 +30,6 @@ const AuthPage = () => {
     if (result.error) {
       setError(result.error.message);
     } else {
-      // signIn succeeded — wait briefly for role check then navigate
       setTimeout(() => navigate("/admin", { replace: true }), 500);
     }
     setAuthLoading(false);
@@ -42,56 +45,62 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-xl p-8 w-full max-w-sm shadow-2xl">
-        <div className="flex flex-col items-center mb-6">
+      <Card className="w-full max-w-sm shadow-2xl">
+        <CardHeader className="flex flex-col items-center pb-2">
           <Crown size={28} className="text-primary mb-2" strokeWidth={1.5} />
           <span className="text-2xl font-light tracking-tight text-foreground font-serif">duartt</span>
           <p className="text-xs text-muted-foreground mt-1">Painel Administrativo</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs text-muted-foreground mb-1">Email</label>
-            <div className="relative">
-              <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@email.com"
-                required
-                className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-muted text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-              />
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <div className="relative mt-1">
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@email.com"
+                  required
+                  className="pl-9"
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <label className="block text-xs text-muted-foreground mb-1">Senha</label>
-            <div className="relative">
-              <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-                className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-muted text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-              />
+            <div>
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative mt-1">
+                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="pl-9"
+                />
+              </div>
             </div>
-          </div>
-          {error && <p className="text-destructive text-xs">{error}</p>}
-          <button
-            type="submit"
-            disabled={authLoading}
-            className="w-full h-10 bg-primary text-primary-foreground font-semibold rounded-lg text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {authLoading && <Loader2 size={15} className="animate-spin" />}
-            Entrar
-          </button>
-        </form>
-        <a href="/" className="block text-center text-xs text-muted-foreground mt-4 hover:text-foreground transition-colors">
-          ← Voltar à loja
-        </a>
-      </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" disabled={authLoading} className="w-full gap-2">
+              {authLoading && <Loader2 size={15} className="animate-spin" />}
+              Entrar
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="justify-center">
+          <a href="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            ← Voltar à loja
+          </a>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

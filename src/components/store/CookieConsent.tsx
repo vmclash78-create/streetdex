@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const CookieConsent = () => {
   const [dismissed, setDismissed] = useState(() => localStorage.getItem("cookie_consent") === "true");
@@ -8,12 +9,12 @@ const CookieConsent = () => {
       <p className="text-xs leading-relaxed">
         Ao navegar por este site <strong>você aceita o uso de cookies</strong> para agilizar a sua experiência de compra.
       </p>
-      <button
+      <Button
+        size="sm"
         onClick={() => { localStorage.setItem("cookie_consent", "true"); setDismissed(true); }}
-        className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1.5 rounded flex-shrink-0 hover:bg-primary/90 transition-colors"
       >
         ENTENDI
-      </button>
+      </Button>
     </div>
   );
 };

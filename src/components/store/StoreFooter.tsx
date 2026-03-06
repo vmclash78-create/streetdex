@@ -1,5 +1,6 @@
 import { MessageCircle, Truck } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
+import { Button } from "@/components/ui/button";
 
 interface StoreFooterProps {
   onNavigateHome: () => void;
@@ -27,20 +28,14 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
             <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Navegação</h4>
             <ul className="space-y-1.5">
               <li>
-                <button
-                  onClick={onNavigateHome}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <Button variant="link" onClick={onNavigateHome} className="text-muted-foreground hover:text-foreground p-0 h-auto text-sm">
                   Início
-                </button>
+                </Button>
               </li>
               <li>
-                <button
-                  onClick={onNavigateHome}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <Button variant="link" onClick={onNavigateHome} className="text-muted-foreground hover:text-foreground p-0 h-auto text-sm">
                   Catálogo
-                </button>
+                </Button>
               </li>
               <li>
                 <a
@@ -66,14 +61,11 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
             </ul>
           </div>
         </div>
-        <a
-          href={`https://wa.me/${whatsappNumber}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full max-w-sm mx-auto py-2.5 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-colors mb-5"
-        >
-          <MessageCircle size={16} /> Falar no WhatsApp
-        </a>
+        <Button asChild className="w-full max-w-sm mx-auto flex bg-green-600 hover:bg-green-700 text-white mb-5">
+          <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+            <MessageCircle size={16} /> Falar no WhatsApp
+          </a>
+        </Button>
         <div className="border-t border-border pt-3">
           <p className="text-center text-xs text-muted-foreground">
             © {new Date().getFullYear()} OppsEvo. Todos os direitos reservados.
