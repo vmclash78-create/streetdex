@@ -3,6 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { Search, ArrowLeft, Package } from "lucide-react";
 import DuarttLogo from "@/components/store/DuarttLogo";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const TrackOrder = () => {
   const [orderNum, setOrderNum] = useState("");
@@ -31,7 +34,9 @@ const TrackOrder = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border sticky top-0 z-50 flex items-center px-4 h-14 max-w-2xl mx-auto">
-        <Link to="/"><ArrowLeft size={20} className="text-foreground" /></Link>
+        <Button variant="ghost" size="icon" asChild>
+          <Link to="/"><ArrowLeft size={20} /></Link>
+        </Button>
         <div className="flex-1 flex justify-center"><DuarttLogo size="sm" /></div>
         <div className="w-8" />
       </header>
@@ -46,23 +51,23 @@ const TrackOrder = () => {
         <form onSubmit={handleSearch} className="w-full flex flex-col gap-3">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
+            <Input
               type="text"
               inputMode="numeric"
               placeholder="Ex: 1042"
               value={orderNum}
               onChange={(e) => { setOrderNum(e.target.value); setError(""); }}
-              className="w-full h-12 pl-10 pr-4 rounded-xl border border-border bg-background text-foreground text-center text-lg font-semibold placeholder:text-muted-foreground placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-12 pl-10 pr-4 text-center text-lg font-semibold"
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-primary text-primary-foreground font-semibold py-3 rounded-xl disabled:opacity-50"
-          >
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <Button type="submit" disabled={loading} size="lg">
             {loading ? "Buscando..." : "Buscar pedido"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

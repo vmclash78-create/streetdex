@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductDetailProps {
   product: Product;
@@ -16,19 +19,11 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
   const images = [product.img, product.img2 || product.img];
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onClick={onBack}>
-      <div
-        className="bg-card rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative transition-colors duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button onClick={onBack} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors">
-          <X size={16} className="text-foreground" />
-        </button>
-
-        {/* Content: side-by-side on desktop */}
+    <Dialog open onOpenChange={() => onBack()}>
+      <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto">
+        <DialogTitle className="sr-only">{product.name}</DialogTitle>
         <div className="flex flex-col md:flex-row">
-          {/* Image section with dark mode container */}
+          {/* Image section */}
           <div className="md:w-1/2 p-4">
             <div className="rounded-xl overflow-hidden bg-muted dark:bg-secondary dark:border dark:border-primary/20 max-w-[500px] mx-auto aspect-[3/4] transition-colors duration-300">
               <img
@@ -38,7 +33,6 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
                 onError={(e) => { (e.target as HTMLImageElement).src = fallbackImg; }}
               />
             </div>
-            {/* Thumbnails */}
             <div className="flex gap-2 mt-2 justify-center">
               {images.map((img, i) => (
                 <button
@@ -58,8 +52,8 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
             {/* Badges */}
             <div className="flex gap-1.5 mb-3">
-              {product.freeShipping && <span className="text-[0.65rem] font-semibold bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">Frete grátis</span>}
-              {product.oldPrice && <span className="text-[0.65rem] font-bold bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">{discountPct(product.oldPrice, product.price)}% OFF</span>}
+              {product.freeShipping && <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 border-0">Frete grátis</Badge>}
+              {product.oldPrice && <Badge variant="destructive" className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-0">{discountPct(product.oldPrice, product.price)}% OFF</Badge>}
             </div>
 
             {/* Price */}
@@ -77,42 +71,41 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
               <p className="text-sm text-foreground font-semibold mb-2">Tamanho</p>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => (
-                  <button
+                  <Button
                     key={s}
+                    variant={selectedSize === s ? "default" : "outline"}
+                    size="sm"
                     onClick={() => setSelectedSize(s)}
-                    className={`rounded-lg border text-sm font-medium px-4 py-2 transition-all ${
-                      selectedSize === s
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted text-foreground border-border hover:border-primary/50"
-                    }`}
+                    className="px-4"
                   >
                     {s}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
 
             {/* Buy button */}
-            <button
+            <Button
               onClick={() => {
                 if (!selectedSize) return;
                 onAddToCart({ cartId: `${product.id}-${selectedSize}-${Date.now()}`, product, size: selectedSize, qty: 1 });
               }}
               disabled={!selectedSize}
-              className="w-full bg-primary text-primary-foreground font-semibold py-3 rounded-xl text-base disabled:opacity-40 hover:bg-primary/90 transition-colors mb-3"
+              className="w-full py-3 text-base mb-3"
+              size="lg"
             >
               Comprar
-            </button>
+            </Button>
 
             {/* WhatsApp */}
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2.5 transition-colors">
+            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/80">
               <MessageCircle size={18} className="text-green-600 flex-shrink-0" />
               <p className="text-sm text-foreground">Dúvidas? <span className="text-green-600 font-semibold">WhatsApp</span></p>
             </a>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check, ExternalLink, Copy, CheckCheck } from "lucide-react";
 import DuarttLogo from "./DuarttLogo";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface OrderSuccessViewProps {
   orderId: string;
@@ -30,22 +31,21 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
         </div>
         <h1 className="text-2xl font-bold text-foreground">Pedido realizado!</h1>
         <p className="text-muted-foreground text-sm max-w-sm">
-          Seu pedido <span className="font-semibold text-foreground">#{orderNumber}</span> foi registrado com sucesso. 
+          Seu pedido <span className="font-semibold text-foreground">#{orderNumber}</span> foi registrado com sucesso.
           Você será notificado sobre atualizações do status.
         </p>
-        <button
-          onClick={copyOrderNumber}
-          className="flex items-center gap-2 text-sm font-medium border border-border rounded-lg px-4 py-2 hover:bg-muted transition-colors"
-        >
-          {copied ? <CheckCheck size={16} className="text-green-600" /> : <Copy size={16} className="text-muted-foreground" />}
+        <Button variant="outline" onClick={copyOrderNumber} className="gap-2">
+          {copied ? <CheckCheck size={16} className="text-green-600" /> : <Copy size={16} />}
           {copied ? "Copiado!" : `Copiar nº do pedido: #${orderNumber}`}
-        </button>
-        <Link to={`/pedido/${orderId}`} className="flex items-center gap-2 text-primary font-semibold text-sm hover:underline">
-          <ExternalLink size={16} /> Acompanhar pedido
-        </Link>
-        <button onClick={onBackToStore} className="bg-primary text-primary-foreground font-semibold py-3 px-8 rounded-xl mt-2">
+        </Button>
+        <Button variant="link" asChild>
+          <Link to={`/pedido/${orderId}`} className="gap-2">
+            <ExternalLink size={16} /> Acompanhar pedido
+          </Link>
+        </Button>
+        <Button onClick={onBackToStore} size="lg" className="mt-2">
           Continuar comprando
-        </button>
+        </Button>
       </div>
     </div>
   );

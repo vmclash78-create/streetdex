@@ -12,6 +12,10 @@ import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
 import { type CartItem, type AppView, infoStripImg, formatPrice } from "@/components/store/storeData";
 import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ALL_SIZES = ["PP", "P", "M", "G", "GG", "XG"];
 const PRICE_RANGES = [
@@ -35,7 +39,6 @@ const Store = () => {
   const { data: settings } = useStoreSettings();
   const isMobile = useIsMobile();
 
-  // Read settings from DB
   const whatsapp = settings?.whatsapp || "5585992783973";
   const storeName = settings?.store_name || "Street Dex";
   const announcementText = settings?.announcement_text || "";
@@ -85,16 +88,9 @@ const Store = () => {
   const filteredProducts = useMemo(() => {
     if (!dbProducts) return [];
     let result = dbProducts.filter((p) => p.status === "active");
-
-    if (searchQuery) {
-      result = result.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
-    if (selectedCategory) {
-      result = result.filter((p) => p.category === selectedCategory);
-    }
-    if (selectedSizes.length > 0) {
-      result = result.filter((p) => p.sizes.some((s) => selectedSizes.includes(s)));
-    }
+    if (searchQuery) result = result.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (selectedCategory) result = result.filter((p) => p.category === selectedCategory);
+    if (selectedSizes.length > 0) result = result.filter((p) => p.sizes.some((s) => selectedSizes.includes(s)));
     if (selectedPriceRange !== null) {
       const range = PRICE_RANGES[selectedPriceRange];
       result = result.filter((p) => Number(p.price) >= range.min && Number(p.price) < range.max);
@@ -158,28 +154,24 @@ const Store = () => {
           <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-card to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
           <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
-            <button
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              size="sm"
+              className="flex-shrink-0 rounded-full"
               onClick={() => setSelectedCategory(null)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                selectedCategory === null
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border text-foreground hover:bg-muted"
-              }`}
             >
               Todos
-            </button>
+            </Button>
             {categories.map((cat) => (
-              <button
+              <Button
                 key={cat}
+                variant={selectedCategory === cat ? "default" : "outline"}
+                size="sm"
+                className="flex-shrink-0 rounded-full"
                 onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                  selectedCategory === cat
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-foreground hover:bg-muted"
-                }`}
               >
                 {cat}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -245,70 +237,77 @@ const Store = () => {
 
         {/* Filters bar */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <button onClick={() => setFiltersOpen(!filtersOpen)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm text-foreground hover:bg-muted transition-colors">
+          <Button variant="outline" size="sm" onClick={() => setFiltersOpen(!filtersOpen)} className="gap-1.5">
             <SlidersHorizontal size={14} />
             Filtros
             {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
-          </button>
+          </Button>
 
           {selectedSizes.map((s) => (
-            <span key={s} className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-              {s}
-              <button onClick={() => toggleSize(s)}><X size={12} /></button>
-            </span>
+            <Badge key={s} variant="secondary" className="gap-1 cursor-pointer" onClick={() => toggleSize(s)}>
+              {s} <X size={12} />
+            </Badge>
           ))}
           {selectedCategory && (
-            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-              {selectedCategory}
-              <button onClick={() => setSelectedCategory(null)}><X size={12} /></button>
-            </span>
+            <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setSelectedCategory(null)}>
+              {selectedCategory} <X size={12} />
+            </Badge>
           )}
           {selectedPriceRange !== null && (
-            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-              {PRICE_RANGES[selectedPriceRange].label}
-              <button onClick={() => setSelectedPriceRange(null)}><X size={12} /></button>
-            </span>
+            <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setSelectedPriceRange(null)}>
+              {PRICE_RANGES[selectedPriceRange].label} <X size={12} />
+            </Badge>
           )}
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-muted-foreground">
               Limpar filtros
-            </button>
+            </Button>
           )}
         </div>
 
         {/* Filter panel */}
         {filtersOpen && (
-          <div className="mb-4 p-4 rounded-xl border border-border bg-card">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Tamanho</p>
-                <div className="flex flex-wrap gap-2">
-                  {ALL_SIZES.map((size) => (
-                    <button key={size} onClick={() => toggleSize(size)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${selectedSizes.includes(size) ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-muted"}`}>
-                      {size}
-                    </button>
-                  ))}
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Tamanho</p>
+                  <div className="flex flex-wrap gap-2">
+                    {ALL_SIZES.map((size) => (
+                      <Button key={size} onClick={() => toggleSize(size)}
+                        variant={selectedSizes.includes(size) ? "default" : "outline"}
+                        size="sm">
+                        {size}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Preço</p>
+                  <div className="flex flex-wrap gap-2">
+                    {PRICE_RANGES.map((range, i) => (
+                      <Button key={range.label} onClick={() => setSelectedPriceRange(selectedPriceRange === i ? null : i)}
+                        variant={selectedPriceRange === i ? "default" : "outline"}
+                        size="sm">
+                        {range.label}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Preço</p>
-                <div className="flex flex-wrap gap-2">
-                  {PRICE_RANGES.map((range, i) => (
-                    <button key={range.label} onClick={() => setSelectedPriceRange(selectedPriceRange === i ? null : i)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${selectedPriceRange === i ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-muted"}`}>
-                      {range.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-5 w-1/2" />
+              </div>
+            ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-2">
