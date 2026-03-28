@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X } from "lucide-react";
+import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
 import HeroCarousel from "@/components/store/HeroCarousel";
@@ -150,14 +150,14 @@ const Store = () => {
 
       {/* Mobile category filter */}
       {isMobile && categories.length > 0 && (
-        <div className="bg-card border-b border-border relative">
-          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-card to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
+        <div className="bg-background border-b border-border/50 relative">
+          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
           <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
             <Button
-              variant={selectedCategory === null ? "default" : "outline"}
+              variant={selectedCategory === null ? "default" : "ghost"}
               size="sm"
-              className="flex-shrink-0 rounded-full"
+              className={`flex-shrink-0 rounded-full tracking-wider uppercase text-[0.65rem] font-bold ${selectedCategory === null ? "neon-glow" : ""}`}
               onClick={() => setSelectedCategory(null)}
             >
               Todos
@@ -165,9 +165,9 @@ const Store = () => {
             {categories.map((cat) => (
               <Button
                 key={cat}
-                variant={selectedCategory === cat ? "default" : "outline"}
+                variant={selectedCategory === cat ? "default" : "ghost"}
                 size="sm"
-                className="flex-shrink-0 rounded-full"
+                className={`flex-shrink-0 rounded-full tracking-wider uppercase text-[0.65rem] font-bold ${selectedCategory === cat ? "neon-glow" : ""}`}
                 onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
               >
                 {cat}
@@ -180,35 +180,36 @@ const Store = () => {
       <HeroCarousel />
 
       {/* Ticker */}
-      <div className="py-2 overflow-hidden whitespace-nowrap bg-primary">
-        <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-wide">
-          <span className="mx-6">Cupom: {couponCode} &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
-          <span className="mx-6">Cupom: {couponCode} &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
+      <div className="py-2.5 overflow-hidden whitespace-nowrap bg-primary relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-transparent to-primary z-10 pointer-events-none" />
+        <div className="animate-marquee inline-block text-primary-foreground text-xs font-bold tracking-[0.15em] uppercase">
+          <span className="mx-6">⚡ Cupom: {couponCode} &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
+          <span className="mx-6">⚡ Cupom: {couponCode} &nbsp;|&nbsp; Parcelamos até 12x &nbsp;|&nbsp; Enviamos para todo o Brasil &nbsp;|&nbsp; Frete Grátis acima de R$399,99 &nbsp;|&nbsp;</span>
         </div>
       </div>
 
       {/* Info strip */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-[1200px] mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full border-2 border-foreground/20 flex items-center justify-center flex-shrink-0">
-              <MessageCircle size={18} className="text-foreground" />
+      <div className="bg-card/50 border-b border-border/50">
+        <div className="max-w-[1200px] mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/info:bg-primary/20 transition-colors">
+              <MessageCircle size={18} className="text-primary" />
             </div>
             <div>
               <p className="text-xs font-bold text-foreground">Canais de Atendimento</p>
               <p className="text-[0.65rem] text-muted-foreground">Whatsapp e Instagram</p>
             </div>
           </a>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full border-2 border-foreground/20 flex items-center justify-center flex-shrink-0">
-              <Percent size={18} className="text-foreground" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Percent size={18} className="text-primary" />
             </div>
             <div>
               <p className="text-xs font-bold text-foreground">CUPOM • Até {couponDiscount}% OFF</p>
-              <p className="text-[0.65rem] text-muted-foreground font-mono">{couponCode}</p>
+              <p className="text-[0.65rem] text-primary font-mono font-bold">{couponCode}</p>
             </div>
           </div>
-          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5">
+          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               <img src={infoStripImg} alt="Estampa diferente" className="w-full h-full object-cover" />
             </div>
@@ -217,9 +218,9 @@ const Store = () => {
               <p className="text-[0.65rem] text-muted-foreground">Nos chame que fazemos!</p>
             </div>
           </a>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full border-2 border-foreground/20 flex items-center justify-center flex-shrink-0">
-              <Truck size={18} className="text-foreground" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Truck size={18} className="text-primary" />
             </div>
             <div>
               <p className="text-xs font-bold text-foreground">Fretes Econômicos</p>
@@ -230,36 +231,38 @@ const Store = () => {
       </div>
 
       {/* Products */}
-      <main className="max-w-[1200px] mx-auto px-4 pt-6 pb-8">
-        <div className="text-center mb-4">
-          <h2 className="text-xl md:text-2xl font-bold text-primary uppercase">BEST SELLERS</h2>
+      <main className="max-w-[1200px] mx-auto px-4 pt-8 pb-10">
+        <div className="text-center mb-6">
+          <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase mb-1">Coleção</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground uppercase tracking-wider">BEST SELLERS</h2>
+          <div className="w-12 h-0.5 bg-primary mx-auto mt-3 rounded-full neon-glow" />
         </div>
 
         {/* Filters bar */}
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <Button variant="outline" size="sm" onClick={() => setFiltersOpen(!filtersOpen)} className="gap-1.5">
+        <div className="flex flex-wrap items-center gap-2 mb-5">
+          <Button variant="outline" size="sm" onClick={() => setFiltersOpen(!filtersOpen)} className="gap-1.5 border-border/50 tracking-wider uppercase text-[0.65rem] font-bold">
             <SlidersHorizontal size={14} />
             Filtros
-            {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
+            {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
           </Button>
 
           {selectedSizes.map((s) => (
-            <Badge key={s} variant="secondary" className="gap-1 cursor-pointer" onClick={() => toggleSize(s)}>
+            <Badge key={s} variant="secondary" className="gap-1 cursor-pointer bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" onClick={() => toggleSize(s)}>
               {s} <X size={12} />
             </Badge>
           ))}
           {selectedCategory && (
-            <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setSelectedCategory(null)}>
+            <Badge variant="secondary" className="gap-1 cursor-pointer bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" onClick={() => setSelectedCategory(null)}>
               {selectedCategory} <X size={12} />
             </Badge>
           )}
           {selectedPriceRange !== null && (
-            <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setSelectedPriceRange(null)}>
+            <Badge variant="secondary" className="gap-1 cursor-pointer bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" onClick={() => setSelectedPriceRange(null)}>
               {PRICE_RANGES[selectedPriceRange].label} <X size={12} />
             </Badge>
           )}
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-muted-foreground hover:text-primary">
               Limpar filtros
             </Button>
           )}
@@ -267,28 +270,30 @@ const Store = () => {
 
         {/* Filter panel */}
         {filtersOpen && (
-          <Card className="mb-4">
+          <Card className="mb-5 border-border/50 bg-card/50 backdrop-blur-sm">
             <CardContent className="p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Tamanho</p>
+                  <p className="text-xs font-bold text-primary mb-2 uppercase tracking-[0.2em]">Tamanho</p>
                   <div className="flex flex-wrap gap-2">
                     {ALL_SIZES.map((size) => (
                       <Button key={size} onClick={() => toggleSize(size)}
                         variant={selectedSizes.includes(size) ? "default" : "outline"}
-                        size="sm">
+                        size="sm"
+                        className={`tracking-wider font-bold ${selectedSizes.includes(size) ? "neon-glow" : "border-border/50"}`}>
                         {size}
                       </Button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Preço</p>
+                  <p className="text-xs font-bold text-primary mb-2 uppercase tracking-[0.2em]">Preço</p>
                   <div className="flex flex-wrap gap-2">
                     {PRICE_RANGES.map((range, i) => (
                       <Button key={range.label} onClick={() => setSelectedPriceRange(selectedPriceRange === i ? null : i)}
                         variant={selectedPriceRange === i ? "default" : "outline"}
-                        size="sm">
+                        size="sm"
+                        className={`tracking-wider font-bold ${selectedPriceRange === i ? "neon-glow" : "border-border/50"}`}>
                         {range.label}
                       </Button>
                     ))}
@@ -300,7 +305,7 @@ const Store = () => {
         )}
 
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col gap-2">
                 <Skeleton className="aspect-[3/4] w-full rounded-lg" />
@@ -310,12 +315,12 @@ const Store = () => {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-2">
-            <Search size={36} className="text-muted-foreground/30" />
-            <p className="text-sm text-muted-foreground">Nenhum produto encontrado</p>
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Search size={40} className="text-muted-foreground/20" />
+            <p className="text-sm text-muted-foreground font-medium">Nenhum produto encontrado</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredProducts.map((p) => (
               <ProductCard key={p.id} product={toProduct(p)} onClick={() => { setSelectedProduct(p); setView("product"); }} />
             ))}
@@ -325,14 +330,18 @@ const Store = () => {
 
       <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsapp} storeName={storeName} />
 
+      {/* WhatsApp floating button */}
       <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
-        className="fixed bottom-5 right-5 z-50 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-colors">
-        <MessageCircle size={22} className="text-white" />
+        className="fixed bottom-5 right-5 z-50 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-400 hover:scale-110 transition-all duration-300"
+        style={{ boxShadow: "0 0 20px hsl(145 63% 42% / 0.4)" }}
+      >
+        <MessageCircle size={24} className="text-white" />
       </a>
 
-      <div className="fixed bottom-5 left-5 z-50 w-12 h-12 bg-destructive rounded-full flex flex-col items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform">
-        <span className="text-destructive-foreground text-[0.6rem] font-bold leading-none">{couponDiscount}%</span>
-        <span className="text-destructive-foreground text-[0.45rem] font-bold leading-none">OFF</span>
+      {/* Coupon floating button */}
+      <div className="fixed bottom-5 left-5 z-50 w-14 h-14 bg-primary rounded-full flex flex-col items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-all duration-300 animate-pulse-neon">
+        <Zap size={14} className="text-primary-foreground mb-0.5" />
+        <span className="text-primary-foreground text-[0.55rem] font-bold leading-none">{couponDiscount}% OFF</span>
       </div>
 
       {view === "product" && selectedProduct && (

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useHeroBanners } from "@/hooks/useStoreData";
-import { heroBanners as fallbackBanners } from "./storeData";
+import { heroBanners as fallbackBanners, WHATSAPP } from "./storeData";
+import { Button } from "@/components/ui/button";
 
 const HeroCarousel = () => {
   const { data: dbBanners } = useHeroBanners();
@@ -28,45 +29,70 @@ const HeroCarousel = () => {
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative">
+    <section className="relative">
+      {/* Carousel images */}
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">
           {banners.map((banner, i) => (
-            <div key={i} className="flex-[0_0_100%] min-w-0 relative bg-foreground/5">
+            <div key={i} className="flex-[0_0_100%] min-w-0 relative">
               <img
                 src={banner.img}
                 alt={`Carrossel ${i + 1}`}
                 loading={i === 0 ? "eager" : "lazy"}
                 className="w-full object-cover object-center"
-                style={{ maxHeight: "70vh" }}
+                style={{ maxHeight: "75vh" }}
               />
-              {banner.cta && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
-                  <button className="bg-primary text-primary-foreground font-semibold px-6 py-2 rounded text-sm hover:bg-primary/90 transition-colors uppercase">
-                    {banner.cta}
-                  </button>
-                </div>
-              )}
+              {/* Dark gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
             </div>
           ))}
         </div>
       </div>
-      <button onClick={scrollPrev} className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-card/80 hover:bg-card flex items-center justify-center text-foreground transition-colors shadow">
+
+      {/* Hero content overlay */}
+      <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-16 px-4 z-10">
+        <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-foreground font-bold tracking-wider uppercase text-center leading-none mb-3">
+          STREET<span className="gradient-text">DEX</span>
+        </h1>
+        <p className="text-muted-foreground text-sm md:text-base tracking-[0.2em] uppercase mb-6 text-center">
+          Vista o que te define
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          <Button size="lg" className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all">
+            Ver Coleção
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="text-sm font-bold tracking-wider uppercase px-8 border-green-500/50 text-green-500 hover:bg-green-500/10 hover:border-green-500"
+          >
+            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+              <MessageCircle size={16} /> WhatsApp
+            </a>
+          </Button>
+        </div>
+      </div>
+
+      {/* Navigation arrows */}
+      <button onClick={scrollPrev} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/30 backdrop-blur-sm hover:bg-background/50 flex items-center justify-center text-foreground transition-all border border-border/30">
         <ChevronLeft size={20} />
       </button>
-      <button onClick={scrollNext} className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-card/80 hover:bg-card flex items-center justify-center text-foreground transition-colors shadow">
+      <button onClick={scrollNext} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/30 backdrop-blur-sm hover:bg-background/50 flex items-center justify-center text-foreground transition-all border border-border/30">
         <ChevronRight size={20} />
       </button>
-      <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+
+      {/* Dots */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
         {banners.map((_, i) => (
           <button
             key={i}
             onClick={() => emblaApi?.scrollTo(i)}
-            className={`rounded-full transition-all ${selectedIndex === i ? "w-2.5 h-2.5 bg-primary" : "w-2 h-2 bg-foreground/30"}`}
+            className={`rounded-full transition-all ${selectedIndex === i ? "w-6 h-1.5 bg-primary neon-glow" : "w-1.5 h-1.5 bg-foreground/30"}`}
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 
