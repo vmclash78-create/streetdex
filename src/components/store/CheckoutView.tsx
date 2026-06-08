@@ -59,7 +59,27 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   };
   const validateStep2 = () => {
     const cep = address.cep.trim().replace(/\D/g, "");
-    return cep.length === 8 && address.street.trim().length > 0 && address.street.trim().length <= 200 && address.number.trim().length > 0 && address.neighborhood.trim().length > 0 && address.city.trim().length > 0;
+    return cep.length === 8 && address.street.trim().length > 0 && address.number.trim().length > 0 && address.neighborhood.trim().length > 0 && address.city.trim().length > 0;
+  };
+
+  const handleCepBlur = async () => {
+    const cep = address.cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          setAddress(prev => ({
+            ...prev,
+            street: data.logradouro || prev.street,
+            neighborhood: data.bairro || prev.neighborhood,
+            city: data.localidade || prev.city
+          }));
+        }
+      } catch (error) {
+        console.error("Erro ao buscar CEP:", error);
+      }
+    }
   };
 
   const handleFinalize = async () => {
@@ -155,7 +175,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 sm:col-span-1">
                 <Label>CEP *</Label>
-                <Input value={address.cep} onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/[^0-9]/g, "") })} placeholder="60000000" maxLength={8} className="mt-1" />
+                <Input value={address.cep} onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/[^0-9]/g, "") })} onBlur={handleCepBlur} placeholder="60000000" maxLength={8} className="mt-1" />
               </div>
               <div className="col-span-2">
                 <Label>Rua *</Label>
