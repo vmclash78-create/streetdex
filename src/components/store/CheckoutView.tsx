@@ -82,7 +82,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           toast({ 
             title: "CEP incompleto", 
             description: "Este CEP não retornou rua ou bairro. Por favor, preencha manualmente com cuidado.", 
-            variant: "warning" 
           });
         }
 
