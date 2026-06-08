@@ -507,14 +507,14 @@ const ProductsView = () => {
                         const cost = parseFloat(e.target.value) || 0;
                         const updates: any = { cost };
                         
-                        // If we have a margin, update price
+                        // Scenario 1: Cost + Margin -> Update Price
                         if (cost > 0 && localMargin) {
                           const marginPercent = parseFloat(localMargin.replace(",", "."));
                           if (!isNaN(marginPercent)) {
                             updates.price = parseFloat((cost * (1 + marginPercent / 100)).toFixed(2));
                           }
                         } 
-                        // If we have price but no margin, update margin
+                        // Scenario 2: Cost + Price -> Update Margin
                         else if (cost > 0 && editingProduct.price) {
                           const margin = ((editingProduct.price - cost) / cost) * 100;
                           setLocalMargin(margin.toFixed(1).replace(".", ","));
@@ -526,6 +526,7 @@ const ProductsView = () => {
                       placeholder="0.00"
                     />
                   </div>
+
 
                 </div>
 
@@ -546,15 +547,24 @@ const ProductsView = () => {
                         }
                         
                         const marginPercent = parseFloat(val);
-                        if (!isNaN(marginPercent) && editingProduct.cost) {
-                          const newPrice = editingProduct.cost * (1 + marginPercent / 100);
-                          setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
+                        if (!isNaN(marginPercent)) {
+                          // Scenario 3: Margin + Cost -> Update Price
+                          if (editingProduct.cost) {
+                            const newPrice = editingProduct.cost * (1 + marginPercent / 100);
+                            setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
+                          }
+                          // Scenario 4: Margin + Price -> Update Cost
+                          else if (editingProduct.price) {
+                            const newCost = editingProduct.price / (1 + marginPercent / 100);
+                            setEditingProduct({ ...editingProduct, cost: parseFloat(newCost.toFixed(2)) });
+                          }
                         }
                       }} 
                       placeholder="Ex: 50"
                       className="mt-1"
                     />
                   </div>
+
 
 
 
