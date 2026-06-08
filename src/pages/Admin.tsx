@@ -277,18 +277,32 @@ const ProductsView = () => {
   const [editingProduct, setEditingProduct] = useState<Partial<DBProduct> | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const openNew = () => setEditingProduct({ 
-    name: "", 
-    price: 0, 
-    cost: 0, 
-    img: "", 
-    sizes: ["P", "M", "G", "GG", "XG"], 
-    status: "active", 
-    stock: 0, 
-    free_shipping: true, 
-    category: "" 
-  });
-  const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
+  const openNew = () => {
+    setEditingProduct({ 
+      name: "", 
+      price: 0, 
+      cost: 0, 
+      img: "", 
+      sizes: ["P", "M", "G", "GG", "XG"], 
+      status: "active", 
+      stock: 0, 
+      free_shipping: true, 
+      category: "" 
+    });
+    setLocalMargin("");
+  };
+  const openEdit = (p: DBProduct) => {
+    setEditingProduct({ ...p });
+    if (p.price && p.cost && p.cost > 0) {
+      const margin = ((p.price - p.cost) / p.cost) * 100;
+      setLocalMargin(margin.toFixed(1).replace(".", ","));
+    } else {
+      setLocalMargin("");
+    }
+  };
+
+
+  const [localMargin, setLocalMargin] = useState<string>("");
 
   const handleSave = async () => {
     if (!editingProduct?.name) {
@@ -309,7 +323,9 @@ const ProductsView = () => {
     }
     await upsertProduct.mutateAsync(editingProduct as any);
     setEditingProduct(null);
+    setLocalMargin("");
   };
+
 
   const handleDelete = async (id: string) => {
     await deleteProduct.mutateAsync(id);
@@ -502,9 +518,12 @@ const ProductsView = () => {
                     <Label className="text-sm font-medium">Margem de Lucro (%)</Label>
                     <Input 
                       type="text" 
-                      value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1).replace(".", ",") : ""} 
+                      value={localMargin} 
                       onChange={(e) => {
-                        const val = e.target.value.replace(",", ".");
+                        const inputVal = e.target.value;
+                        setLocalMargin(inputVal);
+                        
+                        const val = inputVal.replace(",", ".");
                         if (val === "") {
                           setEditingProduct({ ...editingProduct, price: 0 });
                           return;
@@ -522,16 +541,29 @@ const ProductsView = () => {
                   </div>
 
 
+
                   <div>
                     <Label className="text-sm font-medium">Preço de Venda (Final) *</Label>
                     <Input 
                       type="number" 
                       step="0.01" 
                       value={editingProduct.price || ""} 
-                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })} 
+                      onChange={(e) => {
+                        const newPrice = parseFloat(e.target.value) || 0;
+                        setEditingProduct({ ...editingProduct, price: newPrice });
+                        
+                        // Recalculate local margin string when price changes manually
+                        if (newPrice > 0 && editingProduct.cost && editingProduct.cost > 0) {
+                          const margin = ((newPrice - editingProduct.cost) / editingProduct.cost) * 100;
+                          setLocalMargin(margin.toFixed(1).replace(".", ","));
+                        } else if (newPrice === 0) {
+                          setLocalMargin("");
+                        }
+                      }} 
                       className="mt-1" 
                       placeholder="0.00"
                     />
+
                   </div>
                 </div>
 
