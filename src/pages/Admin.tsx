@@ -1211,6 +1211,8 @@ const FinancesView = () => {
                     <Input type="date" value={expDate} onChange={(e) => setExpDate(e.target.value)} className="mt-1" />
                   </div>
                 </div>
+
+
                 <div>
                   <Label>Categoria</Label>
                   <Select value={expCategory} onValueChange={setExpCategory}>
@@ -1265,12 +1267,15 @@ const SettingsView = () => {
             { key: "announcement_text", label: "Texto do Anúncio (topo)" },
             { key: "coupon_code", label: "Código do Cupom" },
             { key: "coupon_discount", label: "Desconto do Cupom (%)" },
+            { key: "pix_discount", label: "Desconto PIX (%)" },
+            { key: "card_fee", label: "Taxa Cartão Crédito (%)" },
           ].map((field) => (
             <div key={field.key}>
               <Label>{field.label}</Label>
               <Input value={getValue(field.key)} onChange={(e) => setLocalSettings({ ...localSettings, [field.key]: e.target.value })} className="mt-1" />
             </div>
           ))}
+
           <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="gap-2">
             {updateSetting.isPending && <Loader2 size={14} className="animate-spin" />}
             <Save size={14} /> Salvar Alterações
