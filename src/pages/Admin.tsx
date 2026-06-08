@@ -878,7 +878,7 @@ const SalesView = () => {
       return { product_id: l.productId, product_name: p.name, unit_price: Number(p.price), unit_cost: Number(p.cost) || 0, quantity: l.quantity, size: l.size || null };
     });
     if (items.length === 0) return;
-    await createSale.mutateAsync({ sale: { sale_date: saleDate, customer_name: customerName || null, payment_method: paymentMethod, discount, total, notes: null }, items });
+    await createSale.mutateAsync({ sale: { sale_date: saleDate, customer_name: customerName || null, payment_method: paymentMethod, discount, total, notes: null, order_number: null }, items });
     setShowForm(false);
     setCartLines([{ productId: "", quantity: 1, size: "" }]);
     setCustomerName("");
@@ -910,7 +910,12 @@ const SalesView = () => {
               {sales.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>{formatDate(s.sale_date)}</TableCell>
-                  <TableCell>{s.customer_name || "—"}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{s.customer_name || "—"}</span>
+                      {s.order_number && <span className="text-[10px] text-muted-foreground">Pedido #{s.order_number}</span>}
+                    </div>
+                  </TableCell>
                   <TableCell><Badge variant="secondary">{s.payment_method}</Badge></TableCell>
                   <TableCell className="font-bold">{formatPrice(Number(s.total))}</TableCell>
                   <TableCell className="text-right">
@@ -1390,7 +1395,7 @@ const OrdersAdminView = () => {
     const order = orders?.find(o => o.id === orderId);
     if (!order) return;
 
-    // Se o status for alterado para 'entregue', move para vendas e exclui de pedidos
+    // Se o status for alterado para 'entregue', move para vendas
     if (status === "entregue") {
       try {
         const items = await supabase.from("order_items").select("*").eq("order_id", orderId);
@@ -1404,7 +1409,8 @@ const OrdersAdminView = () => {
           payment_method: order.payment_method,
           discount: 0,
           total: Number(order.total),
-          notes: order.notes
+          notes: order.notes,
+          order_number: order.order_number // Manter o número do pedido na venda
         };
 
         const saleItems = items.data.map(item => ({
@@ -1412,16 +1418,17 @@ const OrdersAdminView = () => {
           product_name: item.product_name,
           quantity: item.quantity,
           unit_price: Number(item.price),
-          unit_cost: 0, // Informação não disponível no pedido
+          unit_cost: 0, 
           size: item.size
         }));
 
         await createSale.mutateAsync({ sale: saleData as any, items: saleItems as any });
         
-        // Excluir pedido após venda confirmada
-        await deleteOrder.mutateAsync(orderId);
+        // Atualizar o status para entregue mas NÃO excluir imediatamente
+        // (O filtro na visualização cuidará de remover pedidos entregues há mais de 2 dias)
+        await updateStatus.mutateAsync({ id: orderId, status });
         
-        toast({ title: "Sucesso", description: "Pedido concluído e movido para Vendas!" });
+        toast({ title: "Sucesso", description: "Pedido marcado como entregue e registrado em Vendas!" });
         return;
       } catch (error: any) {
         toast({ title: "Erro ao concluir", description: error.message, variant: "destructive" });
@@ -1444,6 +1451,17 @@ const OrdersAdminView = () => {
     setOrderToDelete(null);
   };
 
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    const now = new Date();
+    return orders.filter(order => {
+      if (order.status !== "entregue") return true;
+      const deliveredDate = new Date(order.updated_at || order.created_at);
+      const diffDays = (now.getTime() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24);
+      return diffDays <= 2;
+    });
+  }, [orders]);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -1452,7 +1470,7 @@ const OrdersAdminView = () => {
 
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
-      ) : !orders || orders.length === 0 ? (
+      ) : !filteredOrders || filteredOrders.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground text-sm">Nenhum pedido registrado</div>
       ) : (
         <Card>
@@ -1469,7 +1487,7 @@ const OrdersAdminView = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order) => {
+              {filteredOrders.map((order) => {
                 const statusInfo = getStatusInfo(order.status);
                 return (
                   <TableRow key={order.id}>
