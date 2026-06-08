@@ -17,7 +17,16 @@ import {
   useAdminBanners, useUpsertBanner, useDeleteBanner,
   type DBProduct, type DBSale, type DBSaleItem, type DBExpense, type DBBanner,
 } from "@/hooks/useStoreData";
-import { useOrders, useOrderItems, useUpdateOrderStatus, ORDER_STATUSES, getStatusInfo } from "@/hooks/useOrders";
+import { 
+  useOrders, 
+  useOrderItems, 
+  useUpdateOrderStatus, 
+  useUpdateOrder,
+  useDeleteOrder,
+  ORDER_STATUSES, 
+  getStatusInfo,
+  type DBOrder
+} from "@/hooks/useOrders";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
