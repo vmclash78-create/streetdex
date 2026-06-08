@@ -1038,7 +1038,13 @@ const SettingsView = () => {
 const OrdersAdminView = () => {
   const { data: orders, isLoading } = useOrders();
   const updateStatus = useUpdateOrderStatus();
+  const updateOrder = useUpdateOrder();
+  const deleteOrder = useDeleteOrder();
+  
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [editingOrder, setEditingOrder] = useState<DBOrder | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  
   const { data: orderItems } = useOrderItems(selectedOrderId || undefined);
 
   const selectedOrder = orders?.find((o) => o.id === selectedOrderId);
@@ -1047,9 +1053,23 @@ const OrdersAdminView = () => {
     await updateStatus.mutateAsync({ id: orderId, status });
   };
 
+  const handleEditSave = async () => {
+    if (!editingOrder) return;
+    await updateOrder.mutateAsync(editingOrder);
+    setEditingOrder(null);
+  };
+
+  const handleDelete = async () => {
+    if (!orderToDelete) return;
+    await deleteOrder.mutateAsync(orderToDelete);
+    setOrderToDelete(null);
+  };
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-6">Pedidos</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
@@ -1093,9 +1113,19 @@ const OrdersAdminView = () => {
                     <TableCell className="text-muted-foreground">{new Date(order.created_at).toLocaleDateString("pt-BR")}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedOrderId(order.id)}><Eye size={15} /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedOrderId(order.id)} title="Ver detalhes">
+                          <Eye size={15} />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder({ ...order })} title="Editar">
+                          <Edit2 size={15} />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setOrderToDelete(order.id)} title="Excluir">
+                          <Trash2 size={15} />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                          <a href={`/pedido/${order.id}`} target="_blank" rel="noopener noreferrer"><ChevronRight size={15} /></a>
+                          <a href={`/pedido/${order.id}`} target="_blank" rel="noopener noreferrer" title="Abrir página do pedido">
+                            <ChevronRight size={15} />
+                          </a>
                         </Button>
                       </div>
                     </TableCell>
@@ -1107,6 +1137,7 @@ const OrdersAdminView = () => {
         </Card>
       )}
 
+      {/* View Details Dialog */}
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrderId(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           {selectedOrder && (
@@ -1181,6 +1212,107 @@ const OrdersAdminView = () => {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Order Dialog */}
+      <Dialog open={!!editingOrder} onOpenChange={() => setEditingOrder(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Editar Pedido #{editingOrder?.order_number}</DialogTitle></DialogHeader>
+          {editingOrder && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={editingOrder.status} onValueChange={(v) => setEditingOrder({ ...editingOrder, status: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ORDER_STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Método de Pagamento</Label>
+                  <Select value={editingOrder.payment_method} onValueChange={(v) => setEditingOrder({ ...editingOrder, payment_method: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Total (R$)</Label>
+                <Input type="number" step="0.01" value={editingOrder.total} onChange={(e) => setEditingOrder({ ...editingOrder, total: Number(e.target.value) })} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Rua</Label>
+                  <Input value={editingOrder.address_street || ""} onChange={(e) => setEditingOrder({ ...editingOrder, address_street: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Número</Label>
+                  <Input value={editingOrder.address_number || ""} onChange={(e) => setEditingOrder({ ...editingOrder, address_number: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Bairro</Label>
+                  <Input value={editingOrder.address_neighborhood || ""} onChange={(e) => setEditingOrder({ ...editingOrder, address_neighborhood: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cidade</Label>
+                  <Input value={editingOrder.address_city || ""} onChange={(e) => setEditingOrder({ ...editingOrder, address_city: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>CEP</Label>
+                  <Input value={editingOrder.address_cep || ""} onChange={(e) => setEditingOrder({ ...editingOrder, address_cep: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Complemento</Label>
+                  <Input value={editingOrder.address_complement || ""} onChange={(e) => setEditingOrder({ ...editingOrder, address_complement: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Observações</Label>
+                <Input value={editingOrder.notes || ""} onChange={(e) => setEditingOrder({ ...editingOrder, notes: e.target.value })} />
+              </div>
+
+              <DialogFooter className="pt-4">
+                <Button variant="outline" onClick={() => setEditingOrder(null)}>Cancelar</Button>
+                <Button onClick={handleEditSave} disabled={updateOrder.isPending}>
+                  {updateOrder.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save className="mr-2" size={16} />}
+                  Salvar Alterações
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Excluir Pedido</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-sm text-muted-foreground">
+            Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOrderToDelete(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteOrder.isPending}>
+              {deleteOrder.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Trash2 className="mr-2" size={16} />}
+              Confirmar Exclusão
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
