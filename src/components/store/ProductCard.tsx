@@ -1,5 +1,6 @@
 import { useState, memo } from "react";
 import { type Product, formatPrice, pixPrice, discountPct, fallbackImg } from "./storeData";
+import { useStoreSettings } from "@/hooks/useStoreData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Eye } from "lucide-react";
@@ -11,6 +12,8 @@ interface ProductCardProps {
 
 const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
   const [hovered, setHovered] = useState(false);
+  const { data: settings } = useStoreSettings();
+  const discount = Number(settings?.pix_discount || "0");
 
   return (
     <div
@@ -74,7 +77,7 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
           {product.oldPrice && <p className="text-[0.65rem] text-muted-foreground line-through">{formatPrice(product.oldPrice)}</p>}
           <p className="text-base font-bold text-foreground">{formatPrice(product.price)}</p>
           <p className="text-[0.65rem] mt-0.5">
-            <span className="text-green-500 font-bold">{pixPrice(product.price)}</span>{" "}
+            <span className="text-green-500 font-bold">{pixPrice(product.price, discount)}</span>{" "}
             <span className="text-muted-foreground">com Pix</span>
           </p>
         </div>
