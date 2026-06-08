@@ -501,18 +501,17 @@ const ProductsView = () => {
                   <div>
                     <Label className="text-sm font-medium">Margem de Lucro (%)</Label>
                     <Input 
-                      type="number" 
-                      step="0.1" 
-                      value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1) : ""} 
+                      type="text" 
+                      value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1).replace(".", ",") : ""} 
                       onChange={(e) => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(",", ".");
                         if (val === "") {
-                          // Allow clearing the field without resetting price
-                          setEditingProduct({ ...editingProduct, price: editingProduct.price });
+                          setEditingProduct({ ...editingProduct, price: 0 });
                           return;
                         }
-                        const marginPercent = parseFloat(val) || 0;
-                        if (editingProduct.cost) {
+                        
+                        const marginPercent = parseFloat(val);
+                        if (!isNaN(marginPercent) && editingProduct.cost) {
                           const newPrice = editingProduct.cost * (1 + marginPercent / 100);
                           setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
                         }
@@ -521,6 +520,7 @@ const ProductsView = () => {
                       className="mt-1"
                     />
                   </div>
+
 
                   <div>
                     <Label className="text-sm font-medium">Preço de Venda (Final) *</Label>
