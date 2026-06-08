@@ -31,7 +31,7 @@ const PIX_KEY = "duartt@pix.com";
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
-  const cashDiscount = Number(settings?.cash_discount || "0") / 100;
+  const cashDiscount = pixDiscount; // Same discount for cash and PIX
 
   const [step, setStep] = useState<Step>(1);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
