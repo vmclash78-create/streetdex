@@ -387,7 +387,14 @@ const ProductsView = () => {
               {products?.map((p) => {
                 const margin = getMarkup(Number(p.price), Number(p.cost));
                 return (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className={selectedProductIds.includes(p.id) ? "bg-primary/5" : ""}>
+                    <TableCell>
+                      <Checkbox 
+                        checked={selectedProductIds.includes(p.id)}
+                        onCheckedChange={() => toggleSelectProduct(p.id)}
+                      />
+                    </TableCell>
+
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <img src={p.img} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
