@@ -277,11 +277,23 @@ const ProductsView = () => {
   const [editingProduct, setEditingProduct] = useState<Partial<DBProduct> | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const openNew = () => setEditingProduct({ name: "", price: 0, cost: 0, img: "", sizes: ["P", "M", "G", "GG", "XG"], status: "active", stock: 0, free_shipping: true, category: "" });
+  const openNew = () => setEditingProduct({ 
+    name: "", 
+    price: 0, 
+    cost: 0, 
+    img: "", 
+    sizes: ["P", "M", "G", "GG", "XG"], 
+    status: "active", 
+    stock: 0, 
+    free_shipping: true, 
+    category: "" 
+  });
   const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
 
   const handleSave = async () => {
-    if (!editingProduct?.name || !editingProduct?.img) return;
+    if (!editingProduct?.name || !editingProduct?.img || !editingProduct?.cost) {
+      return;
+    }
     await upsertProduct.mutateAsync(editingProduct as any);
     setEditingProduct(null);
   };
