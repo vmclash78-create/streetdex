@@ -30,8 +30,8 @@ const PIX_KEY = "duartt@pix.com";
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
-  const pixDiscount = Number(settings?.pix_discount || "2") / 100;
-  const cardFee = Number(settings?.card_fee || "0") / 100;
+  const pixDiscount = Number(settings?.pix_discount || "0") / 100;
+  const cashDiscount = Number(settings?.cash_discount || "0") / 100;
 
   const [step, setStep] = useState<Step>(1);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
@@ -46,9 +46,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   
   const finalTotal = useMemo(() => {
     if (paymentMethod === "pix") return total * (1 - pixDiscount);
-    if (paymentMethod === "cartao") return total * (1 + cardFee);
+    if (paymentMethod === "dinheiro") return total * (1 - cashDiscount);
     return total;
-  }, [total, paymentMethod, pixDiscount, cardFee]);
+  }, [total, paymentMethod, pixDiscount, cashDiscount]);
 
 
   const validateStep1 = () => {
@@ -189,8 +189,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                     {method.value === "pix" && paymentMethod === "pix" && pixDiscount > 0 && (
                       <p className="text-xs text-green-600 mt-1 font-semibold">{pixDiscount * 100}% de desconto = {formatPrice(total * (1 - pixDiscount))}</p>
                     )}
-                    {method.value === "cartao" && paymentMethod === "cartao" && cardFee > 0 && (
-                      <p className="text-xs text-amber-600 mt-1 font-semibold">Taxa de {cardFee * 100}% p/ cartão = {formatPrice(total * (1 + cardFee))}</p>
+                    {method.value === "dinheiro" && paymentMethod === "dinheiro" && cashDiscount > 0 && (
+                      <p className="text-xs text-green-600 mt-1 font-semibold">{cashDiscount * 100}% de desconto = {formatPrice(total * (1 - cashDiscount))}</p>
                     )}
 
                   </CardContent>
@@ -279,10 +279,10 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                     <span className="text-sm text-green-600">-{formatPrice(total * pixDiscount)}</span>
                   </div>
                 )}
-                {paymentMethod === "cartao" && cardFee > 0 && (
+                {paymentMethod === "dinheiro" && cashDiscount > 0 && (
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-amber-600">Taxa Cartão ({cardFee * 100}%)</span>
-                    <span className="text-sm text-amber-600">+{formatPrice(total * cardFee)}</span>
+                    <span className="text-sm text-green-600">Desconto Dinheiro ({cashDiscount * 100}%)</span>
+                    <span className="text-sm text-green-600">-{formatPrice(total * cashDiscount)}</span>
                   </div>
                 )}
 
