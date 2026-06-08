@@ -156,7 +156,21 @@ export const useUpdateOrder = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...payload }: Partial<DBOrder> & { id: string }) => {
-      const { error } = await supabase.from("orders").update(payload as any).eq("id", id);
+      // Remove fields that should not be updated or that cause issues
+      const { 
+        customers, 
+        order_number, 
+        created_at, 
+        updated_at, 
+        customer_id,
+        ...updateData 
+      } = payload as any;
+      
+      const { error } = await supabase
+        .from("orders")
+        .update(updateData)
+        .eq("id", id);
+        
       if (error) throw error;
     },
     onSuccess: () => {
