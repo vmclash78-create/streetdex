@@ -578,17 +578,17 @@ const ProductsView = () => {
                         const newPrice = parseFloat(e.target.value) || 0;
                         const updates: any = { price: newPrice };
                         
-                        // If we have price and margin, calculate cost: cost = price / (1 + margin/100)
-                        if (newPrice > 0 && localMargin) {
+                        // Scenario 5: Price + Cost -> Update Margin
+                        if (newPrice > 0 && editingProduct.cost && editingProduct.cost > 0) {
+                          const margin = ((newPrice - editingProduct.cost) / editingProduct.cost) * 100;
+                          setLocalMargin(margin.toFixed(1).replace(".", ","));
+                        }
+                        // Scenario 6: Price + Margin -> Update Cost
+                        else if (newPrice > 0 && localMargin) {
                           const marginPercent = parseFloat(localMargin.replace(",", "."));
                           if (!isNaN(marginPercent) && marginPercent !== -100) {
                             updates.cost = parseFloat((newPrice / (1 + marginPercent / 100)).toFixed(2));
                           }
-                        }
-                        // If we have price and cost, calculate margin
-                        else if (newPrice > 0 && editingProduct.cost && editingProduct.cost > 0) {
-                          const margin = ((newPrice - editingProduct.cost) / editingProduct.cost) * 100;
-                          setLocalMargin(margin.toFixed(1).replace(".", ","));
                         } else if (newPrice === 0) {
                           setLocalMargin("");
                         }
@@ -598,9 +598,8 @@ const ProductsView = () => {
                       className="mt-1" 
                       placeholder="0.00"
                     />
-
-
                   </div>
+
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
