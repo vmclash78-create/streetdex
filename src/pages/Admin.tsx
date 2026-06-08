@@ -290,6 +290,8 @@ const ProductsView = () => {
   });
   const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
 
+  const [localMargin, setLocalMargin] = useState<string>("");
+
   const handleSave = async () => {
     if (!editingProduct?.name) {
       alert("O nome do produto é obrigatório.");
@@ -309,7 +311,9 @@ const ProductsView = () => {
     }
     await upsertProduct.mutateAsync(editingProduct as any);
     setEditingProduct(null);
+    setLocalMargin("");
   };
+
 
   const handleDelete = async (id: string) => {
     await deleteProduct.mutateAsync(id);
