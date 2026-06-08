@@ -1,15 +1,18 @@
 import { useParams, Link } from "react-router-dom";
 import { useOrderById, getStatusInfo, ORDER_STATUSES } from "@/hooks/useOrders";
-import { ShoppingBag, Check, Loader2, ArrowLeft } from "lucide-react";
+import { ShoppingBag, Check, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
 import DuarttLogo from "@/components/store/DuarttLogo";
 import { formatPrice, fallbackImg } from "@/components/store/storeData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useStoreSettings } from "@/hooks/useStoreData";
 
 const OrderTracking = () => {
   const { id } = useParams<{ id: string }>();
   const { data: order, isLoading, error } = useOrderById(id);
+  const { data: settings } = useStoreSettings();
+  const whatsapp = settings?.whatsapp || "5585992783973";
 
   if (isLoading) {
     return (
@@ -110,6 +113,12 @@ const OrderTracking = () => {
             <p className="text-sm font-semibold text-foreground capitalize">{order.payment_method}</p>
           </CardContent>
         </Card>
+
+        <Button asChild className="w-full gap-2 bg-green-600 hover:bg-green-500 h-12 text-white">
+          <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Olá! Gostaria de informações sobre meu pedido #${order.order_number}`)}`} target="_blank" rel="noopener noreferrer">
+            <MessageCircle size={20} /> Suporte via WhatsApp
+          </a>
+        </Button>
       </div>
     </div>
   );
