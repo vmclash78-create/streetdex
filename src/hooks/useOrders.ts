@@ -127,6 +127,11 @@ export const useCreateOrder = () => {
       };
       items: { product_id?: string; product_name: string; product_img?: string; size?: string; quantity: number; price: number }[];
     }) => {
+      // Ensure items is an array and not empty
+      if (!Array.isArray(payload.items) || payload.items.length === 0) {
+        throw new Error("O pedido deve conter pelo menos um item.");
+      }
+
       const { data, error } = await supabase.rpc("create_storefront_order", {
         p_customer_name: payload.customer.name,
         p_customer_phone: payload.customer.phone,
