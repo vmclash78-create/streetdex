@@ -1390,7 +1390,7 @@ const OrdersAdminView = () => {
     const order = orders?.find(o => o.id === orderId);
     if (!order) return;
 
-    // Se o status for alterado para 'entregue', move para vendas e exclui de pedidos
+    // Se o status for alterado para 'entregue', move para vendas
     if (status === "entregue") {
       try {
         const items = await supabase.from("order_items").select("*").eq("order_id", orderId);
@@ -1404,7 +1404,8 @@ const OrdersAdminView = () => {
           payment_method: order.payment_method,
           discount: 0,
           total: Number(order.total),
-          notes: order.notes
+          notes: order.notes,
+          order_number: order.order_number // Manter o número do pedido na venda
         };
 
         const saleItems = items.data.map(item => ({
@@ -1412,16 +1413,17 @@ const OrdersAdminView = () => {
           product_name: item.product_name,
           quantity: item.quantity,
           unit_price: Number(item.price),
-          unit_cost: 0, // Informação não disponível no pedido
+          unit_cost: 0, 
           size: item.size
         }));
 
         await createSale.mutateAsync({ sale: saleData as any, items: saleItems as any });
         
-        // Excluir pedido após venda confirmada
-        await deleteOrder.mutateAsync(orderId);
+        // Atualizar o status para entregue mas NÃO excluir imediatamente
+        // (O filtro na visualização cuidará de remover pedidos entregues há mais de 2 dias)
+        await updateStatus.mutateAsync({ id: orderId, status });
         
-        toast({ title: "Sucesso", description: "Pedido concluído e movido para Vendas!" });
+        toast({ title: "Sucesso", description: "Pedido marcado como entregue e registrado em Vendas!" });
         return;
       } catch (error: any) {
         toast({ title: "Erro ao concluir", description: error.message, variant: "destructive" });
