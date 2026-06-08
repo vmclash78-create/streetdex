@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
-import { type CartItem, formatPrice, pixPrice, fallbackImg, WHATSAPP } from "./storeData";
+import { type CartItem, formatPrice, fallbackImg, WHATSAPP } from "./storeData";
 import { useCreateOrder } from "@/hooks/useOrders";
+import { useStoreSettings } from "@/hooks/useStoreData";
+
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +29,10 @@ const PAYMENT_METHODS = [
 const PIX_KEY = "duartt@pix.com";
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
+  const { data: settings } = useStoreSettings();
+  const pixDiscount = Number(settings?.pix_discount || "2") / 100;
+  const cardFee = Number(settings?.card_fee || "0") / 100;
+
   const [step, setStep] = useState<Step>(1);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
   const [address, setAddress] = useState({ cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" });
@@ -37,7 +43,13 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const { toast } = useToast();
 
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const finalTotal = paymentMethod === "pix" ? total * 0.98 : total;
+  
+  const finalTotal = useMemo(() => {
+    if (paymentMethod === "pix") return total * (1 - pixDiscount);
+    if (paymentMethod === "cartao") return total * (1 + cardFee);
+    return total;
+  }, [total, paymentMethod, pixDiscount, cardFee]);
+
 
   const validateStep1 = () => {
     const name = customer.name.trim();
@@ -174,9 +186,13 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                   <CardContent className="p-4">
                     <p className={`text-sm font-semibold ${paymentMethod === method.value ? "text-primary" : "text-foreground"}`}>{method.label}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{method.description}</p>
-                    {method.value === "pix" && paymentMethod === "pix" && (
-                      <p className="text-xs text-green-600 mt-1 font-semibold">2% de desconto = {pixPrice(total)}</p>
+                    {method.value === "pix" && paymentMethod === "pix" && pixDiscount > 0 && (
+                      <p className="text-xs text-green-600 mt-1 font-semibold">{pixDiscount * 100}% de desconto = {formatPrice(total * (1 - pixDiscount))}</p>
                     )}
+                    {method.value === "cartao" && paymentMethod === "cartao" && cardFee > 0 && (
+                      <p className="text-xs text-amber-600 mt-1 font-semibold">Taxa de {cardFee * 100}% p/ cartão = {formatPrice(total * (1 + cardFee))}</p>
+                    )}
+
                   </CardContent>
                 </Card>
               ))}
@@ -257,12 +273,19 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                   <span className="text-sm text-muted-foreground">Subtotal</span>
                   <span className="text-sm text-foreground">{formatPrice(total)}</span>
                 </div>
-                {paymentMethod === "pix" && (
+                {paymentMethod === "pix" && pixDiscount > 0 && (
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-green-600">Desconto PIX (2%)</span>
-                    <span className="text-sm text-green-600">-{formatPrice(total * 0.02)}</span>
+                    <span className="text-sm text-green-600">Desconto PIX ({pixDiscount * 100}%)</span>
+                    <span className="text-sm text-green-600">-{formatPrice(total * pixDiscount)}</span>
                   </div>
                 )}
+                {paymentMethod === "cartao" && cardFee > 0 && (
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-amber-600">Taxa Cartão ({cardFee * 100}%)</span>
+                    <span className="text-sm text-amber-600">+{formatPrice(total * cardFee)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
                   <span className="text-sm font-bold text-foreground">Total</span>
                   <span className="text-lg font-bold text-foreground">{formatPrice(finalTotal)}</span>

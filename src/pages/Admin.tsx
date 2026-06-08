@@ -1209,8 +1209,21 @@ const FinancesView = () => {
                   <div>
                     <Label>Data</Label>
                     <Input type="date" value={expDate} onChange={(e) => setExpDate(e.target.value)} className="mt-1" />
-                  </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Desconto PIX (%)</Label>
+                <div className="flex gap-2">
+                  <Input value={pixDiscount} onChange={(e) => handleUpdateSetting("pix_discount", e.target.value)} />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Taxa Cartão (%)</Label>
+                <div className="flex gap-2">
+                  <Input value={cardFee} onChange={(e) => handleUpdateSetting("card_fee", e.target.value)} />
+                </div>
+              </div>
+            </div>
+
                 <div>
                   <Label>Categoria</Label>
                   <Select value={expCategory} onValueChange={setExpCategory}>
