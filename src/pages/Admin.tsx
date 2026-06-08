@@ -334,7 +334,7 @@ const ProductsView = () => {
             </TableHeader>
             <TableBody>
               {products?.map((p) => {
-                const margin = getMargin(Number(p.price), Number(p.cost));
+                const margin = getMarkup(Number(p.price), Number(p.cost));
                 return (
                   <TableRow key={p.id}>
                     <TableCell>
