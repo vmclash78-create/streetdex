@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Check, ExternalLink, Copy, CheckCheck } from "lucide-react";
+import { Check, ExternalLink, Copy, CheckCheck, MessageCircle } from "lucide-react";
 import DuarttLogo from "./DuarttLogo";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useStoreSettings } from "@/hooks/useStoreData";
+import { WHATSAPP } from "./storeData";
 
 interface OrderSuccessViewProps {
   orderId: string;
@@ -12,11 +14,18 @@ interface OrderSuccessViewProps {
 
 const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessViewProps) => {
   const [copied, setCopied] = useState(false);
+  const { data: settings } = useStoreSettings();
+  const whatsapp = settings?.whatsapp || WHATSAPP;
 
   const copyOrderNumber = () => {
     navigator.clipboard.writeText(String(orderNumber));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const sendOrderNumberToWhatsApp = () => {
+    const msg = `Olá! Realizei o pedido #${orderNumber} e gostaria de confirmar.`;
+    window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   return (
@@ -34,10 +43,16 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
           Seu pedido <span className="font-semibold text-foreground">#{orderNumber}</span> foi registrado com sucesso.
           Você será notificado sobre atualizações do status.
         </p>
-        <Button variant="outline" onClick={copyOrderNumber} className="gap-2">
-          {copied ? <CheckCheck size={16} className="text-green-600" /> : <Copy size={16} />}
-          {copied ? "Copiado!" : `Copiar nº do pedido: #${orderNumber}`}
-        </Button>
+        <div className="flex flex-col gap-2 w-full max-w-xs">
+          <Button variant="outline" onClick={copyOrderNumber} className="gap-2">
+            {copied ? <CheckCheck size={16} className="text-green-600" /> : <Copy size={16} />}
+            {copied ? "Copiado!" : `Copiar nº do pedido: #${orderNumber}`}
+          </Button>
+          <Button variant="outline" onClick={sendOrderNumberToWhatsApp} className="gap-2 text-green-600 border-green-600/50 hover:bg-green-500/10">
+            <MessageCircle size={16} />
+            Enviar número via WhatsApp
+          </Button>
+        </div>
         <Button variant="link" asChild>
           <Link to={`/pedido/${orderId}`} className="gap-2">
             <ExternalLink size={16} /> Acompanhar pedido
