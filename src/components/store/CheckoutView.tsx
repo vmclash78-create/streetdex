@@ -68,22 +68,44 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       try {
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await response.json();
-        if (!data.erro) {
-          setAddress(prev => ({
-            ...prev,
-            street: data.logradouro || prev.street,
-            neighborhood: data.bairro || prev.neighborhood,
-            city: data.localidade || prev.city
-          }));
+        if (data.erro) {
+          toast({ 
+            title: "CEP não encontrado", 
+            description: "Por favor, verifique o CEP digitado.", 
+            variant: "destructive" 
+          });
+          return;
         }
+        
+        // Ensure neighborhood and street exist (validation of address quality)
+        if (!data.bairro || !data.logradouro) {
+          toast({ 
+            title: "CEP incompleto", 
+            description: "Este CEP não retornou rua ou bairro. Por favor, preencha manualmente com cuidado.", 
+          });
+        }
+
+        setAddress(prev => ({
+          ...prev,
+          street: data.logradouro || prev.street,
+          neighborhood: data.bairro || prev.neighborhood,
+          city: data.localidade || prev.city
+        }));
       } catch (error) {
         console.error("Erro ao buscar CEP:", error);
+        toast({ title: "Erro na consulta de CEP", description: "Não foi possível verificar seu endereço automaticamente." });
       }
     }
   };
 
   const handleFinalize = async () => {
     try {
+      // Final validation before submitting
+      if (!validateStep1() || !validateStep2()) {
+        toast({ title: "Dados incompletos", description: "Por favor, verifique seus dados e endereço.", variant: "destructive" });
+        return;
+      }
+
       const order = await createOrder.mutateAsync({
         customer: { name: customer.name.trim(), phone: customer.phone.trim(), email: customer.email.trim() || undefined },
         order: {
@@ -106,17 +128,24 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         })),
       });
 
-      const itemsText = cartItems.map((i) => `• ${i.product.name} - ${i.size} - ${i.qty}x`).join("\n");
-      const msg = `🛒 *Novo pedido recebido!*\n\n📦 *Pedido:* #${order.order_number}\n\n👤 *Cliente:*\n${customer.name}\n${customer.phone}\n\n📍 *Endereço:*\n${address.street}, ${address.number}\n${address.neighborhood} - ${address.city}\nCEP: ${address.cep}${address.complement ? `\nComplemento: ${address.complement}` : ""}\n\n🛍️ *Produtos:*\n${itemsText}\n\n💰 *Total:* ${formatPrice(finalTotal)}\n💳 *Pagamento:* ${PAYMENT_METHODS.find((p) => p.value === paymentMethod)?.label}\n\n${notes ? `📝 *Obs:* ${notes}\n\n` : ""}🔗 *Ver pedido:* ${window.location.origin}/pedido/${order.id}`;
+      if (!order || !order.id) {
+        throw new Error("Erro ao processar o pedido no servidor.");
+      }
 
-      // Open WhatsApp after order creation succeeds
-      const whatsappUrl = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
-      window.open(whatsappUrl, "_blank");
-      
       onOrderComplete(order.id, order.order_number);
-    } catch (error) {
+      
+      toast({ 
+        title: "Pedido realizado!", 
+        description: `Seu pedido #${order.order_number} foi registrado com sucesso.`,
+      });
+      
+    } catch (error: any) {
       console.error("Order creation error:", error);
-      toast({ title: "Erro ao criar pedido", description: "Ocorreu um problema ao salvar seu pedido. Tente novamente.", variant: "destructive" });
+      toast({ 
+        title: "Erro ao criar pedido", 
+        description: error.message || "Ocorreu um problema ao salvar seu pedido. Tente novamente.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -156,11 +185,12 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><User size={20} className="text-primary" /> Seus dados</h2>
             <div>
               <Label>Nome completo *</Label>
-              <Input value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} placeholder="Seu nome completo" className="mt-1" />
+              <Input value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} placeholder="Ex: João Silva" className="mt-1" />
             </div>
             <div>
-              <Label>Telefone (WhatsApp) *</Label>
+              <Label>WhatsApp (Telefone) *</Label>
               <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
+              <p className="text-[10px] text-muted-foreground mt-1">É neste número que você receberá o comprovante do pedido.</p>
             </div>
             <div>
               <Label>Email (opcional)</Label>
