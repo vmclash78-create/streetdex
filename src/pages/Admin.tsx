@@ -9,13 +9,15 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import {
   useAdminProducts, useUpsertProduct, useDeleteProduct,
   useStoreSettings, useUpdateSetting,
   useSales, useAllSaleItems, useCreateSale, useDeleteSale,
   useExpenses, useCreateExpense, useDeleteExpense,
   useAdminBanners, useUpsertBanner, useDeleteBanner,
-  type DBProduct, type DBSale, type DBSaleItem, type DBExpense, type DBBanner,
+  useCoupons, useUpsertCoupon, useDeleteCoupon,
+  type DBProduct, type DBSale, type DBSaleItem, type DBExpense, type DBBanner, type DBCoupon,
 } from "@/hooks/useStoreData";
 import { 
   useOrders, 
@@ -40,7 +42,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "finances" | "settings";
+type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "coupons" | "finances" | "settings";
 
 const formatPrice = (v: number) => `R$${Number(v).toFixed(2).replace(".", ",")}`;
 const formatDate = (d: string) => {
@@ -69,6 +71,7 @@ const Admin = () => {
     { icon: Image, label: "Banners", key: "banners" },
     { icon: ClipboardList, label: "Pedidos", key: "orders" },
     { icon: ShoppingCart, label: "Vendas", key: "sales" },
+    { icon: Tag, label: "Cupons", key: "coupons" },
     { icon: Wallet, label: "Finanças", key: "finances" },
     { icon: Settings, label: "Configurações", key: "settings" },
   ];
@@ -133,6 +136,7 @@ const Admin = () => {
           {view === "banners" && <BannersView />}
           {view === "orders" && <OrdersAdminView />}
           {view === "sales" && <SalesView />}
+          {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
           {view === "settings" && <SettingsView />}
         </main>
@@ -1577,6 +1581,138 @@ const OrdersAdminView = () => {
               {deleteOrder.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Trash2 className="mr-2" size={16} />}
               Confirmar Exclusão
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// ─── COUPONS ───
+const CouponsView = () => {
+  const { data: coupons, isLoading } = useCoupons();
+  const upsertCoupon = useUpsertCoupon();
+  const deleteCoupon = useDeleteCoupon();
+  const [editingCoupon, setEditingCoupon] = useState<Partial<DBCoupon> | null>(null);
+  const { toast } = useToast();
+
+  const openNew = () => {
+    setEditingCoupon({
+      code: "",
+      discount_value: 0,
+      discount_type: "percentage",
+      min_purchase_amount: 0,
+      status: "active",
+      expires_at: null,
+      max_uses: null
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editingCoupon?.code) {
+      toast({ title: "Erro", description: "O código do cupom é obrigatório.", variant: "destructive" });
+      return;
+    }
+    await upsertCoupon.mutateAsync(editingCoupon);
+    setEditingCoupon(null);
+    toast({ title: "Sucesso", description: "Cupom salvo com sucesso!" });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Cupons de Desconto</h1>
+        <Button onClick={openNew} className="gap-2"><Plus size={16} /> Novo Cupom</Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Código</TableHead>
+                <TableHead>Desconto</TableHead>
+                <TableHead>Expiração</TableHead>
+                <TableHead>Uso</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {coupons?.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell className="font-bold">{c.code}</TableCell>
+                  <TableCell>
+                    {c.discount_type === "percentage" ? `${c.discount_value}%` : formatPrice(c.discount_value)}
+                  </TableCell>
+                  <TableCell>
+                    {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "Nunca"}
+                  </TableCell>
+                  <TableCell>{c.used_count}{c.max_uses ? ` / ${c.max_uses}` : ""}</TableCell>
+                  <TableCell>
+                    <Badge className={c.status === "active" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}>
+                      {c.status === "active" ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="icon" onClick={() => setEditingCoupon(c)}><Edit2 size={16} /></Button>
+                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteCoupon.mutate(c.id)}><Trash2 size={16} /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
+
+      <Dialog open={!!editingCoupon} onOpenChange={() => setEditingCoupon(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingCoupon?.id ? "Editar Cupom" : "Novo Cupom"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Código</Label>
+                <Input value={editingCoupon?.code} onChange={(e) => setEditingCoupon({ ...editingCoupon!, code: e.target.value.toUpperCase() })} placeholder="EX: TRINTAOFF" />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select value={editingCoupon?.discount_type} onValueChange={(v: any) => setEditingCoupon({ ...editingCoupon!, discount_type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Porcentagem (%)</SelectItem>
+                    <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Valor do Desconto</Label>
+                <Input type="number" value={editingCoupon?.discount_value} onChange={(e) => setEditingCoupon({ ...editingCoupon!, discount_value: Number(e.target.value) })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Compra Mínima (R$)</Label>
+                <Input type="number" value={editingCoupon?.min_purchase_amount} onChange={(e) => setEditingCoupon({ ...editingCoupon!, min_purchase_amount: Number(e.target.value) })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data de Expiração</Label>
+                <Input type="date" value={editingCoupon?.expires_at ? editingCoupon.expires_at.split("T")[0] : ""} onChange={(e) => setEditingCoupon({ ...editingCoupon!, expires_at: e.target.value ? e.target.value + "T23:59:59Z" : null })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Limite de Usos (Opcional)</Label>
+                <Input type="number" value={editingCoupon?.max_uses || ""} onChange={(e) => setEditingCoupon({ ...editingCoupon!, max_uses: e.target.value ? Number(e.target.value) : null })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingCoupon(null)}>Cancelar</Button>
+            <Button onClick={handleSave}>Salvar Cupom</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
