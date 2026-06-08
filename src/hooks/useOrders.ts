@@ -140,7 +140,7 @@ export const useCreateOrder = () => {
         p_address_city: payload.order.address_city || "",
         p_address_complement: payload.order.address_complement || "",
         p_notes: payload.order.notes || "",
-        p_items: JSON.stringify(payload.items),
+        p_items: payload.items,
       });
       if (error) throw error;
       const result = data as unknown as { id: string; order_number: number };
