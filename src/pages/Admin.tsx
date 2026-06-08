@@ -402,109 +402,157 @@ const ProductsView = () => {
             <DialogTitle>{editingProduct?.id ? "Editar Produto" : "Novo Produto"}</DialogTitle>
           </DialogHeader>
           {editingProduct && (
-            <div className="space-y-3">
-              <div>
-                <Label>Nome *</Label>
-                <Input value={editingProduct.name || ""} onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} className="mt-1" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <Label>Custo *</Label>
+                  <Label className="text-sm font-medium">Nome do Produto *</Label>
                   <Input 
-                    type="number" 
-                    step="0.01" 
-                    value={editingProduct.cost || ""} 
-                    onChange={(e) => {
-                      const cost = parseFloat(e.target.value) || 0;
-                      setEditingProduct({ ...editingProduct, cost });
-                    }} 
-                    className="mt-1 border-primary/50" 
-                  />
-                </div>
-                <div>
-                  <Label>Margem de Lucro (%)</Label>
-                  <Input 
-                    type="number" 
-                    step="0.1" 
-                    value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1) : ""} 
-                    onChange={(e) => {
-                      const marginPercent = parseFloat(e.target.value) || 0;
-                      if (editingProduct.cost) {
-                        const newPrice = editingProduct.cost * (1 + marginPercent / 100);
-                        setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
-                      }
-                    }} 
-                    placeholder="Ex: 50"
+                    value={editingProduct.name || ""} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} 
                     className="mt-1"
+                    placeholder="Ex: T-Shirt Streetwear"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+
                 <div>
-                  <Label>Preço de Venda (Final) *</Label>
+                  <Label className="text-sm font-medium">Tamanhos (separados por vírgula)</Label>
                   <Input 
-                    type="number" 
-                    step="0.01" 
-                    value={editingProduct.price || ""} 
-                    onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })} 
-                    className="mt-1" 
+                    value={(editingProduct.sizes || []).join(", ")} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, sizes: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} 
+                    className="mt-1"
+                    placeholder="Ex: P, M, G, GG"
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Estoque</Label>
+                    <Input 
+                      type="number" 
+                      value={editingProduct.stock || 0} 
+                      onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value) || 0 })} 
+                      className="mt-1" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Custo *</Label>
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      value={editingProduct.cost || ""} 
+                      onChange={(e) => {
+                        const cost = parseFloat(e.target.value) || 0;
+                        setEditingProduct({ ...editingProduct, cost });
+                      }} 
+                      className="mt-1 border-primary/50" 
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Margem de Lucro (%)</Label>
+                    <Input 
+                      type="number" 
+                      step="0.1" 
+                      value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1) : ""} 
+                      onChange={(e) => {
+                        const marginPercent = parseFloat(e.target.value) || 0;
+                        if (editingProduct.cost) {
+                          const newPrice = editingProduct.cost * (1 + marginPercent / 100);
+                          setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
+                        }
+                      }} 
+                      placeholder="Ex: 50"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Preço de Venda (Final) *</Label>
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      value={editingProduct.price || ""} 
+                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })} 
+                      className="mt-1" 
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Preço Antigo (De:)</Label>
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      value={editingProduct.old_price || ""} 
+                      onChange={(e) => setEditingProduct({ ...editingProduct, old_price: parseFloat(e.target.value) || null })} 
+                      className="mt-1" 
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Status</Label>
+                    <Select value={editingProduct.status || "active"} onValueChange={(v) => setEditingProduct({ ...editingProduct, status: v })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="draft">Rascunho</SelectItem>
+                        <SelectItem value="out">Esgotado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div>
-                  <Label>Preço Antigo (De:)</Label>
+                  <Label className="text-sm font-medium">URL da Imagem Principal *</Label>
                   <Input 
-                    type="number" 
-                    step="0.01" 
-                    value={editingProduct.old_price || ""} 
-                    onChange={(e) => setEditingProduct({ ...editingProduct, old_price: parseFloat(e.target.value) || null })} 
+                    value={editingProduct.img || ""} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, img: e.target.value })} 
                     className="mt-1" 
+                    placeholder="https://exemplo.com/imagem.jpg"
                   />
                 </div>
-              </div>
-              <div>
-                <Label>URL da Imagem *</Label>
-                <Input value={editingProduct.img || ""} onChange={(e) => setEditingProduct({ ...editingProduct, img: e.target.value })} className="mt-1" />
-              </div>
-              <div>
-                <Label>URL da Imagem 2</Label>
-                <Input value={editingProduct.img2 || ""} onChange={(e) => setEditingProduct({ ...editingProduct, img2: e.target.value || null })} className="mt-1" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+
                 <div>
-                  <Label>Categoria</Label>
-                  <Input value={editingProduct.category || ""} onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })} className="mt-1" />
+                  <Label className="text-sm font-medium">URL da Imagem 2</Label>
+                  <Input 
+                    value={editingProduct.img2 || ""} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, img2: e.target.value || null })} 
+                    className="mt-1" 
+                    placeholder="https://exemplo.com/imagem2.jpg"
+                  />
                 </div>
+
                 <div>
-                  <Label>Estoque</Label>
-                  <Input type="number" value={editingProduct.stock || 0} onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value) || 0 })} className="mt-1" />
+                  <Label className="text-sm font-medium">Categoria</Label>
+                  <Input 
+                    value={editingProduct.category || ""} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })} 
+                    className="mt-1" 
+                    placeholder="Ex: Camisetas"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <Checkbox 
+                    id="free_shipping"
+                    checked={editingProduct.free_shipping || false} 
+                    onCheckedChange={(c) => setEditingProduct({ ...editingProduct, free_shipping: !!c })} 
+                  />
+                  <Label htmlFor="free_shipping" className="text-sm cursor-pointer">Oferecer Frete Grátis</Label>
                 </div>
               </div>
-              <div>
-                <Label>Status</Label>
-                <Select value={editingProduct.status || "active"} onValueChange={(v) => setEditingProduct({ ...editingProduct, status: v })}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Ativo</SelectItem>
-                    <SelectItem value="draft">Rascunho</SelectItem>
-                    <SelectItem value="out">Esgotado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Tamanhos (separados por vírgula)</Label>
-                <Input value={(editingProduct.sizes || []).join(", ")} onChange={(e) => setEditingProduct({ ...editingProduct, sizes: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} className="mt-1" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox checked={editingProduct.free_shipping || false} onCheckedChange={(c) => setEditingProduct({ ...editingProduct, free_shipping: !!c })} />
-                <Label>Frete grátis</Label>
-              </div>
-              <DialogFooter>
+
+              <DialogFooter className="pt-4">
                 <Button variant="outline" onClick={() => setEditingProduct(null)}>Cancelar</Button>
-                <Button onClick={handleSave} disabled={upsertProduct.isPending} className="gap-1">
+                <Button onClick={handleSave} disabled={upsertProduct.isPending} className="gap-1 px-8">
                   {upsertProduct.isPending && <Loader2 size={14} className="animate-spin" />}
-                  <Save size={14} /> Salvar
+                  <Save size={14} /> Salvar Produto
                 </Button>
               </DialogFooter>
             </div>
