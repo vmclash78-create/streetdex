@@ -394,18 +394,58 @@ const ProductsView = () => {
                 <Label>Nome *</Label>
                 <Input value={editingProduct.name || ""} onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} className="mt-1" />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Preço Venda *</Label>
-                  <Input type="number" step="0.01" value={editingProduct.price || ""} onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })} className="mt-1" />
+                  <Label>Custo *</Label>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    value={editingProduct.cost || ""} 
+                    onChange={(e) => {
+                      const cost = parseFloat(e.target.value) || 0;
+                      setEditingProduct({ ...editingProduct, cost });
+                    }} 
+                    className="mt-1 border-primary/50" 
+                  />
                 </div>
                 <div>
-                  <Label>Custo</Label>
-                  <Input type="number" step="0.01" value={editingProduct.cost || ""} onChange={(e) => setEditingProduct({ ...editingProduct, cost: parseFloat(e.target.value) || 0 })} className="mt-1" />
+                  <Label>Margem de Lucro (%)</Label>
+                  <Input 
+                    type="number" 
+                    step="0.1" 
+                    value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1) : ""} 
+                    onChange={(e) => {
+                      const marginPercent = parseFloat(e.target.value) || 0;
+                      if (editingProduct.cost) {
+                        const newPrice = editingProduct.cost * (1 + marginPercent / 100);
+                        setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
+                      }
+                    }} 
+                    placeholder="Ex: 50"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Preço de Venda (Final) *</Label>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    value={editingProduct.price || ""} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })} 
+                    className="mt-1" 
+                  />
                 </div>
                 <div>
-                  <Label>Preço Antigo</Label>
-                  <Input type="number" step="0.01" value={editingProduct.old_price || ""} onChange={(e) => setEditingProduct({ ...editingProduct, old_price: parseFloat(e.target.value) || null })} className="mt-1" />
+                  <Label>Preço Antigo (De:)</Label>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    value={editingProduct.old_price || ""} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, old_price: parseFloat(e.target.value) || null })} 
+                    className="mt-1" 
+                  />
                 </div>
               </div>
               <div>
