@@ -89,7 +89,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
         <Card>
           <CardContent className="p-2.5 flex items-center gap-2.5">
             <Truck size={18} className="text-foreground flex-shrink-0" />
-            <p className="text-sm text-foreground">Enviamos via CORREIOS para todo o Brasil</p>
+            <p className="text-sm text-foreground">Entregamos em Hidrolândia e região</p>
           </CardContent>
         </Card>
       </div>
