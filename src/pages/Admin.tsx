@@ -1375,6 +1375,8 @@ const OrdersAdminView = () => {
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
   const deleteOrder = useDeleteOrder();
+  const createSale = useCreateSale();
+  const { toast } = useToast();
   
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<DBOrder | null>(null);
