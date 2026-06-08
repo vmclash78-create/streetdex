@@ -1267,8 +1267,7 @@ const SettingsView = () => {
             { key: "announcement_text", label: "Texto do Anúncio (topo)" },
             { key: "coupon_code", label: "Código do Cupom" },
             { key: "coupon_discount", label: "Desconto do Cupom (%)" },
-            { key: "pix_discount", label: "Desconto PIX (%)" },
-            { key: "cash_discount", label: "Desconto Dinheiro (%)" },
+            { key: "pix_discount", label: "Desconto PIX e Dinheiro (%)" },
           ].map((field) => (
             <div key={field.key}>
               <Label>{field.label}</Label>
