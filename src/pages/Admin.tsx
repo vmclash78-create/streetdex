@@ -1262,24 +1262,37 @@ const SettingsView = () => {
       <h1 className="text-2xl font-bold text-foreground mb-6">Configurações</h1>
       <Card className="max-w-xl">
         <CardHeader>
-          <CardTitle>Dados da Loja</CardTitle>
+          <CardTitle>Identidade Visual e Contato</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {[
-            { key: "store_name", label: "Nome da Loja" },
-            { key: "whatsapp", label: "WhatsApp" },
-            { key: "announcement_text", label: "Texto do Anúncio (topo)" },
-            { key: "coupon_code", label: "Código do Cupom" },
-            { key: "coupon_discount", label: "Desconto do Cupom (%)" },
-            { key: "pix_discount", label: "Desconto PIX e Dinheiro (%)" },
-          ].map((field) => (
-            <div key={field.key}>
-              <Label>{field.label}</Label>
-              <Input value={getValue(field.key)} onChange={(e) => setLocalSettings({ ...localSettings, [field.key]: e.target.value })} className="mt-1" />
+          <div>
+            <Label>Nome da Loja</Label>
+            <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
+          </div>
+          <div>
+            <Label>WhatsApp (Ex: 5585999999999)</Label>
+            <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
+          </div>
+          <div>
+            <Label>Texto do Anúncio (topo da loja)</Label>
+            <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
+          </div>
+          <div>
+            <Label>Logo URL (Claro)</Label>
+            <div className="flex gap-2 items-center mt-1">
+              <Input value={getValue("logo_url")} onChange={(e) => setLocalSettings({ ...localSettings, logo_url: e.target.value })} placeholder="URL da imagem para tema claro" />
+              {getValue("logo_url") && <img src={getValue("logo_url")} alt="Preview" className="w-10 h-10 object-contain border rounded p-1 bg-white" />}
             </div>
-          ))}
+          </div>
+          <div>
+            <Label>Logo URL (Escuro)</Label>
+            <div className="flex gap-2 items-center mt-1">
+              <Input value={getValue("logo_url_dark")} onChange={(e) => setLocalSettings({ ...localSettings, logo_url_dark: e.target.value })} placeholder="URL da imagem para tema escuro" />
+              {getValue("logo_url_dark") && <img src={getValue("logo_url_dark")} alt="Preview" className="w-10 h-10 object-contain border rounded p-1 bg-zinc-900" />}
+            </div>
+          </div>
 
-          <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="gap-2">
+          <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="w-full gap-2">
             {updateSetting.isPending && <Loader2 size={14} className="animate-spin" />}
             <Save size={14} /> Salvar Alterações
           </Button>
