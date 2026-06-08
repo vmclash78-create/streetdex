@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Search, ArrowLeft, Package } from "lucide-react";
+import { Search, ArrowLeft, Package, MessageCircle } from "lucide-react";
 import DuarttLogo from "@/components/store/DuarttLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useStoreSettings } from "@/hooks/useStoreData";
 
 const TrackOrder = () => {
   const [orderNum, setOrderNum] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { data: settings } = useStoreSettings();
+  const whatsapp = settings?.whatsapp || "5585992783973";
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +72,15 @@ const TrackOrder = () => {
             {loading ? "Buscando..." : "Buscar pedido"}
           </Button>
         </form>
+
+        <div className="pt-4 border-t border-border w-full mt-4">
+          <p className="text-xs text-muted-foreground mb-3">Ainda com dúvidas?</p>
+          <Button variant="outline" asChild className="w-full gap-2 border-green-600/50 text-green-600 hover:bg-green-500/10">
+            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
+              <MessageCircle size={18} /> Chamar no WhatsApp
+            </a>
+          </Button>
+        </div>
       </div>
     </div>
   );
