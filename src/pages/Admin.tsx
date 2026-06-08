@@ -518,9 +518,12 @@ const ProductsView = () => {
                     <Label className="text-sm font-medium">Margem de Lucro (%)</Label>
                     <Input 
                       type="text" 
-                      value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1).replace(".", ",") : ""} 
+                      value={localMargin} 
                       onChange={(e) => {
-                        const val = e.target.value.replace(",", ".");
+                        const inputVal = e.target.value;
+                        setLocalMargin(inputVal);
+                        
+                        const val = inputVal.replace(",", ".");
                         if (val === "") {
                           setEditingProduct({ ...editingProduct, price: 0 });
                           return;
@@ -536,6 +539,7 @@ const ProductsView = () => {
                       className="mt-1"
                     />
                   </div>
+
 
 
                   <div>
