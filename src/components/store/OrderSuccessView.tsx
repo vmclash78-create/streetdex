@@ -24,7 +24,7 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
   };
 
   const sendOrderNumberToWhatsApp = () => {
-    const msg = `Olá! Realizei o pedido #${orderNumber} e gostaria de confirmar.`;
+    const msg = `Olá! Acabei de realizar o pedido #${orderNumber} no site. Aguardo confirmação!`;
     window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 

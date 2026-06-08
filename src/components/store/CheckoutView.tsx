@@ -68,16 +68,33 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       try {
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await response.json();
-        if (!data.erro) {
-          setAddress(prev => ({
-            ...prev,
-            street: data.logradouro || prev.street,
-            neighborhood: data.bairro || prev.neighborhood,
-            city: data.localidade || prev.city
-          }));
+        if (data.erro) {
+          toast({ 
+            title: "CEP não encontrado", 
+            description: "Por favor, verifique o CEP digitado.", 
+            variant: "destructive" 
+          });
+          return;
         }
+        
+        // Ensure neighborhood and street exist (validation of address quality)
+        if (!data.bairro || !data.logradouro) {
+          toast({ 
+            title: "CEP incompleto", 
+            description: "Este CEP não retornou rua ou bairro. Por favor, preencha manualmente com cuidado.", 
+            variant: "warning" 
+          });
+        }
+
+        setAddress(prev => ({
+          ...prev,
+          street: data.logradouro || prev.street,
+          neighborhood: data.bairro || prev.neighborhood,
+          city: data.localidade || prev.city
+        }));
       } catch (error) {
         console.error("Erro ao buscar CEP:", error);
+        toast({ title: "Erro na consulta de CEP", description: "Não foi possível verificar seu endereço automaticamente." });
       }
     }
   };
@@ -169,11 +186,12 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><User size={20} className="text-primary" /> Seus dados</h2>
             <div>
               <Label>Nome completo *</Label>
-              <Input value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} placeholder="Seu nome completo" className="mt-1" />
+              <Input value={customer.name} onChange={(e) => setCustomer({ ...customer, name: e.target.value })} placeholder="Ex: João Silva" className="mt-1" />
             </div>
             <div>
-              <Label>Telefone (WhatsApp) *</Label>
+              <Label>WhatsApp (Telefone) *</Label>
               <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
+              <p className="text-[10px] text-muted-foreground mt-1">É neste número que você receberá o comprovante do pedido.</p>
             </div>
             <div>
               <Label>Email (opcional)</Label>
