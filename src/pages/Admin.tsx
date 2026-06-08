@@ -504,7 +504,13 @@ const ProductsView = () => {
                       step="0.1" 
                       value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1) : ""} 
                       onChange={(e) => {
-                        const marginPercent = parseFloat(e.target.value) || 0;
+                        const val = e.target.value;
+                        if (val === "") {
+                          // Allow clearing the field without resetting price
+                          setEditingProduct({ ...editingProduct, price: editingProduct.price });
+                          return;
+                        }
+                        const marginPercent = parseFloat(val) || 0;
                         if (editingProduct.cost) {
                           const newPrice = editingProduct.cost * (1 + marginPercent / 100);
                           setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
@@ -514,6 +520,7 @@ const ProductsView = () => {
                       className="mt-1"
                     />
                   </div>
+
                   <div>
                     <Label className="text-sm font-medium">Preço de Venda (Final) *</Label>
                     <Input 
