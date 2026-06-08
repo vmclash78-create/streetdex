@@ -350,3 +350,65 @@ export const useDeleteExpense = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["expenses"] }),
   });
 };
+
+// ─── COUPONS ───
+export const useCoupons = () => {
+  return useQuery({
+    queryKey: ["coupons"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as DBCoupon[];
+    },
+  });
+};
+
+export const useUpsertCoupon = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (coupon: Partial<DBCoupon>) => {
+      const { data, error } = await supabase.from("coupons").upsert(coupon).select().single();
+      if (error) throw error;
+      return data as DBCoupon;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["coupons"] });
+    },
+  });
+};
+
+export const useDeleteCoupon = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("coupons").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["coupons"] });
+    },
+  });
+};
+
+export const useCouponByCode = (code: string | null) => {
+  return useQuery({
+    queryKey: ["coupon", code],
+    enabled: !!code,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .eq("code", code!)
+        .eq("status", "active")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      
+      const coupon = data as DBCoupon;
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) return null;
+      if (coupon.max_uses && coupon.used_count >= coupon.max_uses) return null;
+      
+      return coupon;
+    },
+  });
+};
