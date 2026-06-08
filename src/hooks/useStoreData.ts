@@ -42,6 +42,7 @@ export type DBSale = {
   total: number;
   sale_date: string;
   notes: string | null;
+  order_number: number | null;
   created_at: string;
 };
 
