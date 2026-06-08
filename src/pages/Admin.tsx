@@ -314,21 +314,23 @@ const ProductsView = () => {
   const [localMargin, setLocalMargin] = useState<string>("");
 
 
+  const { toast } = useToast();
+
   const handleSave = async () => {
     if (!editingProduct?.name) {
-      alert("O nome do produto é obrigatório.");
+      toast({ title: "Erro", description: "O nome do produto é obrigatório.", variant: "destructive" });
       return;
     }
     if (!editingProduct?.img) {
-      alert("A imagem do produto é obrigatória.");
+      toast({ title: "Erro", description: "A imagem do produto é obrigatória.", variant: "destructive" });
       return;
     }
     if (editingProduct?.cost === undefined || editingProduct?.cost === null) {
-      alert("O custo do produto é obrigatório.");
+      toast({ title: "Erro", description: "O custo do produto é obrigatório.", variant: "destructive" });
       return;
     }
     if (!editingProduct?.price || editingProduct?.price <= 0) {
-      alert("O preço de venda deve ser maior que zero.");
+      toast({ title: "Erro", description: "O preço de venda deve ser maior que zero.", variant: "destructive" });
       return;
     }
     await upsertProduct.mutateAsync(editingProduct as any);
