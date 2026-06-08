@@ -30,6 +30,7 @@ const PIX_KEY = "duartt@pix.com";
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
+  const whatsapp = settings?.whatsapp || WHATSAPP;
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
   const cashDiscount = pixDiscount; // Same discount for cash and PIX
 
@@ -88,10 +89,14 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       const itemsText = cartItems.map((i) => `• ${i.product.name} - ${i.size} - ${i.qty}x`).join("\n");
       const msg = `🛒 *Novo pedido recebido!*\n\n📦 *Pedido:* #${order.order_number}\n\n👤 *Cliente:*\n${customer.name}\n${customer.phone}\n\n📍 *Endereço:*\n${address.street}, ${address.number}\n${address.neighborhood} - ${address.city}\nCEP: ${address.cep}${address.complement ? `\nComplemento: ${address.complement}` : ""}\n\n🛍️ *Produtos:*\n${itemsText}\n\n💰 *Total:* ${formatPrice(finalTotal)}\n💳 *Pagamento:* ${PAYMENT_METHODS.find((p) => p.value === paymentMethod)?.label}\n\n${notes ? `📝 *Obs:* ${notes}\n\n` : ""}🔗 *Ver pedido:* ${window.location.origin}/pedido/${order.id}`;
 
-      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
+      // Open WhatsApp after order creation succeeds
+      const whatsappUrl = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+      window.open(whatsappUrl, "_blank");
+      
       onOrderComplete(order.id, order.order_number);
-    } catch {
-      toast({ title: "Erro ao criar pedido", description: "Tente novamente.", variant: "destructive" });
+    } catch (error) {
+      console.error("Order creation error:", error);
+      toast({ title: "Erro ao criar pedido", description: "Ocorreu um problema ao salvar seu pedido. Tente novamente.", variant: "destructive" });
     }
   };
 
