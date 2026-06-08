@@ -910,7 +910,12 @@ const SalesView = () => {
               {sales.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>{formatDate(s.sale_date)}</TableCell>
-                  <TableCell>{s.customer_name || "—"}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{s.customer_name || "—"}</span>
+                      {s.order_number && <span className="text-[10px] text-muted-foreground">Pedido #{s.order_number}</span>}
+                    </div>
+                  </TableCell>
                   <TableCell><Badge variant="secondary">{s.payment_method}</Badge></TableCell>
                   <TableCell className="font-bold">{formatPrice(Number(s.total))}</TableCell>
                   <TableCell className="text-right">
