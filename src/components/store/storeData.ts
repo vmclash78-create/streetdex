@@ -20,7 +20,7 @@ export type AppView = "store" | "cart" | "product" | "checkout" | "order-success
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 export const formatPrice = (v: number) => `R$${v.toFixed(2).replace(".", ",")}`;
-export const pixPrice = (v: number) => `R$${(v * 0.98).toFixed(2).replace(".", ",")}`;
+export const pixPrice = (v: number, discountPct: number = 2) => `R$${(v * (1 - discountPct / 100)).toFixed(2).replace(".", ",")}`;
 export const discountPct = (old: number, cur: number) => Math.round(((old - cur) / old) * 100);
 export const fallbackImg = "https://placehold.co/400x500/f3f4f6/999?text=Produto";
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MessageCircle, ShoppingCart } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
+import { useStoreSettings } from "@/hooks/useStoreData";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,8 @@ interface ProductDetailProps {
 const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: ProductDetailProps) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [imgIndex, setImgIndex] = useState(0);
+  const { data: settings } = useStoreSettings();
+  const discount = Number(settings?.pix_discount || "0");
   const images = [product.img, product.img2 || product.img];
 
   return (
@@ -61,7 +64,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
               {product.oldPrice && <p className="text-muted-foreground text-sm line-through">{formatPrice(product.oldPrice)}</p>}
               <p className="text-3xl font-bold text-foreground">{formatPrice(product.price)}</p>
               <p className="text-sm mt-1">
-                <span className="text-green-500 font-bold">{pixPrice(product.price)}</span>{" "}
+                <span className="text-green-500 font-bold">{pixPrice(product.price, discount)}</span>{" "}
                 <span className="text-muted-foreground">com Pix</span>
               </p>
             </div>
