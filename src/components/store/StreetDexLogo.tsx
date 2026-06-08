@@ -7,7 +7,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const imgSize = size === "sm" ? "h-8" : size === "lg" ? "h-14" : "h-10";
   
   const logoLight = settings?.logo_url || streetdexLogo;
-  const logoDark = settings?.logo_url_dark || streetdexLogoDark;
+  const logoDark = settings?.logo_url_dark || settings?.logo_url || streetdexLogoDark;
 
   return (
     <>
