@@ -321,11 +321,43 @@ const ProductsView = () => {
     return (((price - cost) / cost) * 100).toFixed(0);
   };
 
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
+  const toggleSelectAll = () => {
+    if (selectedProductIds.length === products?.length) {
+      setSelectedProductIds([]);
+    } else {
+      setSelectedProductIds(products?.map(p => p.id) || []);
+    }
+  };
+
+  const toggleSelectProduct = (id: string) => {
+    setSelectedProductIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Deseja excluir ${selectedProductIds.length} produtos?`)) {
+      for (const id of selectedProductIds) {
+        await deleteProduct.mutateAsync(id);
+      }
+      setSelectedProductIds([]);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Produtos</h1>
-        <Button onClick={openNew} className="gap-2"><Plus size={16} /> Novo Produto</Button>
+        <div className="flex gap-2">
+          {selectedProductIds.length > 0 && (
+            <Button variant="destructive" onClick={handleBulkDelete} className="gap-2">
+              <Trash2 size={16} /> Excluir ({selectedProductIds.length})
+            </Button>
+          )}
+          <Button onClick={openNew} className="gap-2"><Plus size={16} /> Novo Produto</Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -335,6 +367,12 @@ const ProductsView = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox 
+                    checked={products && products.length > 0 && selectedProductIds.length === products.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead>Produto</TableHead>
                 <TableHead>Preço</TableHead>
                 <TableHead>Custo</TableHead>
@@ -344,11 +382,19 @@ const ProductsView = () => {
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {products?.map((p) => {
                 const margin = getMarkup(Number(p.price), Number(p.cost));
                 return (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className={selectedProductIds.includes(p.id) ? "bg-primary/5" : ""}>
+                    <TableCell>
+                      <Checkbox 
+                        checked={selectedProductIds.includes(p.id)}
+                        onCheckedChange={() => toggleSelectProduct(p.id)}
+                      />
+                    </TableCell>
+
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <img src={p.img} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
@@ -458,7 +504,13 @@ const ProductsView = () => {
                       step="0.1" 
                       value={editingProduct.price && editingProduct.cost ? (((editingProduct.price - editingProduct.cost) / editingProduct.cost) * 100).toFixed(1) : ""} 
                       onChange={(e) => {
-                        const marginPercent = parseFloat(e.target.value) || 0;
+                        const val = e.target.value;
+                        if (val === "") {
+                          // Allow clearing the field without resetting price
+                          setEditingProduct({ ...editingProduct, price: editingProduct.price });
+                          return;
+                        }
+                        const marginPercent = parseFloat(val) || 0;
                         if (editingProduct.cost) {
                           const newPrice = editingProduct.cost * (1 + marginPercent / 100);
                           setEditingProduct({ ...editingProduct, price: parseFloat(newPrice.toFixed(2)) });
@@ -468,6 +520,7 @@ const ProductsView = () => {
                       className="mt-1"
                     />
                   </div>
+
                   <div>
                     <Label className="text-sm font-medium">Preço de Venda (Final) *</Label>
                     <Input 
