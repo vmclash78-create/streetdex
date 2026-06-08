@@ -291,8 +291,20 @@ const ProductsView = () => {
   const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
 
   const handleSave = async () => {
-    if (!editingProduct?.name || !editingProduct?.img || editingProduct?.cost === undefined || editingProduct?.cost === null) {
-      alert("Por favor, preencha todos os campos obrigatórios (Nome, Imagem e Custo).");
+    if (!editingProduct?.name) {
+      alert("O nome do produto é obrigatório.");
+      return;
+    }
+    if (!editingProduct?.img) {
+      alert("A imagem do produto é obrigatória.");
+      return;
+    }
+    if (editingProduct?.cost === undefined || editingProduct?.cost === null) {
+      alert("O custo do produto é obrigatório.");
+      return;
+    }
+    if (!editingProduct?.price || editingProduct?.price <= 0) {
+      alert("O preço de venda deve ser maior que zero.");
       return;
     }
     await upsertProduct.mutateAsync(editingProduct as any);
