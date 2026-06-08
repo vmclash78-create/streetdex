@@ -348,7 +348,7 @@ const ProductsView = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="sticky top-0 z-10 flex items-center justify-between mb-6 bg-background/80 backdrop-blur-sm py-4 border-b border-border">
         <h1 className="text-2xl font-bold text-foreground">Produtos</h1>
         <div className="flex gap-2">
           {selectedProductIds.length > 0 && (
@@ -361,6 +361,7 @@ const ProductsView = () => {
       </div>
 
       {isLoading ? (
+
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
       ) : (
         <Card>
