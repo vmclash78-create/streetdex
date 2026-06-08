@@ -1375,6 +1375,8 @@ const OrdersAdminView = () => {
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
   const deleteOrder = useDeleteOrder();
+  const createSale = useCreateSale();
+  const { toast } = useToast();
   
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<DBOrder | null>(null);
@@ -1385,6 +1387,48 @@ const OrdersAdminView = () => {
   const selectedOrder = orders?.find((o) => o.id === selectedOrderId);
 
   const handleStatusChange = async (orderId: string, status: string) => {
+    const order = orders?.find(o => o.id === orderId);
+    if (!order) return;
+
+    // Se o status for alterado para 'entregue', move para vendas e exclui de pedidos
+    if (status === "entregue") {
+      try {
+        const items = await supabase.from("order_items").select("*").eq("order_id", orderId);
+        
+        if (items.error) throw items.error;
+
+        // Registrar na tabela de vendas
+        const saleData = {
+          sale_date: new Date().toISOString().split("T")[0],
+          customer_name: order.customers?.name || null,
+          payment_method: order.payment_method,
+          discount: 0,
+          total: Number(order.total),
+          notes: order.notes
+        };
+
+        const saleItems = items.data.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          quantity: item.quantity,
+          unit_price: Number(item.price),
+          unit_cost: 0, // Informação não disponível no pedido
+          size: item.size
+        }));
+
+        await createSale.mutateAsync({ sale: saleData as any, items: saleItems as any });
+        
+        // Excluir pedido após venda confirmada
+        await deleteOrder.mutateAsync(orderId);
+        
+        toast({ title: "Sucesso", description: "Pedido concluído e movido para Vendas!" });
+        return;
+      } catch (error: any) {
+        toast({ title: "Erro ao concluir", description: error.message, variant: "destructive" });
+        return;
+      }
+    }
+
     await updateStatus.mutateAsync({ id: orderId, status });
   };
 
