@@ -1446,6 +1446,17 @@ const OrdersAdminView = () => {
     setOrderToDelete(null);
   };
 
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    const now = new Date();
+    return orders.filter(order => {
+      if (order.status !== "entregue") return true;
+      const deliveredDate = new Date(order.updated_at || order.created_at);
+      const diffDays = (now.getTime() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24);
+      return diffDays <= 2;
+    });
+  }, [orders]);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -1454,7 +1465,7 @@ const OrdersAdminView = () => {
 
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
-      ) : !orders || orders.length === 0 ? (
+      ) : !filteredOrders || filteredOrders.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground text-sm">Nenhum pedido registrado</div>
       ) : (
         <Card>
@@ -1471,7 +1482,7 @@ const OrdersAdminView = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order) => {
+              {filteredOrders.map((order) => {
                 const statusInfo = getStatusInfo(order.status);
                 return (
                   <TableRow key={order.id}>
