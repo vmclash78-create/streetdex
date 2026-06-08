@@ -470,13 +470,13 @@ export type Database = {
           p_address_neighborhood?: string
           p_address_number?: string
           p_address_street?: string
-          p_customer_email: string
+          p_customer_email?: string
           p_customer_name: string
           p_customer_phone: string
           p_items?: Json
           p_notes?: string
-          p_payment_method: string
-          p_total: number
+          p_payment_method?: string
+          p_total?: number
         }
         Returns: Json
       }
