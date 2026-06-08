@@ -367,9 +367,15 @@ export const useUpsertCoupon = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (coupon: Partial<DBCoupon>) => {
-      const { data, error } = await supabase.from("coupons").upsert(coupon).select().single();
-      if (error) throw error;
-      return data as DBCoupon;
+      if (coupon.id) {
+        const { data, error } = await supabase.from("coupons").update(coupon).eq("id", coupon.id).select().single();
+        if (error) throw error;
+        return data as DBCoupon;
+      } else {
+        const { data, error } = await supabase.from("coupons").insert(coupon as any).select().single();
+        if (error) throw error;
+        return data as DBCoupon;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["coupons"] });
