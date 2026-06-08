@@ -277,18 +277,30 @@ const ProductsView = () => {
   const [editingProduct, setEditingProduct] = useState<Partial<DBProduct> | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const openNew = () => setEditingProduct({ 
-    name: "", 
-    price: 0, 
-    cost: 0, 
-    img: "", 
-    sizes: ["P", "M", "G", "GG", "XG"], 
-    status: "active", 
-    stock: 0, 
-    free_shipping: true, 
-    category: "" 
-  });
-  const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
+  const openNew = () => {
+    setEditingProduct({ 
+      name: "", 
+      price: 0, 
+      cost: 0, 
+      img: "", 
+      sizes: ["P", "M", "G", "GG", "XG"], 
+      status: "active", 
+      stock: 0, 
+      free_shipping: true, 
+      category: "" 
+    });
+    setLocalMargin("");
+  };
+  const openEdit = (p: DBProduct) => {
+    setEditingProduct({ ...p });
+    if (p.price && p.cost && p.cost > 0) {
+      const margin = ((p.price - p.cost) / p.cost) * 100;
+      setLocalMargin(margin.toFixed(1).replace(".", ","));
+    } else {
+      setLocalMargin("");
+    }
+  };
+
 
   const [localMargin, setLocalMargin] = useState<string>("");
 
