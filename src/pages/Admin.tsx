@@ -291,7 +291,8 @@ const ProductsView = () => {
   const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
 
   const handleSave = async () => {
-    if (!editingProduct?.name || !editingProduct?.img || !editingProduct?.cost) {
+    if (!editingProduct?.name || !editingProduct?.img || editingProduct?.cost === undefined || editingProduct?.cost === null) {
+      alert("Por favor, preencha todos os campos obrigatórios (Nome, Imagem e Custo).");
       return;
     }
     await upsertProduct.mutateAsync(editingProduct as any);
@@ -303,9 +304,9 @@ const ProductsView = () => {
     setDeleteConfirm(null);
   };
 
-  const getMargin = (price: number, cost: number) => {
+  const getMarkup = (price: number, cost: number) => {
     if (!cost || cost === 0) return null;
-    return ((price - cost) / price * 100).toFixed(0);
+    return (((price - cost) / cost) * 100).toFixed(0);
   };
 
   return (
