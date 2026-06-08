@@ -5,11 +5,12 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image, ClipboardList, Eye, ChevronRight,
+  Image, ClipboardList, Eye, ChevronRight, Upload,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useAdminProducts, useUpsertProduct, useDeleteProduct,
   useStoreSettings, useUpdateSetting,
@@ -1245,6 +1246,8 @@ const SettingsView = () => {
   const { data: settings, isLoading } = useStoreSettings();
   const updateSetting = useUpdateSetting();
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const getValue = (key: string) => localSettings[key] ?? settings?.[key] ?? "";
 
@@ -1253,6 +1256,36 @@ const SettingsView = () => {
       await updateSetting.mutateAsync({ key, value });
     }
     setLocalSettings({});
+    toast({ title: "Sucesso", description: "Configurações salvas!" });
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(key);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${key}-${Math.random()}.${fileExt}`;
+      const filePath = `logos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('store-assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('store-assets')
+        .getPublicUrl(filePath);
+
+      setLocalSettings(prev => ({ ...prev, [key]: publicUrl }));
+      toast({ title: "Sucesso", description: "Upload concluído!" });
+    } catch (error: any) {
+      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+    } finally {
+      setUploading(null);
+    }
   };
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>;
@@ -1264,37 +1297,69 @@ const SettingsView = () => {
         <CardHeader>
           <CardTitle>Identidade Visual e Contato</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Nome da Loja</Label>
-            <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
-          </div>
-          <div>
-            <Label>WhatsApp (Ex: 5585999999999)</Label>
-            <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
-          </div>
-          <div>
-            <Label>Texto do Anúncio (topo da loja)</Label>
-            <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
-          </div>
-          <div>
-            <Label>Logo URL (Claro)</Label>
-            <div className="flex gap-2 items-center mt-1">
-              <Input value={getValue("logo_url")} onChange={(e) => setLocalSettings({ ...localSettings, logo_url: e.target.value })} placeholder="URL da imagem para tema claro" />
-              {getValue("logo_url") && <img src={getValue("logo_url")} alt="Preview" className="w-10 h-10 object-contain border rounded p-1 bg-white" />}
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <Label>Nome da Loja</Label>
+              <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
             </div>
-          </div>
-          <div>
-            <Label>Logo URL (Escuro)</Label>
-            <div className="flex gap-2 items-center mt-1">
-              <Input value={getValue("logo_url_dark")} onChange={(e) => setLocalSettings({ ...localSettings, logo_url_dark: e.target.value })} placeholder="URL da imagem para tema escuro" />
-              {getValue("logo_url_dark") && <img src={getValue("logo_url_dark")} alt="Preview" className="w-10 h-10 object-contain border rounded p-1 bg-zinc-900" />}
+            <div>
+              <Label>WhatsApp (Ex: 5585999999999)</Label>
+              <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <Label>Texto do Anúncio (topo da loja)</Label>
+              <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
             </div>
           </div>
 
-          <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="w-full gap-2">
-            {updateSetting.isPending && <Loader2 size={14} className="animate-spin" />}
-            <Save size={14} /> Salvar Alterações
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border">
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">Logo Modo Claro <div className="w-2 h-2 rounded-full bg-orange-400" /></Label>
+              <div className="flex flex-col gap-3">
+                <div className="aspect-square w-full rounded-lg border border-dashed border-border bg-white flex items-center justify-center overflow-hidden group relative">
+                  {getValue("logo_url") ? (
+                    <img src={getValue("logo_url")} alt="Logo Claro" className="w-4/5 h-4/5 object-contain" />
+                  ) : (
+                    <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
+                      <Upload size={20} />
+                      Sem logo
+                    </div>
+                  )}
+                  {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+                </div>
+                <Button variant="outline" size="sm" className="relative cursor-pointer" disabled={uploading === "logo_url"}>
+                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url")} />
+                  {uploading === "logo_url" ? "Enviando..." : "Alterar Logo"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">Logo Modo Escuro <div className="w-2 h-2 rounded-full bg-zinc-800" /></Label>
+              <div className="flex flex-col gap-3">
+                <div className="aspect-square w-full rounded-lg border border-dashed border-border bg-zinc-900 flex items-center justify-center overflow-hidden group relative">
+                  {getValue("logo_url_dark") ? (
+                    <img src={getValue("logo_url_dark")} alt="Logo Escuro" className="w-4/5 h-4/5 object-contain" />
+                  ) : (
+                    <div className="text-zinc-600 text-xs flex flex-col items-center gap-1">
+                      <Upload size={20} />
+                      Sem logo
+                    </div>
+                  )}
+                  {uploading === "logo_url_dark" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+                </div>
+                <Button variant="outline" size="sm" className="relative cursor-pointer" disabled={uploading === "logo_url_dark"}>
+                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url_dark")} />
+                  {uploading === "logo_url_dark" ? "Enviando..." : "Alterar Logo"}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="w-full gap-2 mt-4" size="lg">
+            {updateSetting.isPending && <Loader2 size={16} className="animate-spin" />}
+            <Save size={16} /> Salvar Tudo
           </Button>
         </CardContent>
       </Card>
