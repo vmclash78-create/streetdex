@@ -205,7 +205,7 @@ const Store = () => {
               <Percent size={18} className="text-primary" />
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground">CUPOM • Até {couponDiscount}% OFF</p>
+              <p className="text-xs font-bold text-foreground">PIX e DINHEIRO • {settings?.pix_discount || "0"}% OFF</p>
               <p className="text-[0.65rem] text-primary font-mono font-bold">{couponCode}</p>
             </div>
           </div>
@@ -341,7 +341,7 @@ const Store = () => {
       {/* Coupon floating button */}
       <div className="fixed bottom-5 left-5 z-50 w-14 h-14 bg-primary rounded-full flex flex-col items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-all duration-300 animate-pulse-neon">
         <Zap size={14} className="text-primary-foreground mb-0.5" />
-        <span className="text-primary-foreground text-[0.55rem] font-bold leading-none">{couponDiscount}% OFF</span>
+        <span className="text-primary-foreground text-[0.55rem] font-bold leading-none">{settings?.pix_discount || "0"}% OFF</span>
       </div>
 
       {view === "product" && selectedProduct && (
