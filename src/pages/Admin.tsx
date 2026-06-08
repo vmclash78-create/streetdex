@@ -15,7 +15,8 @@ import {
   useSales, useAllSaleItems, useCreateSale, useDeleteSale,
   useExpenses, useCreateExpense, useDeleteExpense,
   useAdminBanners, useUpsertBanner, useDeleteBanner,
-  type DBProduct, type DBSale, type DBSaleItem, type DBExpense, type DBBanner,
+  useCoupons, useUpsertCoupon, useDeleteCoupon,
+  type DBProduct, type DBSale, type DBSaleItem, type DBExpense, type DBBanner, type DBCoupon,
 } from "@/hooks/useStoreData";
 import { 
   useOrders, 
@@ -40,7 +41,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "finances" | "settings";
+type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "coupons" | "finances" | "settings";
 
 const formatPrice = (v: number) => `R$${Number(v).toFixed(2).replace(".", ",")}`;
 const formatDate = (d: string) => {
@@ -69,6 +70,7 @@ const Admin = () => {
     { icon: Image, label: "Banners", key: "banners" },
     { icon: ClipboardList, label: "Pedidos", key: "orders" },
     { icon: ShoppingCart, label: "Vendas", key: "sales" },
+    { icon: Tag, label: "Cupons", key: "coupons" },
     { icon: Wallet, label: "Finanças", key: "finances" },
     { icon: Settings, label: "Configurações", key: "settings" },
   ];
@@ -133,6 +135,7 @@ const Admin = () => {
           {view === "banners" && <BannersView />}
           {view === "orders" && <OrdersAdminView />}
           {view === "sales" && <SalesView />}
+          {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
           {view === "settings" && <SettingsView />}
         </main>
