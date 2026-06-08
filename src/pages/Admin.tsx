@@ -505,12 +505,28 @@ const ProductsView = () => {
                       value={editingProduct.cost || ""} 
                       onChange={(e) => {
                         const cost = parseFloat(e.target.value) || 0;
-                        setEditingProduct({ ...editingProduct, cost });
+                        const updates: any = { cost };
+                        
+                        // If we have a margin, update price
+                        if (cost > 0 && localMargin) {
+                          const marginPercent = parseFloat(localMargin.replace(",", "."));
+                          if (!isNaN(marginPercent)) {
+                            updates.price = parseFloat((cost * (1 + marginPercent / 100)).toFixed(2));
+                          }
+                        } 
+                        // If we have price but no margin, update margin
+                        else if (cost > 0 && editingProduct.price) {
+                          const margin = ((editingProduct.price - cost) / cost) * 100;
+                          setLocalMargin(margin.toFixed(1).replace(".", ","));
+                        }
+                        
+                        setEditingProduct({ ...editingProduct, ...updates });
                       }} 
                       className="mt-1 border-primary/50" 
                       placeholder="0.00"
                     />
                   </div>
+
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -550,19 +566,29 @@ const ProductsView = () => {
                       value={editingProduct.price || ""} 
                       onChange={(e) => {
                         const newPrice = parseFloat(e.target.value) || 0;
-                        setEditingProduct({ ...editingProduct, price: newPrice });
+                        const updates: any = { price: newPrice };
                         
-                        // Recalculate local margin string when price changes manually
-                        if (newPrice > 0 && editingProduct.cost && editingProduct.cost > 0) {
+                        // If we have price and margin, calculate cost: cost = price / (1 + margin/100)
+                        if (newPrice > 0 && localMargin) {
+                          const marginPercent = parseFloat(localMargin.replace(",", "."));
+                          if (!isNaN(marginPercent) && marginPercent !== -100) {
+                            updates.cost = parseFloat((newPrice / (1 + marginPercent / 100)).toFixed(2));
+                          }
+                        }
+                        // If we have price and cost, calculate margin
+                        else if (newPrice > 0 && editingProduct.cost && editingProduct.cost > 0) {
                           const margin = ((newPrice - editingProduct.cost) / editingProduct.cost) * 100;
                           setLocalMargin(margin.toFixed(1).replace(".", ","));
                         } else if (newPrice === 0) {
                           setLocalMargin("");
                         }
+                        
+                        setEditingProduct({ ...editingProduct, ...updates });
                       }} 
                       className="mt-1" 
                       placeholder="0.00"
                     />
+
 
                   </div>
                 </div>
