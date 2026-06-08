@@ -291,7 +291,20 @@ const ProductsView = () => {
   const openEdit = (p: DBProduct) => setEditingProduct({ ...p });
 
   const handleSave = async () => {
-    if (!editingProduct?.name || !editingProduct?.img || !editingProduct?.cost) {
+    if (!editingProduct?.name) {
+      alert("O nome do produto é obrigatório.");
+      return;
+    }
+    if (!editingProduct?.img) {
+      alert("A imagem do produto é obrigatória.");
+      return;
+    }
+    if (editingProduct?.cost === undefined || editingProduct?.cost === null) {
+      alert("O custo do produto é obrigatório.");
+      return;
+    }
+    if (!editingProduct?.price || editingProduct?.price <= 0) {
+      alert("O preço de venda deve ser maior que zero.");
       return;
     }
     await upsertProduct.mutateAsync(editingProduct as any);
@@ -303,9 +316,9 @@ const ProductsView = () => {
     setDeleteConfirm(null);
   };
 
-  const getMargin = (price: number, cost: number) => {
+  const getMarkup = (price: number, cost: number) => {
     if (!cost || cost === 0) return null;
-    return ((price - cost) / price * 100).toFixed(0);
+    return (((price - cost) / cost) * 100).toFixed(0);
   };
 
   return (
@@ -333,7 +346,7 @@ const ProductsView = () => {
             </TableHeader>
             <TableBody>
               {products?.map((p) => {
-                const margin = getMargin(Number(p.price), Number(p.cost));
+                const margin = getMarkup(Number(p.price), Number(p.cost));
                 return (
                   <TableRow key={p.id}>
                     <TableCell>
