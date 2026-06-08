@@ -548,10 +548,22 @@ const ProductsView = () => {
                       type="number" 
                       step="0.01" 
                       value={editingProduct.price || ""} 
-                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })} 
+                      onChange={(e) => {
+                        const newPrice = parseFloat(e.target.value) || 0;
+                        setEditingProduct({ ...editingProduct, price: newPrice });
+                        
+                        // Recalculate local margin string when price changes manually
+                        if (newPrice > 0 && editingProduct.cost && editingProduct.cost > 0) {
+                          const margin = ((newPrice - editingProduct.cost) / editingProduct.cost) * 100;
+                          setLocalMargin(margin.toFixed(1).replace(".", ","));
+                        } else if (newPrice === 0) {
+                          setLocalMargin("");
+                        }
+                      }} 
                       className="mt-1" 
                       placeholder="0.00"
                     />
+
                   </div>
                 </div>
 
