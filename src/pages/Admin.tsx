@@ -1224,19 +1224,33 @@ const OrdersAdminView = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Status</Label>
-                  <Select value={editingOrder.status} onValueChange={(v) => setEditingOrder({ ...editingOrder, status: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select 
+                    value={editingOrder.status || ""} 
+                    onValueChange={(v) => setEditingOrder({ ...editingOrder, status: v })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger>
                     <SelectContent>
-                      {ORDER_STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                      {ORDER_STATUSES.map((s) => (
+                        <SelectItem key={s.value} value={s.value || "empty"}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Método de Pagamento</Label>
-                  <Select value={editingOrder.payment_method} onValueChange={(v) => setEditingOrder({ ...editingOrder, payment_method: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select 
+                    value={editingOrder.payment_method || ""} 
+                    onValueChange={(v) => setEditingOrder({ ...editingOrder, payment_method: v })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Selecione o pagamento" /></SelectTrigger>
                     <SelectContent>
-                      {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                      {PAYMENT_METHODS.map((m) => (
+                        <SelectItem key={m} value={m || "empty"}>
+                          {m}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
