@@ -5,5 +5,3 @@ const DuarttLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
 };
 
 export default DuarttLogo;
-
-export default DuarttLogo;
