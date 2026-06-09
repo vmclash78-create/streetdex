@@ -3,7 +3,7 @@ import { useStoreSettings } from "@/hooks/useStoreData";
 
 const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const { data: settings } = useStoreSettings();
-  const imgSize = size === "sm" ? "h-8" : size === "lg" ? "h-14" : "h-10";
+  const imgSize = size === "sm" ? "h-12" : size === "lg" ? "h-20" : "h-16";
   
   const logoUrl = settings?.logo_url;
   
@@ -18,7 +18,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
       <img
         src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
-        className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-0 dark:invert`}
+        className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-110`}
         onError={(e) => {
           // Fallback caso a imagem customizada falhe
           const target = e.target as HTMLImageElement;
