@@ -1501,7 +1501,7 @@ const SettingsView = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
                   <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-muted flex items-center justify-center overflow-hidden group relative">
-                    {getValue("logo_url") ? (
+                    {getValue("logo_url") && getValue("logo_url") !== '/streetdex-logo.png' ? (
                       <div className="flex w-full h-full">
                         <div className="flex-1 bg-white flex items-center justify-center p-4 border-r border-border">
                           <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-full object-contain" />
