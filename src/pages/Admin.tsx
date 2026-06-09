@@ -1131,10 +1131,10 @@ const FinancesView = () => {
             </div>
             <div>
               <Label>Pagamento</Label>
-              <Select value={filterPayment} onValueChange={setFilterPayment}>
+              <Select value={filterPayment || "all"} onValueChange={(v) => setFilterPayment(v === "all" ? "" : v)}>
                 <SelectTrigger className="mt-1 w-[160px]"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                 </SelectContent>
               </Select>
