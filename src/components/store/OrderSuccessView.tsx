@@ -15,7 +15,7 @@ interface OrderSuccessViewProps {
 const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessViewProps) => {
   const [copied, setCopied] = useState(false);
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp || WHATSAPP;
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
 
   const copyOrderNumber = () => {
     navigator.clipboard.writeText(String(orderNumber));
@@ -25,7 +25,7 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
 
   const sendOrderNumberToWhatsApp = () => {
     const msg = `Olá! Acabei de realizar o pedido #${orderNumber} no site. Aguardo confirmação!`;
-    window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+    window.open(`https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   return (
