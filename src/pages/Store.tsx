@@ -40,6 +40,7 @@ const Store = () => {
   const isMobile = useIsMobile();
 
   const whatsapp = settings?.whatsapp || "5585992783973";
+  const whatsappSupport = settings?.whatsapp_support || whatsapp;
   const storeName = settings?.store_name || "Street Dex";
   const announcementText = settings?.announcement_text || "";
   const couponCode = settings?.coupon_code || "PRIMEIRACOMPRA";
