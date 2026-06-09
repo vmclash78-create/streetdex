@@ -14,7 +14,7 @@ const TrackOrder = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp_support || settings?.whatsapp || "5585992783973";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "8899999999999";
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
