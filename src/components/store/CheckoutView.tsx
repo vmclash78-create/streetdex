@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, formatPrice, fallbackImg, WHATSAPP } from "./storeData";
 import { useCreateOrder } from "@/hooks/useOrders";
-import { useStoreSettings } from "@/hooks/useStoreData";
+import { useStoreSettings, useCoupons, useUpsertCoupon, type DBCoupon } from "@/hooks/useStoreData";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,9 @@ const PIX_KEY = "Sua Chave PIX"; // Default fallback
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
+  const { data: coupons } = useCoupons();
+  const upsertCoupon = useUpsertCoupon();
+  
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
   const cashDiscount = Number(settings?.cash_discount || "0") / 100;
@@ -43,16 +46,34 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [notes, setNotes] = useState("");
   const [pixConfirmed, setPixConfirmed] = useState(false);
   
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<DBCoupon | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  
   const createOrder = useCreateOrder();
   const { toast } = useToast();
 
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
   
+  const couponDiscountAmount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    
+    if (appliedCoupon.discount_type === "percentage") {
+      return total * (appliedCoupon.discount_value / 100);
+    } else {
+      return appliedCoupon.discount_value;
+    }
+  }, [appliedCoupon, total]);
+
+  const totalAfterCoupon = total - couponDiscountAmount;
+
   const finalTotal = useMemo(() => {
-    if (paymentMethod === "pix") return total * (1 - pixDiscount);
-    if (paymentMethod === "dinheiro") return total * (1 - cashDiscount);
-    return total;
-  }, [total, paymentMethod, pixDiscount, cashDiscount]);
+    if (paymentMethod === "pix") return totalAfterCoupon * (1 - pixDiscount);
+    if (paymentMethod === "dinheiro") return totalAfterCoupon * (1 - cashDiscount);
+    return totalAfterCoupon;
+  }, [totalAfterCoupon, paymentMethod, pixDiscount, cashDiscount]);
+
 
 
   const validateStep1 = () => {
@@ -125,7 +146,59 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     }
   };
 
+  const handleApplyCoupon = () => {
+    if (!couponCode.trim()) return;
+    
+    setIsApplyingCoupon(true);
+    
+    const coupon = coupons?.find(c => c.code.toUpperCase() === couponCode.trim().toUpperCase());
+    
+    if (!coupon) {
+      toast({ title: "Cupom inválido", description: "O código informado não existe.", variant: "destructive" });
+      setIsApplyingCoupon(false);
+      return;
+    }
+    
+    if (coupon.status !== "active") {
+      toast({ title: "Cupom inativo", description: "Este cupom não está mais ativo.", variant: "destructive" });
+      setIsApplyingCoupon(false);
+      return;
+    }
+    
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+      toast({ title: "Cupom expirado", description: "Este cupom já expirou.", variant: "destructive" });
+      setIsApplyingCoupon(false);
+      return;
+    }
+    
+    if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses) {
+      toast({ title: "Limite atingido", description: "Este cupom já atingiu o limite de usos.", variant: "destructive" });
+      setIsApplyingCoupon(false);
+      return;
+    }
+    
+    if (total < coupon.min_purchase_amount) {
+      toast({ 
+        title: "Valor mínimo não atingido", 
+        description: `O valor mínimo para este cupom é ${formatPrice(coupon.min_purchase_amount)}.`, 
+        variant: "destructive" 
+      });
+      setIsApplyingCoupon(false);
+      return;
+    }
+    
+    setAppliedCoupon(coupon);
+    setIsApplyingCoupon(false);
+    toast({ title: "Cupom aplicado!", description: "O desconto foi aplicado ao seu pedido." });
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
+
   const handleFinalize = async () => {
+
     try {
       // Final validation before submitting
       if (!validateStep1() || !validateStep2()) {
@@ -158,7 +231,17 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         throw new Error("Erro ao processar o pedido no servidor.");
       }
 
+      // Update coupon usage if applicable
+      if (appliedCoupon) {
+        await upsertCoupon.mutateAsync({
+          id: appliedCoupon.id,
+          used_count: appliedCoupon.used_count + 1,
+          status: appliedCoupon.max_uses !== null && appliedCoupon.used_count + 1 >= appliedCoupon.max_uses ? "inactive" : "active"
+        });
+      }
+
       onOrderComplete(order.id, order.order_number);
+
 
 
       
@@ -307,6 +390,45 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
               ))}
             </div>
 
+            <div className="space-y-3 pt-2">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <Ticket size={16} className="text-primary" /> Cupom de desconto
+              </Label>
+              {!appliedCoupon ? (
+                <div className="flex gap-2">
+                  <Input 
+                    value={couponCode} 
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())} 
+                    placeholder="Digite seu cupom" 
+                    className="flex-1"
+                  />
+                  <Button 
+                    variant="secondary" 
+                    onClick={handleApplyCoupon}
+                    disabled={isApplyingCoupon || !couponCode.trim()}
+                  >
+                    {isApplyingCoupon ? <Loader2 size={16} className="animate-spin" /> : "Aplicar"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <Check size={16} className="text-primary" />
+                    <div>
+                      <p className="text-sm font-bold text-primary">{appliedCoupon.code}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Cupom aplicado: {appliedCoupon.discount_type === "percentage" ? `${appliedCoupon.discount_value}%` : formatPrice(appliedCoupon.discount_value)} de desconto
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={handleRemoveCoupon}>
+                    <X size={16} />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+
             {paymentMethod === "pix" && (
               <Card>
                 <CardContent className="p-4 space-y-3">
@@ -382,17 +504,24 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                   <span className="text-sm text-muted-foreground">Subtotal</span>
                   <span className="text-sm text-foreground">{formatPrice(total)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-green-600">Cupom ({appliedCoupon.code})</span>
+                    <span className="text-sm text-green-600">-{formatPrice(couponDiscountAmount)}</span>
+                  </div>
+                )}
                 {paymentMethod === "pix" && pixDiscount > 0 && (
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-green-600">Desconto PIX ({pixDiscount * 100}%)</span>
-                    <span className="text-sm text-green-600">-{formatPrice(total * pixDiscount)}</span>
+                    <span className="text-sm text-green-600">-{formatPrice(totalAfterCoupon * pixDiscount)}</span>
                   </div>
                 )}
                 {paymentMethod === "dinheiro" && cashDiscount > 0 && (
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-green-600">Desconto Dinheiro ({cashDiscount * 100}%)</span>
-                    <span className="text-sm text-green-600">-{formatPrice(total * cashDiscount)}</span>
+                    <span className="text-sm text-green-600">-{formatPrice(totalAfterCoupon * cashDiscount)}</span>
                   </div>
+
                 )}
 
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
