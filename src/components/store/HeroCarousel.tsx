@@ -79,7 +79,7 @@ const HeroCarousel = () => {
             variant="outline"
             className="text-sm font-bold tracking-wider uppercase px-8 border-green-500/50 text-green-500 hover:bg-green-500/10 hover:border-green-500"
           >
-            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+            <a href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="gap-2">
               <MessageCircle size={16} /> WhatsApp
             </a>
           </Button>

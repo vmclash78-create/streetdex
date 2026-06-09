@@ -63,7 +63,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
                     </button>
                   ))}
                   <div className="border-t border-border/50 my-3 mx-5" />
-                  <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-5 py-3 hover:bg-primary/10 transition-colors">
+                  <a href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-5 py-3 hover:bg-primary/10 transition-colors">
                     <MessageCircle size={16} className="text-green-500" />
                     <span className="text-sm font-medium text-foreground">WhatsApp</span>
                   </a>

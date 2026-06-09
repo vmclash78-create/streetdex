@@ -164,7 +164,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </div>
 
             {/* WhatsApp */}
-            <a href={`https://wa.me/${settings?.whatsapp_store || WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
+            <a href={`https://wa.me/${(settings?.whatsapp_store || WHATSAPP).replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
             </a>

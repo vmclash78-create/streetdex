@@ -109,7 +109,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     
     // Abre o WhatsApp para o cliente "receber" o código (simulado)
     const text = `Olá! Meu código de verificação para o StreetDex é: *${code}*`;
-    window.open(`https://wa.me/${customer.phone}?text=${encodeURIComponent(text)}`, "_blank");
+    window.open(`https://wa.me/${customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`, "_blank");
     
     toast({ title: "Código Enviado", description: "Verifique seu WhatsApp para o código de 4 dígitos." });
     setIsVerifying(false);
