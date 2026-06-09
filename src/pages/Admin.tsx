@@ -1091,10 +1091,34 @@ const FinancesView = () => {
 
         <TabsContent value="overview">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card><CardContent className="p-5"><ArrowUpRight size={20} className="text-green-500 mb-2" /><p className="text-2xl font-bold text-foreground">{formatPrice(totalRevenue)}</p><p className="text-xs text-muted-foreground">Receita Total</p></CardContent></Card>
-            <Card><CardContent className="p-5"><ArrowDownRight size={20} className="text-destructive mb-2" /><p className="text-2xl font-bold text-foreground">{formatPrice(totalExp)}</p><p className="text-xs text-muted-foreground">Total Despesas</p></CardContent></Card>
-            <Card><CardContent className="p-5"><DollarSign size={20} className="text-blue-500 mb-2" /><p className="text-2xl font-bold text-foreground">{formatPrice(totalCost)}</p><p className="text-xs text-muted-foreground">Custo Produtos</p></CardContent></Card>
-            <Card><CardContent className="p-5"><TrendingUp size={20} className={netProfit >= 0 ? "text-green-500" : "text-destructive"} /><p className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>{formatPrice(netProfit)}</p><p className="text-xs text-muted-foreground">Lucro Líquido</p></CardContent></Card>
+            <Card>
+              <CardContent className="p-5">
+                <ArrowUpRight size={20} className="text-green-500 mb-2" />
+                <p className="text-2xl font-bold text-foreground">{formatPrice(totalRevenue)}</p>
+                <p className="text-xs text-muted-foreground">Receitas (Vendas)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <ArrowDownRight size={20} className="text-destructive mb-2" />
+                <p className="text-2xl font-bold text-foreground">{formatPrice(totalExp)}</p>
+                <p className="text-xs text-muted-foreground">Despesas (Custos Fixos)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <Box size={20} className="text-blue-500 mb-2" />
+                <p className="text-2xl font-bold text-foreground">{formatPrice(totalCost)}</p>
+                <p className="text-xs text-muted-foreground">Custo dos Produtos (CPV)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <TrendingUp size={20} className={netProfit >= 0 ? "text-green-500" : "text-destructive"} />
+                <p className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>{formatPrice(netProfit)}</p>
+                <p className="text-xs text-muted-foreground">Lucro Líquido Real</p>
+              </CardContent>
+            </Card>
           </div>
 
           <Card>
