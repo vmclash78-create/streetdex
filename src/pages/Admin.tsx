@@ -1472,8 +1472,8 @@ const SettingsView = () => {
         .from('store-assets')
         .getPublicUrl(filePath);
 
-      setLocalSettings(prev => ({ ...prev, [key]: publicUrl }));
-      toast({ title: "Sucesso", description: "Upload concluído!" });
+      await updateSetting.mutateAsync({ key, value: publicUrl });
+      toast({ title: "Sucesso", description: "Logo atualizada em todo o site!" });
     } catch (error: any) {
       toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
     } finally {
