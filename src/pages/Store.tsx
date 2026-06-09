@@ -192,7 +192,7 @@ const Store = () => {
       {/* Info strip */}
       <div className="bg-card/50 border-b border-border/50">
         <div className="max-w-[1200px] mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
+          <a href={`https://wa.me/${whatsappSupport}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/info:bg-primary/20 transition-colors">
               <MessageCircle size={18} className="text-primary" />
             </div>
