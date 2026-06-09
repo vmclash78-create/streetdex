@@ -1315,10 +1315,6 @@ const SettingsView = () => {
               <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>WhatsApp de Suporte/Atendimento</Label>
-              <Input value={getValue("whatsapp_support")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_support: e.target.value })} className="mt-1" />
-            </div>
-            <div>
               <Label>Texto do Anúncio (topo da loja)</Label>
               <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
             </div>
@@ -1626,7 +1622,7 @@ const OrdersAdminView = () => {
                     <SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger>
                     <SelectContent>
                       {ORDER_STATUSES.map((s) => (
-                        <SelectItem key={s.value} value={s.value || "empty"}>
+                        <SelectItem key={s.value} value={s.value}>
                           {s.label}
                         </SelectItem>
                       ))}
@@ -1642,7 +1638,7 @@ const OrdersAdminView = () => {
                     <SelectTrigger><SelectValue placeholder="Selecione o pagamento" /></SelectTrigger>
                     <SelectContent>
                       {PAYMENT_METHODS.map((m) => (
-                        <SelectItem key={m} value={m || "empty"}>
+                        <SelectItem key={m} value={m}>
                           {m}
                         </SelectItem>
                       ))}
