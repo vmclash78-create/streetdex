@@ -1302,25 +1302,11 @@ const SettingsView = () => {
       <h1 className="text-2xl font-bold text-foreground mb-6">Configurações</h1>
       <Card className="max-w-xl">
         <CardHeader>
-          <CardTitle>Identidade Visual e Contato</CardTitle>
+          <CardTitle>Configurações da Loja</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <Label>Nome da Loja</Label>
-              <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
-            </div>
-            <div>
-              <Label>WhatsApp de Vendas (Ex: 5585999999999)</Label>
-              <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
-            </div>
-            <div>
-              <Label>Texto do Anúncio (topo da loja)</Label>
-              <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border">
+          {/* Seção de Upload de Logo no Topo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-6 border-b border-border">
             <div className="space-y-3">
               <Label className="flex items-center gap-2">Logo Modo Claro <div className="w-2 h-2 rounded-full bg-orange-400" /></Label>
               <div className="flex flex-col gap-3">
@@ -1361,6 +1347,41 @@ const SettingsView = () => {
                   {uploading === "logo_url_dark" ? "Enviando..." : "Alterar Logo"}
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* Dados da Loja */}
+          <div className="space-y-4">
+            <div>
+              <Label>Nome da Loja</Label>
+              <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <Label>WhatsApp Principal (Utilizado no Site)</Label>
+              <Input value={getValue("whatsapp_store")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_store: e.target.value })} placeholder="Ex: 5585999999999" className="mt-1" />
+            </div>
+            <div>
+              <Label>Texto do Anúncio (topo da loja)</Label>
+              <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
+            </div>
+          </div>
+
+          {/* Configurações de Desconto e Pagamento */}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-sm font-bold uppercase tracking-wider">Pagamentos e Descontos</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Desconto PIX (%)</Label>
+                <Input type="number" value={getValue("pix_discount")} onChange={(e) => setLocalSettings({ ...localSettings, pix_discount: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Desconto Dinheiro (%)</Label>
+                <Input type="number" value={getValue("cash_discount")} onChange={(e) => setLocalSettings({ ...localSettings, cash_discount: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Chave/API PIX</Label>
+              <Input value={getValue("pix_api_key")} onChange={(e) => setLocalSettings({ ...localSettings, pix_api_key: e.target.value })} placeholder="Sua chave ou token de API" className="mt-1" />
             </div>
           </div>
 
@@ -1735,9 +1756,9 @@ const CouponsView = () => {
   const openNew = () => {
     setEditingCoupon({
       code: "",
-      discount_value: 0,
+      discount_value: undefined,
       discount_type: "percentage",
-      min_purchase_amount: 0,
+      min_purchase_amount: undefined,
       status: "active",
       expires_at: null,
       max_uses: null
@@ -1770,6 +1791,7 @@ const CouponsView = () => {
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>Desconto</TableHead>
+                <TableHead>Mínimo</TableHead>
                 <TableHead>Expiração</TableHead>
                 <TableHead>Uso</TableHead>
                 <TableHead>Status</TableHead>
@@ -1782,6 +1804,9 @@ const CouponsView = () => {
                   <TableCell className="font-bold">{c.code}</TableCell>
                   <TableCell>
                     {c.discount_type === "percentage" ? `${c.discount_value}%` : formatPrice(c.discount_value)}
+                  </TableCell>
+                  <TableCell>
+                    {c.min_purchase_amount ? formatPrice(c.min_purchase_amount) : "—"}
                   </TableCell>
                   <TableCell>
                     {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "Nunca"}
@@ -1828,11 +1853,11 @@ const CouponsView = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Valor do Desconto</Label>
-                <Input type="number" value={editingCoupon?.discount_value} onChange={(e) => setEditingCoupon({ ...editingCoupon!, discount_value: Number(e.target.value) })} />
+                <Input type="number" value={editingCoupon?.discount_value ?? ""} onChange={(e) => setEditingCoupon({ ...editingCoupon!, discount_value: e.target.value ? Number(e.target.value) : 0 })} />
               </div>
               <div className="space-y-2">
                 <Label>Compra Mínima (R$)</Label>
-                <Input type="number" value={editingCoupon?.min_purchase_amount} onChange={(e) => setEditingCoupon({ ...editingCoupon!, min_purchase_amount: Number(e.target.value) })} />
+                <Input type="number" value={editingCoupon?.min_purchase_amount ?? ""} onChange={(e) => setEditingCoupon({ ...editingCoupon!, min_purchase_amount: e.target.value ? Number(e.target.value) : 0 })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
