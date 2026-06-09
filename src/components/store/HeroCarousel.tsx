@@ -58,7 +58,16 @@ const HeroCarousel = () => {
           Vista o que te define
         </p>
         <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <Button size="lg" className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all">
+          <Button 
+            size="lg" 
+            className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all"
+            onClick={() => {
+              const element = document.getElementById("best-sellers");
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
             Ver Coleção
           </Button>
           <Button
@@ -67,7 +76,7 @@ const HeroCarousel = () => {
             variant="outline"
             className="text-sm font-bold tracking-wider uppercase px-8 border-green-500/50 text-green-500 hover:bg-green-500/10 hover:border-green-500"
           >
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+            <a href={`https://wa.me/${dbBanners?.[selectedIndex]?.active ? (useHeroBanners().data?.[selectedIndex]?.active ? useHeroBanners().data?.[selectedIndex]?.active : (useStoreSettings().data?.whatsapp_store || WHATSAPP)) : (useStoreSettings().data?.whatsapp_store || WHATSAPP)}`} target="_blank" rel="noopener noreferrer" className="gap-2">
               <MessageCircle size={16} /> WhatsApp
             </a>
           </Button>
