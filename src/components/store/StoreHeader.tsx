@@ -25,7 +25,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  const whatsappNumber = whatsapp || "558592783973";
+  const whatsappNumber = whatsapp || "8899999999999";
   const announcement = announcementText || "ENVIO COM 5 DIAS ÚTEIS | CUPOM: HAPPY | ❤️ FRETE GRÁTIS A PARTIR DE R$399,99";
 
   return (
