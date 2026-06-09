@@ -338,7 +338,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          product_id: string
+          product_id: string | null
           product_name: string
           quantity: number
           sale_id: string
@@ -349,7 +349,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          product_id: string
+          product_id?: string | null
           product_name: string
           quantity?: number
           sale_id: string
@@ -360,7 +360,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          product_id?: string
+          product_id?: string | null
           product_name?: string
           quantity?: number
           sale_id?: string
