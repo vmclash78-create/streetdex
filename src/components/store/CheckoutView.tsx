@@ -386,7 +386,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             size="lg"
           >
             {createOrder.isPending ? <Loader2 size={18} className="animate-spin" /> : null}
-            Finalizar Pedido via WhatsApp
+            Finalizar Pedido e Enviar no WhatsApp
           </Button>
         )}
       </div>
