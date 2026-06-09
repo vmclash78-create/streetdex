@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MessageCircle, ShoppingCart, Heart, Check, Loader2 } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -144,7 +145,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </div>
 
             {/* WhatsApp */}
-            <a href={`https://wa.me/${(settings?.whatsapp_store || settings?.whatsapp || WHATSAPP).toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
+            <a href={getWhatsAppLink(settings?.whatsapp_store || settings?.whatsapp || WHATSAPP)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
             </a>

@@ -1,6 +1,8 @@
 import { MessageCircle, Truck, Instagram } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import { Button } from "@/components/ui/button";
+import { getWhatsAppLink } from "@/utils/whatsapp";
+import { WHATSAPP } from "./storeData";
 
 interface StoreFooterProps {
   onNavigateHome: () => void;
@@ -9,7 +11,7 @@ interface StoreFooterProps {
 }
 
 const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) => {
-  const whatsappNumber = whatsapp || "8899999999999";
+  const whatsappNumber = whatsapp || WHATSAPP;
 
   return (
     <footer className="bg-card border-t border-border/50 transition-colors duration-300">
@@ -23,7 +25,7 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
               Streetwear autêntico. Estilo que define quem você é.
             </p>
             <div className="flex gap-3 mt-4">
-              <a href={`https://wa.me/${whatsappNumber.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-muted hover:bg-primary/20 flex items-center justify-center transition-colors">
+              <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-muted hover:bg-primary/20 flex items-center justify-center transition-colors">
                 <MessageCircle size={16} className="text-foreground" />
               </a>
               <button className="w-9 h-9 rounded-full bg-muted hover:bg-primary/20 flex items-center justify-center transition-colors">
@@ -45,7 +47,7 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
                 </Button>
               </li>
               <li>
-                <a href={`https://wa.me/${whatsappNumber.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
                   Contato
                 </a>
               </li>
@@ -65,7 +67,7 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
         </div>
 
         <Button asChild className="w-full max-w-sm mx-auto flex bg-green-600 hover:bg-green-500 text-white mb-6 font-bold tracking-wider uppercase h-11">
-          <a href={`https://wa.me/${whatsappNumber.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+          <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="gap-2">
             <MessageCircle size={16} /> Falar no WhatsApp
           </a>
         </Button>

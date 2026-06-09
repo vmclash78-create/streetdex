@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useHeroBanners, useStoreSettings } from "@/hooks/useStoreData";
 import { heroBanners as fallbackBanners, WHATSAPP } from "./storeData";
 import { Button } from "@/components/ui/button";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 
 const HeroCarousel = () => {
   const { data: dbBanners } = useHeroBanners();
@@ -79,7 +80,7 @@ const HeroCarousel = () => {
             variant="outline"
             className="text-sm font-bold tracking-wider uppercase px-8 border-green-500/50 text-green-500 hover:bg-green-500/10 hover:border-green-500"
           >
-            <a href={`https://wa.me/${whatsapp.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+            <a href={getWhatsAppLink(whatsapp)} target="_blank" rel="noopener noreferrer" className="gap-2">
               <MessageCircle size={16} /> WhatsApp
             </a>
           </Button>

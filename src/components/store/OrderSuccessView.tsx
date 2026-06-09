@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { WHATSAPP } from "./storeData";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 
 interface OrderSuccessViewProps {
   orderId: string;
@@ -25,7 +26,7 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
 
   const sendOrderNumberToWhatsApp = () => {
     const msg = `Olá! Acabei de realizar o pedido #${orderNumber} no site. Aguardo confirmação!`;
-    window.open(`https://wa.me/${whatsapp.toString().replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
+    window.open(getWhatsAppLink(whatsapp, msg), "_blank");
   };
 
   return (

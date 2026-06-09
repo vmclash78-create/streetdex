@@ -10,7 +10,8 @@ import CheckoutView from "@/components/store/CheckoutView";
 import OrderSuccessView from "@/components/store/OrderSuccessView";
 import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
-import { type CartItem, type AppView, infoStripImg, formatPrice } from "@/components/store/storeData";
+import { type CartItem, type AppView, infoStripImg, formatPrice, WHATSAPP } from "@/components/store/storeData";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +40,7 @@ const Store = () => {
   const { data: settings } = useStoreSettings();
   const isMobile = useIsMobile();
 
-  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "8899999999999";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const whatsappSupport = whatsapp;
   const storeName = settings?.store_name || "Street Dex";
   const announcementText = settings?.announcement_text || "";
@@ -192,7 +193,7 @@ const Store = () => {
       {/* Info strip */}
       <div className="bg-card/50 border-b border-border/50">
         <div className="max-w-[1200px] mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a href={`https://wa.me/${whatsappSupport.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
+          <a href={getWhatsAppLink(whatsappSupport)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/info:bg-primary/20 transition-colors">
               <MessageCircle size={18} className="text-primary" />
             </div>
@@ -210,7 +211,7 @@ const Store = () => {
               <p className="text-[0.65rem] text-primary font-mono font-bold">{couponCode}</p>
             </div>
           </div>
-          <a href={`https://wa.me/${whatsappSupport.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
+          <a href={getWhatsAppLink(whatsappSupport)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               <img src={infoStripImg} alt="Estampa diferente" className="w-full h-full object-cover" />
             </div>
@@ -332,7 +333,7 @@ const Store = () => {
       <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsappSupport} storeName={storeName} />
 
       {/* WhatsApp floating button */}
-      <a href={`https://wa.me/${whatsappSupport.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"
+      <a href={getWhatsAppLink(whatsappSupport)} target="_blank" rel="noopener noreferrer"
         className="fixed bottom-5 right-5 z-50 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-400 hover:scale-110 transition-all duration-300"
         style={{ boxShadow: "0 0 20px hsl(145 63% 42% / 0.4)" }}
       >
