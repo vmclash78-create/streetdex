@@ -107,8 +107,11 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
           <span className="text-lg font-bold text-foreground">{formatPrice(total)}</span>
         </div>
         <div className="flex flex-col text-right mb-1.5">
-          {pixDiscount > 0 && <p className="text-xs text-green-600 font-semibold">{formatPrice(pixTotal)} no PIX</p>}
-          {cashDiscount > 0 && <p className="text-xs text-green-600 font-semibold">{formatPrice(cashTotal)} no Dinheiro</p>}
+          {(pixDiscount > 0 || cashDiscount > 0) && (
+            <p className="text-xs text-green-600 font-semibold">
+              {formatPrice(Math.min(pixTotal, cashTotal))} no PIX ou Dinheiro
+            </p>
+          )}
         </div>
         <Button onClick={onCheckout} className="w-full" size="lg">Finalizar Pedido</Button>
       </div>
