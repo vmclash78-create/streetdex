@@ -1043,8 +1043,15 @@ const FinancesView = () => {
   const [filterDateTo, setFilterDateTo] = useState("");
 
   const totalRevenue = sales?.reduce((s, sale) => s + Number(sale.total), 0) || 0;
-  const totalCost = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
-  const totalExp = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
+  
+  // CPV total: items das vendas + despesas categoria Fornecedores
+  const productCostsFromSales = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
+  const supplierExpenses = expenses?.filter(e => e.category === "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalCost = productCostsFromSales + supplierExpenses;
+
+  const otherExpenses = expenses?.filter(e => e.category !== "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalExp = otherExpenses; // Despesas operacionais (exceto fornecedores que já está no CPV)
+  
   const netProfit = totalRevenue - totalCost - totalExp;
 
   const filteredSales = useMemo(() => {
