@@ -1620,7 +1620,7 @@ const OrdersAdminView = () => {
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <Select 
-                    value={editingOrder.status || ""} 
+                    value={editingOrder.status || ORDER_STATUSES[0].value} 
                     onValueChange={(v) => setEditingOrder({ ...editingOrder, status: v })}
                   >
                     <SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger>
