@@ -9,7 +9,7 @@ interface StoreFooterProps {
 }
 
 const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) => {
-  const whatsappNumber = whatsapp || "5585992783973";
+  const whatsappNumber = whatsapp || "558592783973";
 
   return (
     <footer className="bg-card border-t border-border/50 transition-colors duration-300">
