@@ -16,7 +16,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   return (
     <div className="flex items-center">
       <img
-        src={`${logoSrc}${logoSrc.includes('?') ? '&' : '?'}t=${new Date().getTime()}`}
+        src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
         className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-0 dark:invert`}
       />
