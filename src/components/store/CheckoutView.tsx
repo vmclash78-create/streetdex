@@ -414,8 +414,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         </div>
         {step < 4 ? (
           <Button
-            onClick={() => setStep((s) => (s + 1) as Step)}
-            disabled={(step === 1 && !validateStep1()) || (step === 2 && !validateStep2())}
+            onClick={handleNext}
             className="w-full gap-2"
             size="lg"
           >
