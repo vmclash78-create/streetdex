@@ -129,7 +129,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     try {
       // Final validation before submitting
       if (!validateStep1() || !validateStep2()) {
-        toast({ title: "Dados incompletos", description: "Por favor, verifique seus dados e endereço.", variant: "destructive" });
         return;
       }
 
