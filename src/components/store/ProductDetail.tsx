@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { MessageCircle, ShoppingCart } from "lucide-react";
+import { MessageCircle, ShoppingCart, Heart, Check, Loader2 } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProductDetailProps {
   product: Product;
@@ -17,9 +21,54 @@ interface ProductDetailProps {
 const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: ProductDetailProps) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [imgIndex, setImgIndex] = useState(0);
+  const [showWishlist, setShowWishlist] = useState(false);
+  const [wishlistName, setWishlistName] = useState("");
+  const [wishlistPhone, setWishlistPhone] = useState("");
+  const [wishlistVerified, setWishlistVerified] = useState(false);
+  const [wishlistSentCode, setWishlistSentCode] = useState<string | null>(null);
+  const [wishlistInputCode, setWishlistInputCode] = useState("");
+  const [isSubmittingWishlist, setIsSubmittingWishlist] = useState(false);
+
   const { data: settings } = useStoreSettings();
+  const { toast } = useToast();
   const discount = Number(settings?.pix_discount || "0");
   const images = [product.img, product.img2 || product.img];
+
+  const handleWishlistAction = async () => {
+    if (!wishlistVerified) {
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      setWishlistSentCode(code);
+      const text = `Olá! Meu código para a Lista de Desejos StreetDex é: *${code}*`;
+      window.open(`https://wa.me/${wishlistPhone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`, "_blank");
+      toast({ title: "Código enviado", description: "Verifique seu WhatsApp." });
+      return;
+    }
+
+    setIsSubmittingWishlist(true);
+    try {
+      const { error } = await supabase.from("wishlist").insert({
+        customer_name: wishlistName,
+        customer_phone: wishlistPhone,
+        product_id: product.id as any
+      });
+      if (error) throw error;
+      toast({ title: "Adicionado!", description: "Você será notificado sobre promoções deste produto." });
+      setShowWishlist(false);
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSubmittingWishlist(false);
+    }
+  };
+
+  const verifyWishlistCode = () => {
+    if (wishlistInputCode === wishlistSentCode) {
+      setWishlistVerified(true);
+      toast({ title: "Telefone Verificado!" });
+    } else {
+      toast({ title: "Código inválido", variant: "destructive" });
+    }
+  };
 
   return (
     <Dialog open onOpenChange={() => onBack()}>
