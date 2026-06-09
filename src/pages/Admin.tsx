@@ -137,9 +137,9 @@ const Admin = () => {
   return (
     <div className="flex h-screen bg-background transition-colors duration-300">
       <aside className={`${sidebarCollapsed ? "w-16" : "w-60"} transition-all duration-200 flex flex-col border-r border-border bg-card hidden md:flex`}>
-        <div className="flex items-center gap-2 px-4 py-5 border-b border-border">
-          <span className="text-lg font-bold tracking-tight text-primary flex-shrink-0">SD</span>
-          {!sidebarCollapsed && <span className="text-lg font-light tracking-tight text-foreground">Street Dex</span>}
+        <div className="flex items-center gap-3 px-4 py-5 border-b border-border overflow-hidden">
+          <StreetDexLogo size="sm" />
+          {!sidebarCollapsed && <span className="text-lg font-light tracking-tight text-foreground truncate">{settings?.store_name || "Street Dex"}</span>}
         </div>
         <nav className="flex-1 py-3">
           {navItems.map((item) => (
