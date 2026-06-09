@@ -51,7 +51,14 @@ const formatDate = (d: string) => {
   return date.toLocaleDateString("pt-BR");
 };
 
-const PAYMENT_METHODS = ["Dinheiro", "PIX", "Cartão Crédito", "Cartão Débito", "Transferência"];
+const PAYMENT_METHODS = ["dinheiro", "pix", "cartão crédito", "cartão débito", "transferência"];
+const PAYMENT_LABELS: Record<string, string> = {
+  pix: "PIX",
+  dinheiro: "Dinheiro",
+  "cartão crédito": "Cartão Crédito",
+  "cartão débito": "Cartão Débito",
+  transferência: "Transferência"
+};
 const EXPENSE_CATEGORIES = ["Fornecedores", "Marketing", "Logística", "Aluguel", "Embalagens", "Funcionários", "Impostos", "Outros"];
 
 const statusColors: Record<string, string> = {
@@ -856,7 +863,7 @@ const SalesView = () => {
   const [showForm, setShowForm] = useState(false);
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split("T")[0]);
   const [customerName, setCustomerName] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("PIX");
+  const [paymentMethod, setPaymentMethod] = useState("pix");
   const [discount, setDiscount] = useState(0);
   const [cartLines, setCartLines] = useState<{ productId: string; quantity: number; size: string }[]>([{ productId: "", quantity: 1, size: "" }]);
 
@@ -916,7 +923,7 @@ const SalesView = () => {
                       {s.order_number && <span className="text-[10px] text-muted-foreground">Pedido #{s.order_number}</span>}
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="secondary">{s.payment_method}</Badge></TableCell>
+                  <TableCell><Badge variant="secondary" className="capitalize">{PAYMENT_LABELS[s.payment_method] || s.payment_method}</Badge></TableCell>
                   <TableCell className="font-bold">{formatPrice(Number(s.total))}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteSale.mutate(s.id)}><Trash2 size={15} /></Button>
@@ -950,7 +957,7 @@ const SalesView = () => {
                 <Label>Forma de Pagamento</Label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>{PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                  <SelectContent>{PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{PAYMENT_LABELS[m]}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
@@ -1159,7 +1166,7 @@ const FinancesView = () => {
                 <SelectTrigger className="mt-1 w-[160px]"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                  {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{PAYMENT_LABELS[m]}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -1180,7 +1187,7 @@ const FinancesView = () => {
                   <TableRow key={s.id}>
                     <TableCell>{formatDate(s.sale_date)}</TableCell>
                     <TableCell>{s.customer_name || "—"}</TableCell>
-                    <TableCell><Badge variant="secondary">{s.payment_method}</Badge></TableCell>
+                    <TableCell><Badge variant="secondary" className="capitalize">{PAYMENT_LABELS[s.payment_method] || s.payment_method}</Badge></TableCell>
                     <TableCell className="font-bold">{formatPrice(Number(s.total))}</TableCell>
                   </TableRow>
                 ))}
@@ -1684,7 +1691,7 @@ const OrdersAdminView = () => {
                     <SelectContent>
                       {PAYMENT_METHODS.map((m) => (
                         <SelectItem key={m} value={m}>
-                          {m}
+                          {PAYMENT_LABELS[m]}
                         </SelectItem>
                       ))}
                     </SelectContent>
