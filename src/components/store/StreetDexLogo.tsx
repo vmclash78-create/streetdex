@@ -1,5 +1,4 @@
 import streetdexLogo from "@/assets/streetdex-logo.png";
-import streetdexLogoDark from "@/assets/streetdex-logo-dark.png";
 import { useStoreSettings } from "@/hooks/useStoreData";
 
 const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
@@ -7,26 +6,21 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const imgSize = size === "sm" ? "h-8" : size === "lg" ? "h-14" : "h-10";
   
   const logoUrl = settings?.logo_url;
-  const logoUrlDark = settings?.logo_url_dark;
   
-  const logoLight = logoUrl || streetdexLogo;
-  // If we have an explicit dark logo, use it, otherwise use the light logo with a filter
-  const logoDark = logoUrlDark || logoUrl || streetdexLogoDark;
-  const useFilter = !logoUrlDark && logoUrl;
-
+  // Se não houver logo personalizada, usamos a padrão
+  const logoSrc = logoUrl || streetdexLogo;
+  
+  // A classe dark-logo-filter (definida no index.css) inverte as cores no modo escuro
+  // se a logo for personalizada. A logo padrão já tem sua própria versão se necessário,
+  // mas aqui simplificamos para usar apenas um campo e adaptar via CSS.
   return (
-    <>
+    <div className="flex items-center">
       <img
-        src={`${logoLight}${logoLight.includes('?') ? '&' : '?'}t=${new Date().getTime()}`}
+        src={`${logoSrc}${logoSrc.includes('?') ? '&' : '?'}t=${new Date().getTime()}`}
         alt={settings?.store_name || "Street Dex"}
-        className={`${imgSize} w-auto object-contain dark:hidden`}
+        className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-0 dark:invert`}
       />
-      <img
-        src={`${logoDark}${logoDark.includes('?') ? '&' : '?'}t=${new Date().getTime()}`}
-        alt={settings?.store_name || "Street Dex"}
-        className={`${imgSize} w-auto object-contain hidden dark:block ${useFilter ? 'dark-logo-filter' : ''}`}
-      />
-    </>
+    </div>
   );
 };
 
