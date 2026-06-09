@@ -1531,6 +1531,13 @@ const OrdersAdminView = () => {
   const [editingOrder, setEditingOrder] = useState<DBOrder | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   
+  // Filtros
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterPayment, setFilterPayment] = useState("");
+  const [filterMinAmount, setFilterMinAmount] = useState("");
+  const [filterMaxAmount, setFilterMaxAmount] = useState("");
+  
   const { data: orderItems } = useOrderItems(selectedOrderId || undefined);
 
   const selectedOrder = orders?.find((o) => o.id === selectedOrderId);
@@ -1597,13 +1604,98 @@ const OrdersAdminView = () => {
 
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
-    return orders.filter(order => order.status !== "entregue");
-  }, [orders]);
+    return orders.filter(order => {
+      // Ocultar entregues por padrão (comportamento original mantido ou ajustado se necessário)
+      if (order.status === "entregue") return false;
+
+      // Filtro de Datas
+      if (filterDateFrom && new Date(order.created_at).toISOString().split("T")[0] < filterDateFrom) return false;
+      if (filterDateTo && new Date(order.created_at).toISOString().split("T")[0] > filterDateTo) return false;
+
+      // Filtro de Forma de Pagamento
+      if (filterPayment && order.payment_method !== filterPayment) return false;
+
+      // Filtro de Valores
+      const total = Number(order.total);
+      if (filterMinAmount && total < Number(filterMinAmount)) return false;
+      if (filterMaxAmount && total > Number(filterMaxAmount)) return false;
+
+      return true;
+    });
+  }, [orders, filterDateFrom, filterDateTo, filterPayment, filterMinAmount, filterMaxAmount]);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
+      </div>
+
+      <div className="flex flex-wrap gap-4 mb-6 bg-card p-4 rounded-lg border border-border shadow-sm">
+        <div className="space-y-1.5 flex-1 min-w-[200px]">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Data (De / Até)</Label>
+          <div className="flex gap-2">
+            <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-9" />
+            <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-9" />
+          </div>
+        </div>
+
+        <div className="space-y-1.5 w-full md:w-[180px]">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Pagamento</Label>
+          <Select value={filterPayment || "all"} onValueChange={(v) => setFilterPayment(v === "all" ? "" : v)}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {PAYMENT_METHODS.map((m) => (
+                <SelectItem key={m} value={m}>{PAYMENT_LABELS[m] || m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5 flex-1 min-w-[200px]">
+          <Label className="text-xs uppercase text-muted-foreground font-bold">Valor (Min / Max)</Label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">R$</span>
+              <Input 
+                type="number" 
+                placeholder="0,00" 
+                value={filterMinAmount} 
+                onChange={(e) => setFilterMinAmount(e.target.value)} 
+                className="h-9 pl-7" 
+              />
+            </div>
+            <div className="relative flex-1">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">R$</span>
+              <Input 
+                type="number" 
+                placeholder="Max" 
+                value={filterMaxAmount} 
+                onChange={(e) => setFilterMaxAmount(e.target.value)} 
+                className="h-9 pl-7" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-end">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              setFilterDateFrom("");
+              setFilterDateTo("");
+              setFilterPayment("");
+              setFilterMinAmount("");
+              setFilterMaxAmount("");
+            }}
+            className="h-9 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Limpar
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
