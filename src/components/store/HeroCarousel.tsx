@@ -13,7 +13,7 @@ const HeroCarousel = () => {
     ? dbBanners.filter((b) => b.active)
     : fallbackBanners;
   
-  const whatsapp = settings?.whatsapp_store || WHATSAPP;
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000, stopOnInteraction: false })]);
   const [selectedIndex, setSelectedIndex] = useState(0);

@@ -14,7 +14,7 @@ const TrackOrder = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp_support || settings?.whatsapp || "5585992783973";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "8899999999999";
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +76,7 @@ const TrackOrder = () => {
         <div className="pt-4 border-t border-border w-full mt-4">
           <p className="text-xs text-muted-foreground mb-3">Ainda com dúvidas?</p>
           <Button variant="outline" asChild className="w-full gap-2 border-green-600/50 text-green-600 hover:bg-green-500/10">
-            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://wa.me/${whatsapp.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
               <MessageCircle size={18} /> Chamar no WhatsApp
             </a>
           </Button>

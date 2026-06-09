@@ -12,7 +12,7 @@ const OrderTracking = () => {
   const { id } = useParams<{ id: string }>();
   const { data: order, isLoading, error } = useOrderById(id);
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp_support || settings?.whatsapp || "5585992783973";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "8899999999999";
 
   if (isLoading) {
     return (
@@ -115,7 +115,7 @@ const OrderTracking = () => {
         </Card>
 
         <Button asChild className="w-full gap-2 bg-green-600 hover:bg-green-500 h-12 text-white">
-          <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Olá! Gostaria de informações sobre meu pedido #${order.order_number}`)}`} target="_blank" rel="noopener noreferrer">
+          <a href={`https://wa.me/${whatsapp.toString().replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Gostaria de informações sobre meu pedido #${order.order_number}`)}`} target="_blank" rel="noopener noreferrer">
             <MessageCircle size={20} /> Suporte via WhatsApp
           </a>
         </Button>
