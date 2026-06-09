@@ -1622,7 +1622,7 @@ const OrdersAdminView = () => {
                     <SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger>
                     <SelectContent>
                       {ORDER_STATUSES.map((s) => (
-                        <SelectItem key={s.value} value={s.value || "empty"}>
+                        <SelectItem key={s.value} value={s.value}>
                           {s.label}
                         </SelectItem>
                       ))}
@@ -1638,7 +1638,7 @@ const OrdersAdminView = () => {
                     <SelectTrigger><SelectValue placeholder="Selecione o pagamento" /></SelectTrigger>
                     <SelectContent>
                       {PAYMENT_METHODS.map((m) => (
-                        <SelectItem key={m} value={m || "empty"}>
+                        <SelectItem key={m} value={m}>
                           {m}
                         </SelectItem>
                       ))}
