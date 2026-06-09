@@ -26,7 +26,7 @@ const PAYMENT_METHODS = [
   { value: "cartao", label: "Cartão na entrega", description: "Débito ou crédito na entrega" },
 ];
 
-const PIX_KEY = "duartt@pix.com";
+const PIX_KEY = "Sua Chave PIX"; // Default fallback
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
@@ -305,8 +305,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                 <CardContent className="p-4 space-y-3">
                   <p className="text-sm font-bold text-foreground">Chave PIX:</p>
                   <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                    <span className="text-sm text-foreground flex-1 font-mono">{PIX_KEY}</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { navigator.clipboard.writeText(PIX_KEY); toast({ title: "Chave copiada!" }); }}>
+                    <span className="text-sm text-foreground flex-1 font-mono">{settings?.pix_api_key || PIX_KEY}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { navigator.clipboard.writeText(settings?.pix_api_key || PIX_KEY); toast({ title: "Chave copiada!" }); }}>
                       <Copy size={14} />
                     </Button>
                   </div>
