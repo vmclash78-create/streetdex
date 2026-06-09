@@ -232,7 +232,7 @@ const Store = () => {
       </div>
 
       {/* Products */}
-      <main className="max-w-[1200px] mx-auto px-4 pt-8 pb-10">
+      <main id="best-sellers" className="max-w-[1200px] mx-auto px-4 pt-8 pb-10">
         <div className="text-center mb-6">
           <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase mb-1">Coleção</p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground uppercase tracking-wider">BEST SELLERS</h2>
