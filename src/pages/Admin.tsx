@@ -1123,7 +1123,7 @@ const FinancesView = () => {
               <CardContent className="p-5">
                 <Box size={20} className="text-blue-500 mb-2" />
                 <p className="text-2xl font-bold text-foreground">{formatPrice(totalCost)}</p>
-                <p className="text-xs text-muted-foreground">Custo dos Produtos (CPV)</p>
+                <p className="text-xs text-muted-foreground">Custo Prods + Fornecedores</p>
               </CardContent>
             </Card>
             <Card>
