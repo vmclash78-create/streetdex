@@ -210,7 +210,7 @@ const Store = () => {
               <p className="text-[0.65rem] text-primary font-mono font-bold">{couponCode}</p>
             </div>
           </div>
-          <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
+          <a href={`https://wa.me/${whatsappSupport}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               <img src={infoStripImg} alt="Estampa diferente" className="w-full h-full object-cover" />
             </div>
