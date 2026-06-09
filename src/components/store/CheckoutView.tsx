@@ -159,11 +159,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }
 
       onOrderComplete(order.id, order.order_number);
-      
-      const whatsappNumber = (settings?.whatsapp_store || settings?.whatsapp || WHATSAPP).toString().replace(/\D/g, "");
-      const message = `Olá! Acabei de realizar o pedido #${order.order_number} no site. Aguardo confirmação!\n\n*Detalhes do Pedido:* \nTotal: ${formatPrice(finalTotal)}\nPagamento: ${paymentMethod.toUpperCase()}`;
-      
-      window.open(getWhatsAppLink(whatsappNumber, message), "_blank");
+
 
       
     } catch (error: any) {
@@ -441,7 +437,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             size="lg"
           >
             {createOrder.isPending ? <Loader2 size={18} className="animate-spin" /> : null}
-            Finalizar Pedido e Enviar no WhatsApp
+            Finalizar Pedido
           </Button>
         )}
       </div>
