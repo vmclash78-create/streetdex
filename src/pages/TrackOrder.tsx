@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useStoreSettings } from "@/hooks/useStoreData";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 
 const TrackOrder = () => {
   const [orderNum, setOrderNum] = useState("");
@@ -76,7 +77,7 @@ const TrackOrder = () => {
         <div className="pt-4 border-t border-border w-full mt-4">
           <p className="text-xs text-muted-foreground mb-3">Ainda com dúvidas?</p>
           <Button variant="outline" asChild className="w-full gap-2 border-green-600/50 text-green-600 hover:bg-green-500/10">
-            <a href={`https://wa.me/${whatsapp.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
+            <a href={getWhatsAppLink(whatsapp)} target="_blank" rel="noopener noreferrer">
               <MessageCircle size={18} /> Chamar no WhatsApp
             </a>
           </Button>
