@@ -1620,7 +1620,7 @@ const OrdersAdminView = () => {
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <Select 
-                    value={editingOrder.status || ""} 
+                    value={editingOrder.status || ORDER_STATUSES[0].value} 
                     onValueChange={(v) => setEditingOrder({ ...editingOrder, status: v })}
                   >
                     <SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger>
@@ -1636,7 +1636,7 @@ const OrdersAdminView = () => {
                 <div className="space-y-2">
                   <Label>Método de Pagamento</Label>
                   <Select 
-                    value={editingOrder.payment_method || ""} 
+                    value={editingOrder.payment_method || PAYMENT_METHODS[0]} 
                     onValueChange={(v) => setEditingOrder({ ...editingOrder, payment_method: v })}
                   >
                     <SelectTrigger><SelectValue placeholder="Selecione o pagamento" /></SelectTrigger>
