@@ -3,7 +3,7 @@ import { useStoreSettings } from "@/hooks/useStoreData";
 
 const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const { data: settings } = useStoreSettings();
-  const imgSize = size === "sm" ? "h-8" : size === "lg" ? "h-14" : "h-10";
+  const imgSize = size === "sm" ? "h-12" : size === "lg" ? "h-20" : "h-16";
   
   const logoUrl = settings?.logo_url;
   
