@@ -26,13 +26,13 @@ const PAYMENT_METHODS = [
   { value: "cartao", label: "Cartão na entrega", description: "Débito ou crédito na entrega" },
 ];
 
-const PIX_KEY = "duartt@pix.com";
+const PIX_KEY = "Sua Chave PIX"; // Default fallback
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp || WHATSAPP;
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
-  const cashDiscount = pixDiscount; // Same discount for cash and PIX
+  const cashDiscount = Number(settings?.cash_discount || "0") / 100;
 
   const [step, setStep] = useState<Step>(1);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
@@ -40,6 +40,11 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [notes, setNotes] = useState("");
   const [pixConfirmed, setPixConfirmed] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [sentCode, setSentCode] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  
   const createOrder = useCreateOrder();
   const { toast } = useToast();
 
@@ -77,12 +82,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           return;
         }
         
-        // Ensure neighborhood and street exist (validation of address quality)
-        if (!data.bairro || !data.logradouro) {
-          toast({ 
-            title: "CEP incompleto", 
-            description: "Este CEP não retornou rua ou bairro. Por favor, preencha manualmente com cuidado.", 
-          });
+        // Validação adicional de rua e bairro se necessário
+        if (address.street && data.logradouro && address.street.toLowerCase() !== data.logradouro.toLowerCase()) {
+           toast({ title: "Endereço divergente", description: "A rua informada é diferente da rua do CEP.", variant: "warning" as any });
         }
 
         setAddress(prev => ({
@@ -95,6 +97,31 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         console.error("Erro ao buscar CEP:", error);
         toast({ title: "Erro na consulta de CEP", description: "Não foi possível verificar seu endereço automaticamente." });
       }
+    }
+  };
+
+  const sendVerificationCode = () => {
+    if (!validateStep1()) return;
+    setIsVerifying(true);
+    // Simulação de envio de código via WhatsApp
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    setSentCode(code);
+    
+    // Abre o WhatsApp para o cliente "receber" o código (simulado)
+    const text = `Olá! Meu código de verificação para o StreetDex é: *${code}*`;
+    window.open(`https://wa.me/${customer.phone}?text=${encodeURIComponent(text)}`, "_blank");
+    
+    toast({ title: "Código Enviado", description: "Verifique seu WhatsApp para o código de 4 dígitos." });
+    setIsVerifying(false);
+  };
+
+  const verifyCode = () => {
+    if (verificationCode === sentCode) {
+      setPhoneVerified(true);
+      setStep(2);
+      toast({ title: "Número Verificado!", description: "Agora preencha seu endereço." });
+    } else {
+      toast({ title: "Código Inválido", description: "O código digitado está incorreto.", variant: "destructive" });
     }
   };
 
@@ -189,13 +216,33 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             </div>
             <div>
               <Label>WhatsApp (Telefone) *</Label>
-              <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
-              <p className="text-[10px] text-muted-foreground mt-1">É neste número que você receberá o comprovante do pedido.</p>
+              <div className="flex gap-2">
+                <Input value={customer.phone} onChange={(e) => { setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") }); setPhoneVerified(false); }} placeholder="85999999999" maxLength={11} className="mt-1" />
+                {!phoneVerified && (
+                  <Button onClick={sendVerificationCode} disabled={!validateStep1() || isVerifying} size="sm" className="mt-1">
+                    Validar
+                  </Button>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">É necessário validar seu número via WhatsApp antes de prosseguir.</p>
             </div>
-            <div>
-              <Label>Email (opcional)</Label>
-              <Input value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} placeholder="seuemail@exemplo.com" type="email" className="mt-1" />
-            </div>
+            
+            {!phoneVerified && sentCode && (
+              <div className="space-y-2 pt-4 border-t border-border">
+                <Label>Código de Verificação (4 dígitos)</Label>
+                <div className="flex gap-2">
+                  <Input value={verificationCode} onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ""))} placeholder="0000" maxLength={4} />
+                  <Button onClick={verifyCode}>Verificar</Button>
+                </div>
+              </div>
+            )}
+
+            {customer.email && (
+              <div>
+                <Label>Email (opcional)</Label>
+                <Input value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} placeholder="seuemail@exemplo.com" type="email" className="mt-1" />
+              </div>
+            )}
           </div>
         )}
 
@@ -258,8 +305,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                 <CardContent className="p-4 space-y-3">
                   <p className="text-sm font-bold text-foreground">Chave PIX:</p>
                   <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                    <span className="text-sm text-foreground flex-1 font-mono">{PIX_KEY}</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { navigator.clipboard.writeText(PIX_KEY); toast({ title: "Chave copiada!" }); }}>
+                    <span className="text-sm text-foreground flex-1 font-mono">{settings?.pix_api_key || PIX_KEY}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { navigator.clipboard.writeText(settings?.pix_api_key || PIX_KEY); toast({ title: "Chave copiada!" }); }}>
                       <Copy size={14} />
                     </Button>
                   </div>
@@ -370,7 +417,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         {step < 4 ? (
           <Button
             onClick={() => setStep((s) => (s + 1) as Step)}
-            disabled={(step === 1 && !validateStep1()) || (step === 2 && !validateStep2())}
+            disabled={(step === 1 && !phoneVerified) || (step === 2 && !validateStep2())}
             className="w-full gap-2"
             size="lg"
           >

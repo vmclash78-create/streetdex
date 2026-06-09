@@ -51,7 +51,14 @@ const formatDate = (d: string) => {
   return date.toLocaleDateString("pt-BR");
 };
 
-const PAYMENT_METHODS = ["Dinheiro", "PIX", "Cartão Crédito", "Cartão Débito", "Transferência"];
+const PAYMENT_METHODS = ["dinheiro", "pix", "cartão crédito", "cartão débito", "transferência"];
+const PAYMENT_LABELS: Record<string, string> = {
+  pix: "PIX",
+  dinheiro: "Dinheiro",
+  "cartão crédito": "Cartão Crédito",
+  "cartão débito": "Cartão Débito",
+  transferência: "Transferência"
+};
 const EXPENSE_CATEGORIES = ["Fornecedores", "Marketing", "Logística", "Aluguel", "Embalagens", "Funcionários", "Impostos", "Outros"];
 
 const statusColors: Record<string, string> = {
@@ -856,7 +863,7 @@ const SalesView = () => {
   const [showForm, setShowForm] = useState(false);
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split("T")[0]);
   const [customerName, setCustomerName] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("PIX");
+  const [paymentMethod, setPaymentMethod] = useState("pix");
   const [discount, setDiscount] = useState(0);
   const [cartLines, setCartLines] = useState<{ productId: string; quantity: number; size: string }[]>([{ productId: "", quantity: 1, size: "" }]);
 
@@ -916,7 +923,7 @@ const SalesView = () => {
                       {s.order_number && <span className="text-[10px] text-muted-foreground">Pedido #{s.order_number}</span>}
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="secondary">{s.payment_method}</Badge></TableCell>
+                  <TableCell><Badge variant="secondary" className="capitalize">{PAYMENT_LABELS[s.payment_method] || s.payment_method}</Badge></TableCell>
                   <TableCell className="font-bold">{formatPrice(Number(s.total))}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteSale.mutate(s.id)}><Trash2 size={15} /></Button>
@@ -950,7 +957,7 @@ const SalesView = () => {
                 <Label>Forma de Pagamento</Label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>{PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                  <SelectContent>{PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{PAYMENT_LABELS[m]}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
@@ -1091,10 +1098,34 @@ const FinancesView = () => {
 
         <TabsContent value="overview">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card><CardContent className="p-5"><ArrowUpRight size={20} className="text-green-500 mb-2" /><p className="text-2xl font-bold text-foreground">{formatPrice(totalRevenue)}</p><p className="text-xs text-muted-foreground">Receita Total</p></CardContent></Card>
-            <Card><CardContent className="p-5"><ArrowDownRight size={20} className="text-destructive mb-2" /><p className="text-2xl font-bold text-foreground">{formatPrice(totalExp)}</p><p className="text-xs text-muted-foreground">Total Despesas</p></CardContent></Card>
-            <Card><CardContent className="p-5"><DollarSign size={20} className="text-blue-500 mb-2" /><p className="text-2xl font-bold text-foreground">{formatPrice(totalCost)}</p><p className="text-xs text-muted-foreground">Custo Produtos</p></CardContent></Card>
-            <Card><CardContent className="p-5"><TrendingUp size={20} className={netProfit >= 0 ? "text-green-500" : "text-destructive"} /><p className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>{formatPrice(netProfit)}</p><p className="text-xs text-muted-foreground">Lucro Líquido</p></CardContent></Card>
+            <Card>
+              <CardContent className="p-5">
+                <ArrowUpRight size={20} className="text-green-500 mb-2" />
+                <p className="text-2xl font-bold text-foreground">{formatPrice(totalRevenue)}</p>
+                <p className="text-xs text-muted-foreground">Receitas (Vendas)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <ArrowDownRight size={20} className="text-destructive mb-2" />
+                <p className="text-2xl font-bold text-foreground">{formatPrice(totalExp)}</p>
+                <p className="text-xs text-muted-foreground">Despesas (Custos Fixos)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <Box size={20} className="text-blue-500 mb-2" />
+                <p className="text-2xl font-bold text-foreground">{formatPrice(totalCost)}</p>
+                <p className="text-xs text-muted-foreground">Custo dos Produtos (CPV)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <TrendingUp size={20} className={netProfit >= 0 ? "text-green-500" : "text-destructive"} />
+                <p className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>{formatPrice(netProfit)}</p>
+                <p className="text-xs text-muted-foreground">Lucro Líquido Real</p>
+              </CardContent>
+            </Card>
           </div>
 
           <Card>
@@ -1135,7 +1166,7 @@ const FinancesView = () => {
                 <SelectTrigger className="mt-1 w-[160px]"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                  {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{PAYMENT_LABELS[m]}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -1156,7 +1187,7 @@ const FinancesView = () => {
                   <TableRow key={s.id}>
                     <TableCell>{formatDate(s.sale_date)}</TableCell>
                     <TableCell>{s.customer_name || "—"}</TableCell>
-                    <TableCell><Badge variant="secondary">{s.payment_method}</Badge></TableCell>
+                    <TableCell><Badge variant="secondary" className="capitalize">{PAYMENT_LABELS[s.payment_method] || s.payment_method}</Badge></TableCell>
                     <TableCell className="font-bold">{formatPrice(Number(s.total))}</TableCell>
                   </TableRow>
                 ))}
@@ -1302,25 +1333,11 @@ const SettingsView = () => {
       <h1 className="text-2xl font-bold text-foreground mb-6">Configurações</h1>
       <Card className="max-w-xl">
         <CardHeader>
-          <CardTitle>Identidade Visual e Contato</CardTitle>
+          <CardTitle>Configurações da Loja</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <Label>Nome da Loja</Label>
-              <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
-            </div>
-            <div>
-              <Label>WhatsApp de Vendas (Ex: 5585999999999)</Label>
-              <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
-            </div>
-            <div>
-              <Label>Texto do Anúncio (topo da loja)</Label>
-              <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border">
+          {/* Seção de Upload de Logo no Topo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-6 border-b border-border">
             <div className="space-y-3">
               <Label className="flex items-center gap-2">Logo Modo Claro <div className="w-2 h-2 rounded-full bg-orange-400" /></Label>
               <div className="flex flex-col gap-3">
@@ -1361,6 +1378,41 @@ const SettingsView = () => {
                   {uploading === "logo_url_dark" ? "Enviando..." : "Alterar Logo"}
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* Dados da Loja */}
+          <div className="space-y-4">
+            <div>
+              <Label>Nome da Loja</Label>
+              <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <Label>WhatsApp Principal (Utilizado no Site)</Label>
+              <Input value={getValue("whatsapp_store")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_store: e.target.value })} placeholder="Ex: 5585999999999" className="mt-1" />
+            </div>
+            <div>
+              <Label>Texto do Anúncio (topo da loja)</Label>
+              <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
+            </div>
+          </div>
+
+          {/* Configurações de Desconto e Pagamento */}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-sm font-bold uppercase tracking-wider">Pagamentos e Descontos</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Desconto PIX (%)</Label>
+                <Input type="number" value={getValue("pix_discount")} onChange={(e) => setLocalSettings({ ...localSettings, pix_discount: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Desconto Dinheiro (%)</Label>
+                <Input type="number" value={getValue("cash_discount")} onChange={(e) => setLocalSettings({ ...localSettings, cash_discount: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Chave/API PIX</Label>
+              <Input value={getValue("pix_api_key")} onChange={(e) => setLocalSettings({ ...localSettings, pix_api_key: e.target.value })} placeholder="Sua chave ou token de API" className="mt-1" />
             </div>
           </div>
 
@@ -1639,7 +1691,7 @@ const OrdersAdminView = () => {
                     <SelectContent>
                       {PAYMENT_METHODS.map((m) => (
                         <SelectItem key={m} value={m}>
-                          {m}
+                          {PAYMENT_LABELS[m]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1735,9 +1787,9 @@ const CouponsView = () => {
   const openNew = () => {
     setEditingCoupon({
       code: "",
-      discount_value: 0,
+      discount_value: undefined,
       discount_type: "percentage",
-      min_purchase_amount: 0,
+      min_purchase_amount: undefined,
       status: "active",
       expires_at: null,
       max_uses: null
@@ -1770,6 +1822,7 @@ const CouponsView = () => {
               <TableRow>
                 <TableHead>Código</TableHead>
                 <TableHead>Desconto</TableHead>
+                <TableHead>Mínimo</TableHead>
                 <TableHead>Expiração</TableHead>
                 <TableHead>Uso</TableHead>
                 <TableHead>Status</TableHead>
@@ -1782,6 +1835,9 @@ const CouponsView = () => {
                   <TableCell className="font-bold">{c.code}</TableCell>
                   <TableCell>
                     {c.discount_type === "percentage" ? `${c.discount_value}%` : formatPrice(c.discount_value)}
+                  </TableCell>
+                  <TableCell>
+                    {c.min_purchase_amount ? formatPrice(c.min_purchase_amount) : "—"}
                   </TableCell>
                   <TableCell>
                     {c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "Nunca"}
@@ -1828,11 +1884,11 @@ const CouponsView = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Valor do Desconto</Label>
-                <Input type="number" value={editingCoupon?.discount_value} onChange={(e) => setEditingCoupon({ ...editingCoupon!, discount_value: Number(e.target.value) })} />
+                <Input type="number" value={editingCoupon?.discount_value ?? ""} onChange={(e) => setEditingCoupon({ ...editingCoupon!, discount_value: e.target.value ? Number(e.target.value) : 0 })} />
               </div>
               <div className="space-y-2">
                 <Label>Compra Mínima (R$)</Label>
-                <Input type="number" value={editingCoupon?.min_purchase_amount} onChange={(e) => setEditingCoupon({ ...editingCoupon!, min_purchase_amount: Number(e.target.value) })} />
+                <Input type="number" value={editingCoupon?.min_purchase_amount ?? ""} onChange={(e) => setEditingCoupon({ ...editingCoupon!, min_purchase_amount: e.target.value ? Number(e.target.value) : 0 })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

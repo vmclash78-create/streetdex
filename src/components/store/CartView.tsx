@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, ShoppingCart, X, Trash2, Minus, Plus, Truck, MessageCircle } from "lucide-react";
 import DuarttLogo from "./DuarttLogo";
 import { type CartItem, formatPrice, pixPrice, fallbackImg, WHATSAPP } from "./storeData";
+import { useStoreSettings } from "@/hooks/useStoreData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +18,14 @@ interface CartViewProps {
 
 const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onCheckout }: CartViewProps) => {
   const [note, setNote] = useState("");
+  const { data: settings } = useStoreSettings();
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
+  
+  const pixDiscount = Number(settings?.pix_discount || "0");
+  const cashDiscount = Number(settings?.cash_discount || "0");
+  
+  const pixTotal = total * (1 - pixDiscount / 100);
+  const cashTotal = total * (1 - cashDiscount / 100);
 
   if (cartItems.length === 0) {
     return (
@@ -98,7 +106,10 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
           <span className="text-sm text-foreground">Total:</span>
           <span className="text-lg font-bold text-foreground">{formatPrice(total)}</span>
         </div>
-        <p className="text-xs text-green-600 text-right mb-1.5">{pixPrice(total)} com Pix</p>
+        <div className="flex flex-col text-right mb-1.5">
+          {pixDiscount > 0 && <p className="text-xs text-green-600 font-semibold">{formatPrice(pixTotal)} no PIX</p>}
+          {cashDiscount > 0 && <p className="text-xs text-green-600 font-semibold">{formatPrice(cashTotal)} no Dinheiro</p>}
+        </div>
         <Button onClick={onCheckout} className="w-full" size="lg">Finalizar Pedido</Button>
       </div>
     </div>

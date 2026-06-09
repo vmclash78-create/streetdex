@@ -2,15 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
-import { useHeroBanners } from "@/hooks/useStoreData";
+import { useHeroBanners, useStoreSettings } from "@/hooks/useStoreData";
 import { heroBanners as fallbackBanners, WHATSAPP } from "./storeData";
 import { Button } from "@/components/ui/button";
 
 const HeroCarousel = () => {
   const { data: dbBanners } = useHeroBanners();
+  const { data: settings } = useStoreSettings();
   const banners = dbBanners && dbBanners.length > 0
     ? dbBanners.filter((b) => b.active)
     : fallbackBanners;
+  
+  const whatsapp = settings?.whatsapp_store || WHATSAPP;
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000, stopOnInteraction: false })]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -58,7 +61,16 @@ const HeroCarousel = () => {
           Vista o que te define
         </p>
         <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <Button size="lg" className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all">
+          <Button 
+            size="lg" 
+            className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all"
+            onClick={() => {
+              const element = document.getElementById("best-sellers");
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
             Ver Coleção
           </Button>
           <Button
@@ -67,7 +79,7 @@ const HeroCarousel = () => {
             variant="outline"
             className="text-sm font-bold tracking-wider uppercase px-8 border-green-500/50 text-green-500 hover:bg-green-500/10 hover:border-green-500"
           >
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="gap-2">
               <MessageCircle size={16} /> WhatsApp
             </a>
           </Button>
