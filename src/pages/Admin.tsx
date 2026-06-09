@@ -1496,11 +1496,17 @@ const SettingsView = () => {
             <Label className="flex items-center gap-2">Logo da Loja</Label>
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Modo Claro</p>
-                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-white flex items-center justify-center overflow-hidden group relative">
+                <div className="space-y-2 col-span-2">
+                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-muted flex items-center justify-center overflow-hidden group relative">
                     {getValue("logo_url") ? (
-                      <img src={getValue("logo_url")} alt="Logo Claro" className="w-4/5 h-4/5 object-contain" />
+                      <div className="flex w-full h-full">
+                        <div className="flex-1 bg-white flex items-center justify-center p-4 border-r border-border">
+                          <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-full object-contain" />
+                        </div>
+                        <div className="flex-1 bg-zinc-900 flex items-center justify-center p-4">
+                          <img src={getValue("logo_url")} alt="Preview Escuro" className="max-w-full max-h-full object-contain dark-logo-filter" />
+                        </div>
+                      </div>
                     ) : (
                       <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
                         <Upload size={20} />
@@ -1510,33 +1516,15 @@ const SettingsView = () => {
                     {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Modo Escuro</p>
-                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-zinc-900 flex items-center justify-center overflow-hidden group relative">
-                    {getValue("logo_url_dark") ? (
-                      <img src={getValue("logo_url_dark")} alt="Logo Escuro" className="w-4/5 h-4/5 object-contain" />
-                    ) : (
-                      <div className="text-zinc-600 text-xs flex flex-col items-center gap-1">
-                        <Upload size={20} />
-                        Sem logo
-                      </div>
-                    )}
-                    {uploading === "logo_url_dark" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
-                  </div>
-                </div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url"}>
                   <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url")} />
-                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo (Claro)"}
-                </Button>
-                <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url_dark"}>
-                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url_dark")} />
-                  {uploading === "logo_url_dark" ? "Enviando..." : "Subir Logo (Escuro)"}
+                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo da Loja"}
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                O site alternará automaticamente entre as logos dependendo do tema do usuário.
+                A logo será adaptada automaticamente para os modos claro e escuro.
               </p>
             </div>
           </div>
