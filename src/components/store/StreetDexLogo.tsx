@@ -18,7 +18,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
       <img
         src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
-        className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-0 dark:invert`}
+        className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-110`}
         onError={(e) => {
           // Fallback caso a imagem customizada falhe
           const target = e.target as HTMLImageElement;
