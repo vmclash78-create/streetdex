@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Package, ShoppingBag, Settings, LogOut,
   Plus, Edit2, Trash2, TrendingUp, DollarSign, Box, ChevronDown,
