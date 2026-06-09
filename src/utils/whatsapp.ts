@@ -1,16 +1,31 @@
 export const getWhatsAppLink = (number: any, message?: string) => {
   if (!number) return "https://wa.me";
   
-  // Remove tudo que não for dígito
-  const cleanedNumber = number.toString().replace(/\D/g, "");
+  // Extrai apenas os números para garantir um formato limpo
+  let cleaned = number.toString().replace(/\D/g, "");
   
-  // Regra básica para números do Brasil:
-  // Se tem 10 ou 11 dígitos, adiciona o 55 (Brasil)
-  let finalNumber = cleanedNumber;
-  if ((cleanedNumber.length === 10 || cleanedNumber.length === 11) && !cleanedNumber.startsWith("55")) {
-    finalNumber = `55${cleanedNumber}`;
+  // Se o número começar com 0 (ex: 088...), remove o zero inicial
+  if (cleaned.startsWith("0")) {
+    cleaned = cleaned.substring(1);
+  }
+
+  // Remove 55 duplicado (caso o usuário tenha digitado 55 no admin e o código adicione de novo ou ele mesmo duplicou)
+  if (cleaned.startsWith("5555")) {
+    cleaned = cleaned.substring(2);
   }
   
-  const baseUrl = `https://wa.me/${finalNumber}`;
-  return message ? `${baseUrl}?text=${encodeURIComponent(message)}` : baseUrl;
+  // Se o número tiver 10 ou 11 dígitos (DDD + número), adiciona o 55 do Brasil
+  if ((cleaned.length === 10 || cleaned.length === 11) && !cleaned.startsWith("55")) {
+    cleaned = `55${cleaned}`;
+  }
+  
+  // Construção do link wa.me (padrão oficial simplificado)
+  // Usamos a construção manual para garantir que não haja parâmetros vazios estranhos
+  let url = `https://wa.me/${cleaned}`;
+  
+  if (message && message.trim().length > 0) {
+    url += `?text=${encodeURIComponent(message)}`;
+  }
+  
+  return url;
 };

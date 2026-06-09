@@ -1,6 +1,6 @@
 // ─── CDN BASE ────────────────────────────────────────────────────────────────
 const CDN = "https://acdn-us.mitiendanube.com/stores/005/091/071";
-export const WHATSAPP = "8899999999999"; // Número padrão para fallback
+export const WHATSAPP = "88999999999"; // Número padrão para fallback (11 dígitos, DDD 88)
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 export type Product = {
