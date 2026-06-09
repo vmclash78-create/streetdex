@@ -20,10 +20,12 @@ export const getWhatsAppLink = (number: any, message?: string) => {
   }
   
   // Construção do link wa.me (padrão oficial simplificado)
-  const baseUrl = `https://wa.me/${cleaned}`;
+  // Usamos a construção manual para garantir que não haja parâmetros vazios estranhos
+  let url = `https://wa.me/${cleaned}`;
   
-  if (!message) return baseUrl;
+  if (message && message.trim().length > 0) {
+    url += `?text=${encodeURIComponent(message)}`;
+  }
   
-  // Adiciona a mensagem apenas se houver conteúdo, evitando parâmetros vazios
-  return `${baseUrl}?text=${encodeURIComponent(message)}`;
+  return url;
 };
