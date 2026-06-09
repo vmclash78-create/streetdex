@@ -73,6 +73,51 @@ const Admin = () => {
   const [view, setView] = useState<AdminView>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { signOut } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    console.log("Setting up real-time order notifications...");
+    const channel = supabase
+      .channel('admin-order-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          console.log('New order detected via real-time:', payload);
+          
+          // Show toast notification
+          toast({
+            title: "Novo Pedido Recebido! 🔔",
+            description: `O pedido #${payload.new.order_number} acaba de ser realizado.`,
+            variant: "default",
+          });
+
+          // Play notification sound
+          try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+            audio.play().catch(err => console.warn("Could not play notification sound:", err));
+          } catch (error) {
+            console.error("Error playing notification sound:", error);
+          }
+
+          // Refresh the orders data
+          queryClient.invalidateQueries({ queryKey: ["orders"] });
+          queryClient.invalidateQueries({ queryKey: ["order-items"] });
+        }
+      )
+      .subscribe((status) => {
+        console.log("Supabase real-time status:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast, queryClient]);
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
