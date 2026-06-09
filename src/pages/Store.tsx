@@ -39,7 +39,7 @@ const Store = () => {
   const { data: settings } = useStoreSettings();
   const isMobile = useIsMobile();
 
-  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "5585992783973";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "558592783973";
   const whatsappSupport = whatsapp;
   const storeName = settings?.store_name || "Street Dex";
   const announcementText = settings?.announcement_text || "";
