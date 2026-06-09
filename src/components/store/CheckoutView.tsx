@@ -247,9 +247,23 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><MapPin size={20} className="text-primary" /> Endereço de entrega</h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-2 sm:col-span-1 relative">
                 <Label>CEP *</Label>
-                <Input value={address.cep} onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/[^0-9]/g, "") })} onBlur={handleCepBlur} placeholder="60000000" maxLength={8} className="mt-1" />
+                <div className="relative">
+                  <Input 
+                    value={address.cep} 
+                    onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/[^0-9]/g, "") })} 
+                    onBlur={handleCepBlur} 
+                    placeholder="60000000" 
+                    maxLength={8} 
+                    className="mt-1" 
+                  />
+                  {isValidatingCep && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Loader2 size={16} className="animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="col-span-2">
                 <Label>Rua *</Label>
