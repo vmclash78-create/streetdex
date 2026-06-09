@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getWhatsAppLink } from "@/utils/whatsapp";
+import { validatePhone, validateCEP } from "@/utils/validation";
 
 interface CheckoutViewProps {
   cartItems: CartItem[];
@@ -56,44 +57,71 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
   const validateStep1 = () => {
     const name = customer.name.trim();
-    const phone = customer.phone.trim().replace(/\D/g, "");
-    return name.length >= 2 && name.length <= 100 && phone.length >= 10 && phone.length <= 11;
+    if (name.length < 2) {
+      toast({ title: "Nome inválido", description: "Por favor, digite seu nome completo.", variant: "destructive" });
+      return false;
+    }
+    
+    const phoneValidation = validatePhone(customer.phone);
+    if (!phoneValidation.isValid) {
+      toast({ title: "Telefone inválido", description: phoneValidation.error, variant: "destructive" });
+      return false;
+    }
+    
+    return true;
   };
+
   const validateStep2 = () => {
     const cep = address.cep.trim().replace(/\D/g, "");
-    return cep.length === 8 && address.street.trim().length > 0 && address.number.trim().length > 0 && address.neighborhood.trim().length > 0 && address.city.trim().length > 0;
+    if (cep.length !== 8) {
+      toast({ title: "CEP inválido", description: "O CEP deve ter 8 dígitos.", variant: "destructive" });
+      return false;
+    }
+
+    if (!address.street.trim() || !address.neighborhood.trim() || !address.city.trim()) {
+      toast({ title: "Endereço incompleto", description: "Por favor, preencha todos os campos obrigatórios.", variant: "destructive" });
+      return false;
+    }
+
+    if (!address.number.trim()) {
+      toast({ title: "Número faltando", description: "Por favor, informe o número da residência.", variant: "destructive" });
+      return false;
+    }
+
+    return true;
   };
+
+  const [isValidatingCep, setIsValidatingCep] = useState(false);
 
   const handleCepBlur = async () => {
     const cep = address.cep.replace(/\D/g, "");
     if (cep.length === 8) {
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
-        if (data.erro) {
-          toast({ 
-            title: "CEP não encontrado", 
-            description: "Por favor, verifique o CEP digitado.", 
-            variant: "destructive" 
-          });
-          return;
-        }
-        
-        // Validação adicional de rua e bairro se necessário
-        if (address.street && data.logradouro && address.street.toLowerCase() !== data.logradouro.toLowerCase()) {
-           toast({ title: "Endereço divergente", description: "A rua informada é diferente da rua do CEP.", variant: "warning" as any });
-        }
+      setIsValidatingCep(true);
+      const validation = await validateCEP(cep);
+      setIsValidatingCep(false);
 
-        setAddress(prev => ({
-          ...prev,
-          street: data.logradouro || prev.street,
-          neighborhood: data.bairro || prev.neighborhood,
-          city: data.localidade || prev.city
-        }));
-      } catch (error) {
-        console.error("Erro ao buscar CEP:", error);
-        toast({ title: "Erro na consulta de CEP", description: "Não foi possível verificar seu endereço automaticamente." });
+      if (!validation.isValid) {
+        toast({ 
+          title: "CEP inválido", 
+          description: validation.error, 
+          variant: "destructive" 
+        });
+        return;
       }
+
+      const data = validation.data;
+      
+      setAddress(prev => ({
+        ...prev,
+        street: data.logradouro || prev.street,
+        neighborhood: data.bairro || prev.neighborhood,
+        city: data.localidade || prev.city
+      }));
+
+      toast({
+        title: "CEP localizado",
+        description: `${data.localidade} - ${data.uf}`,
+      });
     }
   };
 
@@ -101,7 +129,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     try {
       // Final validation before submitting
       if (!validateStep1() || !validateStep2()) {
-        toast({ title: "Dados incompletos", description: "Por favor, verifique seus dados e endereço.", variant: "destructive" });
         return;
       }
 
@@ -146,6 +173,20 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         description: error.message || "Ocorreu um problema ao salvar seu pedido. Tente novamente.", 
         variant: "destructive" 
       });
+    }
+  };
+
+  const handleNext = () => {
+    if (step === 1) {
+      if (validateStep1()) setStep(2);
+    } else if (step === 2) {
+      if (validateStep2()) setStep(3);
+    } else if (step === 3) {
+      if (paymentMethod === "pix" && !pixConfirmed) {
+        toast({ title: "Confirmação pendente", description: "Por favor, confirme que realizou o pagamento via PIX.", variant: "warning" as any });
+        return;
+      }
+      setStep(4);
     }
   };
 
@@ -206,9 +247,23 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><MapPin size={20} className="text-primary" /> Endereço de entrega</h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-2 sm:col-span-1 relative">
                 <Label>CEP *</Label>
-                <Input value={address.cep} onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/[^0-9]/g, "") })} onBlur={handleCepBlur} placeholder="60000000" maxLength={8} className="mt-1" />
+                <div className="relative">
+                  <Input 
+                    value={address.cep} 
+                    onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/[^0-9]/g, "") })} 
+                    onBlur={handleCepBlur} 
+                    placeholder="60000000" 
+                    maxLength={8} 
+                    className="mt-1" 
+                  />
+                  {isValidatingCep && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Loader2 size={16} className="animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="col-span-2">
                 <Label>Rua *</Label>
@@ -372,8 +427,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         </div>
         {step < 4 ? (
           <Button
-            onClick={() => setStep((s) => (s + 1) as Step)}
-            disabled={(step === 1 && !validateStep1()) || (step === 2 && !validateStep2())}
+            onClick={handleNext}
             className="w-full gap-2"
             size="lg"
           >
