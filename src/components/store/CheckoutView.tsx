@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 
 interface CheckoutViewProps {
   cartItems: CartItem[];
@@ -135,7 +136,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       const whatsappNumber = (settings?.whatsapp_store || settings?.whatsapp || WHATSAPP).toString().replace(/\D/g, "");
       const message = `Olá! Acabei de realizar o pedido #${order.order_number} no site. Aguardo confirmação!\n\n*Detalhes do Pedido:* \nTotal: ${formatPrice(finalTotal)}\nPagamento: ${paymentMethod.toUpperCase()}`;
       
-      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
+      window.open(getWhatsAppLink(whatsappNumber, message), "_blank");
 
       
     } catch (error: any) {

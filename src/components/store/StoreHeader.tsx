@@ -3,7 +3,8 @@ import { ShoppingCart, Search, Menu, MessageCircle, Truck, Heart } from "lucide-
 import StreetDexLogo from "./StreetDexLogo";
 import ThemeToggle from "./ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { navLinks } from "./storeData";
+import { navLinks, WHATSAPP } from "./storeData";
+import { getWhatsAppLink } from "@/utils/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  const whatsappNumber = whatsapp || "8899999999999";
+  const whatsappNumber = whatsapp || WHATSAPP;
   const announcement = announcementText || "ENVIO COM 5 DIAS ÚTEIS | CUPOM: HAPPY | ❤️ FRETE GRÁTIS A PARTIR DE R$399,99";
 
   return (
@@ -53,17 +54,34 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex-1 py-3 overflow-y-auto">
-                  {navLinks.map((link) => (
-                    <button
-                      key={link.key}
-                      onClick={() => setSidebarOpen(false)}
-                      className="block w-full text-left px-5 py-3 text-sm font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors tracking-wide uppercase"
-                    >
-                      {link.label}
-                    </button>
-                  ))}
+                  {navLinks.map((link) => {
+                    const isContact = link.key === "Contato";
+                    if (isContact) {
+                      return (
+                        <a
+                          key={link.key}
+                          href={getWhatsAppLink(whatsappNumber)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setSidebarOpen(false)}
+                          className="block w-full text-left px-5 py-3 text-sm font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors tracking-wide uppercase"
+                        >
+                          {link.label}
+                        </a>
+                      );
+                    }
+                    return (
+                      <button
+                        key={link.key}
+                        onClick={() => setSidebarOpen(false)}
+                        className="block w-full text-left px-5 py-3 text-sm font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors tracking-wide uppercase"
+                      >
+                        {link.label}
+                      </button>
+                    );
+                  })}
                   <div className="border-t border-border/50 my-3 mx-5" />
-                  <a href={`https://wa.me/${whatsappNumber.toString().replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-5 py-3 hover:bg-primary/10 transition-colors">
+                  <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-5 py-3 hover:bg-primary/10 transition-colors">
                     <MessageCircle size={16} className="text-green-500" />
                     <span className="text-sm font-medium text-foreground">WhatsApp</span>
                   </a>
