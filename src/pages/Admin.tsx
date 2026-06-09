@@ -1116,7 +1116,7 @@ const FinancesView = () => {
               <CardContent className="p-5">
                 <ArrowDownRight size={20} className="text-destructive mb-2" />
                 <p className="text-2xl font-bold text-foreground">{formatPrice(totalExp)}</p>
-                <p className="text-xs text-muted-foreground">Despesas (Custos Fixos)</p>
+                <p className="text-xs text-muted-foreground">Despesas Operacionais</p>
               </CardContent>
             </Card>
             <Card>
