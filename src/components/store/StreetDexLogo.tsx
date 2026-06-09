@@ -6,8 +6,13 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const { data: settings } = useStoreSettings();
   const imgSize = size === "sm" ? "h-8" : size === "lg" ? "h-14" : "h-10";
   
-  const logoLight = settings?.logo_url || streetdexLogo;
-  const logoDark = settings?.logo_url_dark || settings?.logo_url || streetdexLogoDark;
+  const logoUrl = settings?.logo_url;
+  const logoUrlDark = settings?.logo_url_dark;
+  
+  const logoLight = logoUrl || streetdexLogo;
+  // If we have an explicit dark logo, use it, otherwise use the light logo with a filter
+  const logoDark = logoUrlDark || logoUrl || streetdexLogoDark;
+  const useFilter = !logoUrlDark && logoUrl;
 
   return (
     <>
@@ -19,7 +24,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
       <img
         src={logoDark}
         alt={settings?.store_name || "Street Dex"}
-        className={`${imgSize} w-auto object-contain hidden dark:block`}
+        className={`${imgSize} w-auto object-contain hidden dark:block ${useFilter ? 'dark-logo-filter' : ''}`}
       />
     </>
   );

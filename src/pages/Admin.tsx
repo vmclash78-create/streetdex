@@ -9,6 +9,7 @@ import {
   Image, ClipboardList, Eye, ChevronRight, Upload,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,9 +137,9 @@ const Admin = () => {
   return (
     <div className="flex h-screen bg-background transition-colors duration-300">
       <aside className={`${sidebarCollapsed ? "w-16" : "w-60"} transition-all duration-200 flex flex-col border-r border-border bg-card hidden md:flex`}>
-        <div className="flex items-center gap-2 px-4 py-5 border-b border-border">
-          <span className="text-lg font-bold tracking-tight text-primary flex-shrink-0">SD</span>
-          {!sidebarCollapsed && <span className="text-lg font-light tracking-tight text-foreground">Street Dex</span>}
+        <div className="flex items-center gap-3 px-4 py-5 border-b border-border overflow-hidden">
+          <StreetDexLogo size="sm" />
+          {!sidebarCollapsed && <span className="text-lg font-light tracking-tight text-foreground truncate">{settings?.store_name || "Street Dex"}</span>}
         </div>
         <nav className="flex-1 py-3">
           {navItems.map((item) => (
@@ -1471,8 +1472,8 @@ const SettingsView = () => {
         .from('store-assets')
         .getPublicUrl(filePath);
 
-      setLocalSettings(prev => ({ ...prev, [key]: publicUrl }));
-      toast({ title: "Sucesso", description: "Upload concluído!" });
+      await updateSetting.mutateAsync({ key, value: publicUrl });
+      toast({ title: "Sucesso", description: "Logo atualizada em todo o site!" });
     } catch (error: any) {
       toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
     } finally {
@@ -1495,11 +1496,17 @@ const SettingsView = () => {
             <Label className="flex items-center gap-2">Logo da Loja</Label>
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Modo Claro</p>
-                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-white flex items-center justify-center overflow-hidden group relative">
+                <div className="space-y-2 col-span-2">
+                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-muted flex items-center justify-center overflow-hidden group relative">
                     {getValue("logo_url") ? (
-                      <img src={getValue("logo_url")} alt="Logo Claro" className="w-4/5 h-4/5 object-contain" />
+                      <div className="flex w-full h-full">
+                        <div className="flex-1 bg-white flex items-center justify-center p-4 border-r border-border">
+                          <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-full object-contain" />
+                        </div>
+                        <div className="flex-1 bg-zinc-900 flex items-center justify-center p-4">
+                          <img src={getValue("logo_url")} alt="Preview Escuro" className="max-w-full max-h-full object-contain dark-logo-filter" />
+                        </div>
+                      </div>
                     ) : (
                       <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
                         <Upload size={20} />
@@ -1509,33 +1516,15 @@ const SettingsView = () => {
                     {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Modo Escuro</p>
-                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-zinc-900 flex items-center justify-center overflow-hidden group relative">
-                    {getValue("logo_url_dark") ? (
-                      <img src={getValue("logo_url_dark")} alt="Logo Escuro" className="w-4/5 h-4/5 object-contain" />
-                    ) : (
-                      <div className="text-zinc-600 text-xs flex flex-col items-center gap-1">
-                        <Upload size={20} />
-                        Sem logo
-                      </div>
-                    )}
-                    {uploading === "logo_url_dark" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
-                  </div>
-                </div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url"}>
                   <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url")} />
-                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo (Claro)"}
-                </Button>
-                <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url_dark"}>
-                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url_dark")} />
-                  {uploading === "logo_url_dark" ? "Enviando..." : "Subir Logo (Escuro)"}
+                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo da Loja"}
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                O site alternará automaticamente entre as logos dependendo do tema do usuário.
+                A logo será adaptada automaticamente para os modos claro e escuro.
               </p>
             </div>
           </div>

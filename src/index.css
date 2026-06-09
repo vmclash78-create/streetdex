@@ -205,6 +205,10 @@
   .neon-text {
     text-shadow: 0 0 10px hsl(var(--primary-glow) / 0.3);
   }
+  
+  .dark-logo-filter {
+    filter: brightness(0) invert(1);
+  }
 }
 
 
