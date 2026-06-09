@@ -1501,10 +1501,10 @@ const SettingsView = () => {
                     {getValue("logo_url") ? (
                       <div className="flex w-full h-full">
                         <div className="flex-1 bg-white flex items-center justify-center p-4 border-r border-border">
-                          <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-full object-contain" />
+                          <img src={`${getValue("logo_url")}?t=${new Date().getTime()}`} alt="Preview Claro" className="max-w-full max-h-full object-contain" />
                         </div>
                         <div className="flex-1 bg-zinc-900 flex items-center justify-center p-4">
-                          <img src={getValue("logo_url")} alt="Preview Escuro" className="max-w-full max-h-full object-contain dark-logo-filter" />
+                          <img src={`${getValue("logo_url")}?t=${new Date().getTime()}`} alt="Preview Escuro" className="max-w-full max-h-full object-contain dark-logo-filter" />
                         </div>
                       </div>
                     ) : (
