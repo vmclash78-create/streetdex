@@ -1043,8 +1043,15 @@ const FinancesView = () => {
   const [filterDateTo, setFilterDateTo] = useState("");
 
   const totalRevenue = sales?.reduce((s, sale) => s + Number(sale.total), 0) || 0;
-  const totalCost = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
-  const totalExp = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
+  
+  // CPV total: items das vendas + despesas categoria Fornecedores
+  const productCostsFromSales = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
+  const supplierExpenses = expenses?.filter(e => e.category === "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalCost = productCostsFromSales + supplierExpenses;
+
+  const otherExpenses = expenses?.filter(e => e.category !== "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalExp = otherExpenses; // Despesas operacionais (exceto fornecedores que já está no CPV)
+  
   const netProfit = totalRevenue - totalCost - totalExp;
 
   const filteredSales = useMemo(() => {
@@ -1109,14 +1116,14 @@ const FinancesView = () => {
               <CardContent className="p-5">
                 <ArrowDownRight size={20} className="text-destructive mb-2" />
                 <p className="text-2xl font-bold text-foreground">{formatPrice(totalExp)}</p>
-                <p className="text-xs text-muted-foreground">Despesas (Custos Fixos)</p>
+                <p className="text-xs text-muted-foreground">Despesas Operacionais</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
                 <Box size={20} className="text-blue-500 mb-2" />
                 <p className="text-2xl font-bold text-foreground">{formatPrice(totalCost)}</p>
-                <p className="text-xs text-muted-foreground">Custo dos Produtos (CPV)</p>
+                <p className="text-xs text-muted-foreground">Custo Prods + Fornecedores</p>
               </CardContent>
             </Card>
             <Card>

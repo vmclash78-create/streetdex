@@ -34,7 +34,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const { data: settings } = useStoreSettings();
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
-  const cashDiscount = Number(settings?.cash_discount || "0") / 100;
+  const cashDiscount = pixDiscount; // Dinheiro usa o mesmo desconto que o PIX
 
   const [step, setStep] = useState<Step>(1);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
