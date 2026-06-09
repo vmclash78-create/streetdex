@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MessageCircle, ShoppingCart, Heart, Check, Loader2 } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -63,11 +63,15 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
   const verifyWishlistCode = () => {
     if (wishlistInputCode === wishlistSentCode) {
-      setWishlistVerified(true);
+      setPhoneVerified(true);
       toast({ title: "Telefone Verificado!" });
     } else {
       toast({ title: "Código inválido", variant: "destructive" });
     }
+  };
+
+  const setPhoneVerified = (val: boolean) => {
+    setWishlistVerified(val);
   };
 
   return (
@@ -136,26 +140,78 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
               </div>
             </div>
 
-            {/* Buy button */}
-            <Button
-              onClick={() => {
-                if (!selectedSize) return;
-                onAddToCart({ cartId: `${product.id}-${selectedSize}-${Date.now()}`, product, size: selectedSize, qty: 1 });
-              }}
-              disabled={!selectedSize}
-              className="w-full py-3 text-base mb-3 font-bold tracking-wider uppercase neon-glow gap-2"
-              size="lg"
-            >
-              <ShoppingCart size={18} /> Comprar
-            </Button>
+            {/* Buy and Wishlist buttons */}
+            <div className="flex flex-col gap-2 mt-auto">
+              <Button
+                onClick={() => {
+                  if (!selectedSize) return;
+                  onAddToCart({ cartId: `${product.id}-${selectedSize}-${Date.now()}`, product, size: selectedSize, qty: 1 });
+                }}
+                disabled={!selectedSize}
+                className="w-full py-3 text-base font-bold tracking-wider uppercase neon-glow gap-2"
+                size="lg"
+              >
+                <ShoppingCart size={18} /> Comprar
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => setShowWishlist(true)}
+                className="w-full gap-2 border-primary/20 hover:bg-primary/5 text-primary font-bold uppercase tracking-wider text-xs py-5"
+              >
+                <Heart size={16} /> Adicionar à Lista de Desejos
+              </Button>
+            </div>
 
             {/* WhatsApp */}
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 transition-colors hover:bg-green-500/20 border border-green-500/20">
+            <a href={`https://wa.me/${settings?.whatsapp_store || WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
             </a>
           </div>
         </div>
+
+        {/* Wishlist Dialog */}
+        <Dialog open={showWishlist} onOpenChange={setShowWishlist}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader><DialogTitle>Lista de Desejos</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-2">
+              <p className="text-xs text-muted-foreground">Cadastre-se para ser avisado quando este produto entrar em oferta!</p>
+              <div>
+                <Label>Seu Nome</Label>
+                <Input value={wishlistName} onChange={(e) => setWishlistName(e.target.value)} placeholder="João Silva" className="mt-1" />
+              </div>
+              <div>
+                <Label>Seu WhatsApp</Label>
+                <div className="flex gap-2">
+                  <Input value={wishlistPhone} onChange={(e) => { setWishlistPhone(e.target.value.replace(/\D/g, "")); setWishlistVerified(false); }} placeholder="85999999999" maxLength={11} className="mt-1" />
+                  {!wishlistVerified && (
+                    <Button size="sm" onClick={handleWishlistAction} disabled={wishlistName.length < 2 || wishlistPhone.length < 10} className="mt-1">
+                      Validar
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {!wishlistVerified && wishlistSentCode && (
+                <div className="space-y-2 pt-2 border-t border-border">
+                  <Label>Código recebido</Label>
+                  <div className="flex gap-2">
+                    <Input value={wishlistInputCode} onChange={(e) => setWishlistInputCode(e.target.value)} placeholder="0000" maxLength={4} />
+                    <Button onClick={verifyWishlistCode}>OK</Button>
+                  </div>
+                </div>
+              )}
+
+              {wishlistVerified && (
+                <Button onClick={handleWishlistAction} disabled={isSubmittingWishlist} className="w-full gap-2 bg-primary neon-glow">
+                  {isSubmittingWishlist ? <Loader2 className="animate-spin" size={16} /> : <Heart size={16} />}
+                  Confirmar na Lista
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
