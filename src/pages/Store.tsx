@@ -332,7 +332,7 @@ const Store = () => {
       <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsappSupport} storeName={storeName} />
 
       {/* WhatsApp floating button */}
-      <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
+      <a href={`https://wa.me/${whatsappSupport}`} target="_blank" rel="noopener noreferrer"
         className="fixed bottom-5 right-5 z-50 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-400 hover:scale-110 transition-all duration-300"
         style={{ boxShadow: "0 0 20px hsl(145 63% 42% / 0.4)" }}
       >
