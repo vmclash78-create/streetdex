@@ -417,7 +417,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         {step < 4 ? (
           <Button
             onClick={() => setStep((s) => (s + 1) as Step)}
-            disabled={(step === 1 && !validateStep1()) || (step === 2 && !validateStep2())}
+            disabled={(step === 1 && !phoneVerified) || (step === 2 && !validateStep2())}
             className="w-full gap-2"
             size="lg"
           >
