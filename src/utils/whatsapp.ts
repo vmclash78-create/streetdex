@@ -1,5 +1,5 @@
 export const getWhatsAppLink = (number: any, message?: string) => {
-  if (!number) return "https://wa.me/";
+  if (!number) return "https://wa.me";
   
   // Remove tudo que não for dígito
   const cleanedNumber = number.toString().replace(/\D/g, "");
