@@ -219,7 +219,7 @@ export const useUpdateSetting = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      const { error } = await supabase.from("store_settings").update({ value }).eq("key", key);
+      const { error } = await supabase.from("store_settings").upsert({ key, value }, { onConflict: 'key' });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["store-settings"] }),
