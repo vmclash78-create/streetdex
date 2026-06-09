@@ -916,6 +916,27 @@ const SalesView = () => {
   const [discount, setDiscount] = useState(0);
   const [cartLines, setCartLines] = useState<{ productId: string; quantity: number; size: string }[]>([{ productId: "", quantity: 1, size: "" }]);
 
+  // Filtros
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterPayment, setFilterPayment] = useState("all");
+  const [filterMinAmount, setFilterMinAmount] = useState("");
+  const [filterMaxAmount, setFilterMaxAmount] = useState("");
+
+  const filteredSales = useMemo(() => {
+    if (!sales) return [];
+    return sales.filter(s => {
+      const dateMatch = (!filterDateFrom || s.sale_date >= filterDateFrom) && 
+                        (!filterDateTo || s.sale_date <= filterDateTo);
+      const paymentMatch = filterPayment === "all" || s.payment_method === filterPayment;
+      const amount = Number(s.total);
+      const minMatch = !filterMinAmount || amount >= Number(filterMinAmount);
+      const maxMatch = !filterMaxAmount || amount <= Number(filterMaxAmount);
+      return dateMatch && paymentMatch && minMatch && maxMatch;
+    });
+  }, [sales, filterDateFrom, filterDateTo, filterPayment, filterMinAmount, filterMaxAmount]);
+
+
   const activeProducts = products?.filter((p) => p.status === "active") || [];
 
   const addLine = () => setCartLines([...cartLines, { productId: "", quantity: 1, size: "" }]);
@@ -948,10 +969,94 @@ const SalesView = () => {
         <Button onClick={() => setShowForm(true)} className="gap-2"><Plus size={16} /> Nova Venda</Button>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-card p-4 rounded-lg border border-border">
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium flex items-center gap-2">
+            <Calendar size={12} className="text-primary" /> De
+          </Label>
+          <Input 
+            type="date" 
+            value={filterDateFrom} 
+            onChange={(e) => setFilterDateFrom(e.target.value)} 
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium flex items-center gap-2">
+            <Calendar size={12} className="text-primary" /> Até
+          </Label>
+          <Input 
+            type="date" 
+            value={filterDateTo} 
+            onChange={(e) => setFilterDateTo(e.target.value)} 
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium flex items-center gap-2">
+            <CreditCard size={12} className="text-primary" /> Pagamento
+          </Label>
+          <Select value={filterPayment} onValueChange={setFilterPayment}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Métodos</SelectItem>
+              {PAYMENT_METHODS.map((m) => (
+                <SelectItem key={m} value={m}>{PAYMENT_LABELS[m] || m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium flex items-center gap-2">
+            <DollarSign size={12} className="text-primary" /> Valor Mín.
+          </Label>
+          <Input 
+            type="number" 
+            placeholder="0,00"
+            value={filterMinAmount} 
+            onChange={(e) => setFilterMinAmount(e.target.value)} 
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="space-y-1.5 flex flex-col justify-end">
+          <div className="flex gap-2">
+            <div className="flex-1 space-y-1.5">
+              <Label className="text-xs font-medium flex items-center gap-2 md:hidden">
+                <DollarSign size={12} className="text-primary" /> Valor Máx.
+              </Label>
+              <Input 
+                type="number" 
+                placeholder="Máx"
+                value={filterMaxAmount} 
+                onChange={(e) => setFilterMaxAmount(e.target.value)} 
+                className="h-9 text-sm"
+              />
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                setFilterDateFrom("");
+                setFilterDateTo("");
+                setFilterPayment("all");
+                setFilterMinAmount("");
+                setFilterMaxAmount("");
+              }}
+              className="h-9 text-xs"
+            >
+              Limpar
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
-      ) : sales && sales.length > 0 ? (
+      ) : filteredSales && filteredSales.length > 0 ? (
         <Card>
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -963,7 +1068,7 @@ const SalesView = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sales.map((s) => (
+              {filteredSales.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>{formatDate(s.sale_date)}</TableCell>
                   <TableCell>
