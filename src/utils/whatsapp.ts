@@ -8,6 +8,11 @@ export const getWhatsAppLink = (number: any, message?: string) => {
   if (cleaned.startsWith("0")) {
     cleaned = cleaned.substring(1);
   }
+
+  // Remove 55 duplicado (caso o usuário tenha digitado 55 no admin e o código adicione de novo ou ele mesmo duplicou)
+  if (cleaned.startsWith("5555")) {
+    cleaned = cleaned.substring(2);
+  }
   
   // Se o número tiver 10 ou 11 dígitos (DDD + número), adiciona o 55 do Brasil
   if ((cleaned.length === 10 || cleaned.length === 11) && !cleaned.startsWith("55")) {
