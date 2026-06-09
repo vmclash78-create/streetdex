@@ -24,9 +24,6 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
   const [showWishlist, setShowWishlist] = useState(false);
   const [wishlistName, setWishlistName] = useState("");
   const [wishlistPhone, setWishlistPhone] = useState("");
-  const [wishlistVerified, setWishlistVerified] = useState(false);
-  const [wishlistSentCode, setWishlistSentCode] = useState<string | null>(null);
-  const [wishlistInputCode, setWishlistInputCode] = useState("");
   const [isSubmittingWishlist, setIsSubmittingWishlist] = useState(false);
 
   const { data: settings } = useStoreSettings();
@@ -35,12 +32,8 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
   const images = [product.img, product.img2 || product.img];
 
   const handleWishlistAction = async () => {
-    if (!wishlistVerified) {
-      const code = Math.floor(1000 + Math.random() * 9000).toString();
-      setWishlistSentCode(code);
-      const text = `Olá! Meu código para a Lista de Desejos StreetDex é: *${code}*`;
-      window.open(`https://wa.me/${wishlistPhone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`, "_blank");
-      toast({ title: "Código enviado", description: "Verifique seu WhatsApp." });
+    if (!wishlistName || wishlistPhone.length < 10) {
+      toast({ title: "Dados incompletos", description: "Preencha seu nome e WhatsApp corretamente.", variant: "destructive" });
       return;
     }
 
@@ -59,19 +52,6 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
     } finally {
       setIsSubmittingWishlist(false);
     }
-  };
-
-  const verifyWishlistCode = () => {
-    if (wishlistInputCode === wishlistSentCode) {
-      setPhoneVerified(true);
-      toast({ title: "Telefone Verificado!" });
-    } else {
-      toast({ title: "Código inválido", variant: "destructive" });
-    }
-  };
-
-  const setPhoneVerified = (val: boolean) => {
-    setWishlistVerified(val);
   };
 
   return (
@@ -164,7 +144,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </div>
 
             {/* WhatsApp */}
-            <a href={`https://wa.me/${(settings?.whatsapp_store || WHATSAPP).replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
+            <a href={`https://wa.me/${(settings?.whatsapp_store || settings?.whatsapp || WHATSAPP).replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
             </a>
@@ -183,32 +163,13 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
               </div>
               <div>
                 <Label>Seu WhatsApp</Label>
-                <div className="flex gap-2">
-                  <Input value={wishlistPhone} onChange={(e) => { setWishlistPhone(e.target.value.replace(/\D/g, "")); setWishlistVerified(false); }} placeholder="85999999999" maxLength={11} className="mt-1" />
-                  {!wishlistVerified && (
-                    <Button size="sm" onClick={handleWishlistAction} disabled={wishlistName.length < 2 || wishlistPhone.length < 10} className="mt-1">
-                      Validar
-                    </Button>
-                  )}
-                </div>
+                <Input value={wishlistPhone} onChange={(e) => setWishlistPhone(e.target.value.replace(/\D/g, ""))} placeholder="85999999999" maxLength={11} className="mt-1" />
               </div>
 
-              {!wishlistVerified && wishlistSentCode && (
-                <div className="space-y-2 pt-2 border-t border-border">
-                  <Label>Código recebido</Label>
-                  <div className="flex gap-2">
-                    <Input value={wishlistInputCode} onChange={(e) => setWishlistInputCode(e.target.value)} placeholder="0000" maxLength={4} />
-                    <Button onClick={verifyWishlistCode}>OK</Button>
-                  </div>
-                </div>
-              )}
-
-              {wishlistVerified && (
-                <Button onClick={handleWishlistAction} disabled={isSubmittingWishlist} className="w-full gap-2 bg-primary neon-glow">
-                  {isSubmittingWishlist ? <Loader2 className="animate-spin" size={16} /> : <Heart size={16} />}
-                  Confirmar na Lista
-                </Button>
-              )}
+              <Button onClick={handleWishlistAction} disabled={isSubmittingWishlist} className="w-full gap-2 bg-primary neon-glow">
+                {isSubmittingWishlist ? <Loader2 className="animate-spin" size={16} /> : <Heart size={16} />}
+                Confirmar na Lista
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

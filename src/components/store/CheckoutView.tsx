@@ -40,10 +40,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [notes, setNotes] = useState("");
   const [pixConfirmed, setPixConfirmed] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [sentCode, setSentCode] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
   
   const createOrder = useCreateOrder();
   const { toast } = useToast();
@@ -97,31 +93,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         console.error("Erro ao buscar CEP:", error);
         toast({ title: "Erro na consulta de CEP", description: "Não foi possível verificar seu endereço automaticamente." });
       }
-    }
-  };
-
-  const sendVerificationCode = () => {
-    if (!validateStep1()) return;
-    setIsVerifying(true);
-    // Simulação de envio de código via WhatsApp
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setSentCode(code);
-    
-    // Abre o WhatsApp para o cliente "receber" o código (simulado)
-    const text = `Olá! Meu código de verificação para o StreetDex é: *${code}*`;
-    window.open(`https://wa.me/55${customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`, "_blank");
-    
-    toast({ title: "Código Enviado", description: "Verifique seu WhatsApp para o código de 4 dígitos." });
-    setIsVerifying(false);
-  };
-
-  const verifyCode = () => {
-    if (verificationCode === sentCode) {
-      setPhoneVerified(true);
-      setStep(2);
-      toast({ title: "Número Verificado!", description: "Agora preencha seu endereço." });
-    } else {
-      toast({ title: "Código Inválido", description: "O código digitado está incorreto.", variant: "destructive" });
     }
   };
 
@@ -216,26 +187,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             </div>
             <div>
               <Label>WhatsApp (Telefone) *</Label>
-              <div className="flex gap-2">
-                <Input value={customer.phone} onChange={(e) => { setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") }); setPhoneVerified(false); }} placeholder="85999999999" maxLength={11} className="mt-1" />
-                {!phoneVerified && (
-                  <Button onClick={sendVerificationCode} disabled={!validateStep1() || isVerifying} size="sm" className="mt-1">
-                    Validar
-                  </Button>
-                )}
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1">É necessário validar seu número via WhatsApp antes de prosseguir.</p>
+              <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
+              <p className="text-[10px] text-muted-foreground mt-1">É neste número que você receberá o comprovante do pedido.</p>
             </div>
-            
-            {!phoneVerified && sentCode && (
-              <div className="space-y-2 pt-4 border-t border-border">
-                <Label>Código de Verificação (4 dígitos)</Label>
-                <div className="flex gap-2">
-                  <Input value={verificationCode} onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ""))} placeholder="0000" maxLength={4} />
-                  <Button onClick={verifyCode}>Verificar</Button>
-                </div>
-              </div>
-            )}
 
             {customer.email && (
               <div>
@@ -417,7 +371,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         {step < 4 ? (
           <Button
             onClick={() => setStep((s) => (s + 1) as Step)}
-            disabled={(step === 1 && !phoneVerified) || (step === 2 && !validateStep2())}
+            disabled={(step === 1 && !validateStep1()) || (step === 2 && !validateStep2())}
             className="w-full gap-2"
             size="lg"
           >
