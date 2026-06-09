@@ -329,7 +329,7 @@ const Store = () => {
         )}
       </main>
 
-      <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsapp} storeName={storeName} />
+      <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsappSupport} storeName={storeName} />
 
       {/* WhatsApp floating button */}
       <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
