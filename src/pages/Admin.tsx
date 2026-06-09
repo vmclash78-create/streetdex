@@ -76,6 +76,8 @@ const Admin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const { data: settings } = useStoreSettings();
+
   useEffect(() => {
     console.log("Setting up real-time order notifications...");
     const channel = supabase
@@ -99,7 +101,8 @@ const Admin = () => {
 
           // Play notification sound
           try {
-            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+            const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+            const audio = new Audio(soundUrl);
             audio.play().catch(err => console.warn("Could not play notification sound:", err));
           } catch (error) {
             console.error("Error playing notification sound:", error);
@@ -117,7 +120,7 @@ const Admin = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient]);
+  }, [toast, queryClient, settings?.notification_sound]);
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
@@ -1465,6 +1468,43 @@ const SettingsView = () => {
             <div>
               <Label>Chave/API PIX</Label>
               <Input value={getValue("pix_api_key")} onChange={(e) => setLocalSettings({ ...localSettings, pix_api_key: e.target.value })} placeholder="Sua chave ou token de API" className="mt-1" />
+            </div>
+          </div>
+
+          {/* Configurações de Notificação */}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-sm font-bold uppercase tracking-wider">Notificações</h3>
+            <div>
+              <Label>Som de Novo Pedido</Label>
+              <Select 
+                value={getValue("notification_sound")} 
+                onValueChange={(v) => {
+                  setLocalSettings({ ...localSettings, notification_sound: v });
+                  // Test the sound when selected
+                  try {
+                    const audio = new Audio(v);
+                    audio.play().catch(err => console.warn("Could not play sound preview:", err));
+                  } catch (e) {
+                    console.error("Error playing sound preview:", e);
+                  }
+                }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione um som" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(() => {
+                    try {
+                      const sounds = JSON.parse(getValue("notification_sounds") || "[]");
+                      return sounds.map((s: any) => (
+                        <SelectItem key={s.url} value={s.url}>{s.name}</SelectItem>
+                      ));
+                    } catch (e) {
+                      return <SelectItem value="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3">Clássico</SelectItem>;
+                    }
+                  })()}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
