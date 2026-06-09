@@ -1388,7 +1388,7 @@ const SettingsView = () => {
               <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>WhatsApp Principal (Utilizado no Site)</Label>
+              <Label>WhatsApp Principal (Utilizado globalmente no site)</Label>
               <Input value={getValue("whatsapp_store")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_store: e.target.value })} placeholder="Ex: 5585999999999" className="mt-1" />
             </div>
             <div>

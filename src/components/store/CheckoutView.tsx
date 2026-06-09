@@ -132,10 +132,11 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
       onOrderComplete(order.id, order.order_number);
       
-      toast({ 
-        title: "Pedido realizado!", 
-        description: `Seu pedido #${order.order_number} foi registrado com sucesso.`,
-      });
+      const whatsappNumber = (settings?.whatsapp_store || settings?.whatsapp || WHATSAPP).toString().replace(/\D/g, "");
+      const message = `Olá! Acabei de realizar o pedido #${order.order_number} no site. Aguardo confirmação!\n\n*Detalhes do Pedido:* \nTotal: ${formatPrice(finalTotal)}\nPagamento: ${paymentMethod.toUpperCase()}`;
+      
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
+
       
     } catch (error: any) {
       console.error("Order creation error:", error);
@@ -385,7 +386,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             size="lg"
           >
             {createOrder.isPending ? <Loader2 size={18} className="animate-spin" /> : null}
-            Finalizar Pedido via WhatsApp
+            Finalizar Pedido e Enviar no WhatsApp
           </Button>
         )}
       </div>
