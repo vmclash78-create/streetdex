@@ -17,12 +17,12 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   return (
     <>
       <img
-        src={logoLight}
+        src={`${logoLight}${logoLight.includes('?') ? '&' : '?'}t=${new Date().getTime()}`}
         alt={settings?.store_name || "Street Dex"}
         className={`${imgSize} w-auto object-contain dark:hidden`}
       />
       <img
-        src={logoDark}
+        src={`${logoDark}${logoDark.includes('?') ? '&' : '?'}t=${new Date().getTime()}`}
         alt={settings?.store_name || "Street Dex"}
         className={`${imgSize} w-auto object-contain hidden dark:block ${useFilter ? 'dark-logo-filter' : ''}`}
       />
