@@ -10,15 +10,22 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   // Se não houver logo personalizada, usamos a padrão
   const logoSrc = logoUrl || streetdexLogo;
   
-  // A classe dark-logo-filter (definida no index.css) inverte as cores no modo escuro
-  // se a logo for personalizada. A logo padrão já tem sua própria versão se necessário,
-  // mas aqui simplificamos para usar apenas um campo e adaptar via CSS.
+  // A logo é adaptada para o modo escuro usando filtros CSS
+  // No modo escuro, aplicamos inversão se for a logo padrão (preta)
+  // ou se for uma logo customizada que precise de contraste.
   return (
     <div className="flex items-center">
       <img
         src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
         className={`${imgSize} w-auto object-contain transition-all duration-300 dark:brightness-0 dark:invert`}
+        onError={(e) => {
+          // Fallback caso a imagem customizada falhe
+          const target = e.target as HTMLImageElement;
+          if (target.src !== streetdexLogo) {
+            target.src = streetdexLogo;
+          }
+        }}
       />
     </div>
   );
