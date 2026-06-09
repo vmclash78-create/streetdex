@@ -177,6 +177,20 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     }
   };
 
+  const handleNext = () => {
+    if (step === 1) {
+      if (validateStep1()) setStep(2);
+    } else if (step === 2) {
+      if (validateStep2()) setStep(3);
+    } else if (step === 3) {
+      if (paymentMethod === "pix" && !pixConfirmed) {
+        toast({ title: "Confirmação pendente", description: "Por favor, confirme que realizou o pagamento via PIX.", variant: "warning" as any });
+        return;
+      }
+      setStep(4);
+    }
+  };
+
   const stepLabels = ["Dados", "Endereço", "Pagamento", "Confirmar"];
 
   return (
