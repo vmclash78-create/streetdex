@@ -1457,13 +1457,7 @@ const OrdersAdminView = () => {
 
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
-    const now = new Date();
-    return orders.filter(order => {
-      if (order.status !== "entregue") return true;
-      const deliveredDate = new Date(order.updated_at || order.created_at);
-      const diffDays = (now.getTime() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24);
-      return diffDays <= 2;
-    });
+    return orders.filter(order => order.status !== "entregue");
   }, [orders]);
 
   return (
