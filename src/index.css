@@ -201,7 +201,12 @@
   .font-display {
     font-family: 'Oswald', 'Bebas Neue', ui-sans-serif, sans-serif;
   }
+
+  .neon-text {
+    text-shadow: 0 0 10px hsl(var(--primary-glow) / 0.3);
+  }
 }
+
 
 /* Remove Lovable badge - Estilos para ocultar completamente o elemento e evitar vazamento visual ou de acessibilidade */
 #lovable-badge,
