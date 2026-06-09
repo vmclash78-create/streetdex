@@ -1490,64 +1490,65 @@ const SettingsView = () => {
           <CardTitle>Configurações da Loja</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Seção de Upload de Logo no Topo */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-6 border-b border-border">
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">Logo Modo Claro <div className="w-2 h-2 rounded-full bg-orange-400" /></Label>
-              <div className="flex flex-col gap-3">
-                <div className="aspect-square w-full rounded-lg border border-dashed border-border bg-white flex items-center justify-center overflow-hidden group relative">
-                  {getValue("logo_url") ? (
-                    <img src={getValue("logo_url")} alt="Logo Claro" className="w-4/5 h-4/5 object-contain" />
-                  ) : (
-                    <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
-                      <Upload size={20} />
-                      Sem logo
-                    </div>
-                  )}
-                  {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+          {/* Seção de Upload de Logo Simplificada */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">Logo da Loja</Label>
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Modo Claro</p>
+                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-white flex items-center justify-center overflow-hidden group relative">
+                    {getValue("logo_url") ? (
+                      <img src={getValue("logo_url")} alt="Logo Claro" className="w-4/5 h-4/5 object-contain" />
+                    ) : (
+                      <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
+                        <Upload size={20} />
+                        Sem logo
+                      </div>
+                    )}
+                    {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+                  </div>
                 </div>
-                <Button variant="outline" size="sm" className="relative cursor-pointer" disabled={uploading === "logo_url"}>
+                <div className="space-y-2">
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Modo Escuro</p>
+                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-zinc-900 flex items-center justify-center overflow-hidden group relative">
+                    {getValue("logo_url_dark") ? (
+                      <img src={getValue("logo_url_dark")} alt="Logo Escuro" className="w-4/5 h-4/5 object-contain" />
+                    ) : (
+                      <div className="text-zinc-600 text-xs flex flex-col items-center gap-1">
+                        <Upload size={20} />
+                        Sem logo
+                      </div>
+                    )}
+                    {uploading === "logo_url_dark" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url"}>
                   <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url")} />
-                  {uploading === "logo_url" ? "Enviando..." : "Alterar Logo"}
+                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo (Claro)"}
                 </Button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">Logo Modo Escuro <div className="w-2 h-2 rounded-full bg-zinc-800" /></Label>
-              <div className="flex flex-col gap-3">
-                <div className="aspect-square w-full rounded-lg border border-dashed border-border bg-zinc-900 flex items-center justify-center overflow-hidden group relative">
-                  {getValue("logo_url_dark") ? (
-                    <img src={getValue("logo_url_dark")} alt="Logo Escuro" className="w-4/5 h-4/5 object-contain" />
-                  ) : (
-                    <div className="text-zinc-600 text-xs flex flex-col items-center gap-1">
-                      <Upload size={20} />
-                      Sem logo
-                    </div>
-                  )}
-                  {uploading === "logo_url_dark" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
-                </div>
-                <Button variant="outline" size="sm" className="relative cursor-pointer" disabled={uploading === "logo_url_dark"}>
+                <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url_dark"}>
                   <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url_dark")} />
-                  {uploading === "logo_url_dark" ? "Enviando..." : "Alterar Logo"}
+                  {uploading === "logo_url_dark" ? "Enviando..." : "Subir Logo (Escuro)"}
                 </Button>
               </div>
+              <p className="text-[11px] text-muted-foreground">
+                O site alternará automaticamente entre as logos dependendo do tema do usuário.
+              </p>
             </div>
           </div>
 
           {/* Dados da Loja */}
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4 border-t border-border">
             <div>
               <Label>Nome da Loja</Label>
               <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>WhatsApp Principal (Utilizado globalmente no site)</Label>
+              <Label>WhatsApp Principal</Label>
               <Input value={getValue("whatsapp_store")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_store: e.target.value })} placeholder="Ex: 5585999999999" className="mt-1" />
-            </div>
-            <div>
-              <Label>Texto do Anúncio (topo da loja)</Label>
-              <Input value={getValue("announcement_text")} onChange={(e) => setLocalSettings({ ...localSettings, announcement_text: e.target.value })} className="mt-1" />
             </div>
           </div>
 
@@ -1570,10 +1571,6 @@ const SettingsView = () => {
                 className="mt-1" 
               />
             </div>
-            <div>
-              <Label>Chave/API PIX</Label>
-              <Input value={getValue("pix_api_key")} onChange={(e) => setLocalSettings({ ...localSettings, pix_api_key: e.target.value })} placeholder="Sua chave ou token de API" className="mt-1" />
-            </div>
           </div>
 
           {/* Configurações de Notificação */}
@@ -1585,7 +1582,6 @@ const SettingsView = () => {
                 value={getValue("notification_sound")} 
                 onValueChange={(v) => {
                   setLocalSettings({ ...localSettings, notification_sound: v });
-                  // Test the sound when selected
                   try {
                     const audio = new Audio(v);
                     audio.play().catch(err => console.warn("Could not play sound preview:", err));
@@ -1601,6 +1597,7 @@ const SettingsView = () => {
                   {(() => {
                     try {
                       const sounds = JSON.parse(getValue("notification_sounds") || "[]");
+                      if (sounds.length === 0) throw new Error();
                       return sounds.map((s: any) => (
                         <SelectItem key={s.url} value={s.url}>{s.name}</SelectItem>
                       ));
