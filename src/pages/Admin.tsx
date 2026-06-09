@@ -1400,15 +1400,21 @@ const SettingsView = () => {
           {/* Configurações de Desconto e Pagamento */}
           <div className="space-y-4 pt-4 border-t border-border">
             <h3 className="text-sm font-bold uppercase tracking-wider">Pagamentos e Descontos</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Desconto PIX (%)</Label>
-                <Input type="number" value={getValue("pix_discount")} onChange={(e) => setLocalSettings({ ...localSettings, pix_discount: e.target.value })} className="mt-1" />
-              </div>
-              <div>
-                <Label>Desconto Dinheiro (%)</Label>
-                <Input type="number" value={getValue("cash_discount")} onChange={(e) => setLocalSettings({ ...localSettings, cash_discount: e.target.value })} className="mt-1" />
-              </div>
+            <div>
+              <Label>Desconto para PIX e Dinheiro (%)</Label>
+              <Input 
+                type="number" 
+                value={getValue("pix_discount")} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setLocalSettings({ 
+                    ...localSettings, 
+                    pix_discount: val,
+                    cash_discount: val 
+                  });
+                }} 
+                className="mt-1" 
+              />
             </div>
             <div>
               <Label>Chave/API PIX</Label>
