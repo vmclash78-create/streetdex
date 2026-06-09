@@ -1636,7 +1636,7 @@ const OrdersAdminView = () => {
                 <div className="space-y-2">
                   <Label>Método de Pagamento</Label>
                   <Select 
-                    value={editingOrder.payment_method || ""} 
+                    value={editingOrder.payment_method || PAYMENT_METHODS[0]} 
                     onValueChange={(v) => setEditingOrder({ ...editingOrder, payment_method: v })}
                   >
                     <SelectTrigger><SelectValue placeholder="Selecione o pagamento" /></SelectTrigger>
