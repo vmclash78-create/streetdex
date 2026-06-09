@@ -1459,12 +1459,15 @@ const SettingsView = () => {
     try {
       setUploading(key);
       const fileExt = file.name.split('.').pop();
-      const fileName = `${key}-${Math.random()}.${fileExt}`;
+      const fileName = `logo-${Date.now()}.${fileExt}`;
       const filePath = `logos/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('store-assets')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
