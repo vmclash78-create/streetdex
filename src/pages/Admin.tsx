@@ -1311,8 +1311,12 @@ const SettingsView = () => {
               <Input value={getValue("store_name")} onChange={(e) => setLocalSettings({ ...localSettings, store_name: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>WhatsApp (Ex: 5585999999999)</Label>
+              <Label>WhatsApp de Vendas (Ex: 5585999999999)</Label>
               <Input value={getValue("whatsapp")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <Label>WhatsApp de Suporte/Atendimento</Label>
+              <Input value={getValue("whatsapp_support")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_support: e.target.value })} className="mt-1" />
             </div>
             <div>
               <Label>Texto do Anúncio (topo da loja)</Label>

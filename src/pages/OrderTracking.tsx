@@ -12,7 +12,7 @@ const OrderTracking = () => {
   const { id } = useParams<{ id: string }>();
   const { data: order, isLoading, error } = useOrderById(id);
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp || "5585992783973";
+  const whatsapp = settings?.whatsapp_support || settings?.whatsapp || "5585992783973";
 
   if (isLoading) {
     return (
