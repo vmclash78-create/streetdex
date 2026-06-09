@@ -1506,6 +1506,7 @@ const SettingsView = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
           <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="w-full gap-2 mt-4" size="lg">
             {updateSetting.isPending && <Loader2 size={16} className="animate-spin" />}
