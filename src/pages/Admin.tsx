@@ -167,6 +167,18 @@ const Admin = () => {
   };
 
   const testarNotificacao = () => {
+    // Pedir permissão para notificações do navegador se ainda não tiver
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          toast({
+            title: "Permissão Concedida",
+            description: "Agora você receberá notificações desktop de novos pedidos.",
+          });
+        }
+      });
+    }
+
     if (!somLiberadoRef.current) {
       toast({
         title: "Áudio bloqueado",
@@ -181,6 +193,14 @@ const Admin = () => {
       title: "Teste de Som",
       description: "O sinal sonoro foi enviado. Você ouviu?",
     });
+
+    // Enviar notificação de teste
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Teste de Notificação Street Dex", {
+        body: "As notificações estão funcionando corretamente!",
+        icon: "/favicon.ico"
+      });
+    }
   };
 
   useEffect(() => {
