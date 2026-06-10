@@ -144,20 +144,21 @@ const Admin = () => {
           if (audioPermission || (window as any).audioEnabled) {
             try {
               const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              console.log("Attempting to play sound:", soundUrl);
               
-              if (!audioRef.current) {
-                audioRef.current = new Audio(soundUrl);
-              } else if (audioRef.current.src !== soundUrl) {
-                audioRef.current.src = soundUrl;
+              // We create a new audio object every time to ensure it plays independently
+              const notificationAudio = new Audio(soundUrl);
+              notificationAudio.volume = 1.0;
+              
+              const playPromise = notificationAudio.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                  console.warn("Could not play notification sound:", err);
+                  // If it fails, maybe permission was revoked or lost
+                  setAudioPermission(false);
+                  (window as any).audioEnabled = false;
+                });
               }
-              
-              audioRef.current.currentTime = 0;
-              audioRef.current.play().catch(err => {
-                console.warn("Could not play notification sound:", err);
-                // If it fails, maybe permission was revoked or lost
-                setAudioPermission(false);
-                (window as any).audioEnabled = false;
-              });
             } catch (error) {
               console.error("Error playing notification sound:", error);
             }

@@ -28,6 +28,12 @@ export const validatePhone = (phone: string): { isValid: boolean; error?: string
     return { isValid: false, error: "O número de celular deve começar com o dígito 9 após o DDD." };
   }
 
+  // Common fake patterns (e.g., 99999-9999, 00000-0000, 12345-6789)
+  const numberPart = cleaned.substring(2);
+  if (numberPart === "999999999" || numberPart === "123456789") {
+    return { isValid: false, error: "Por favor, informe um número de telefone real." };
+  }
+
   return { isValid: true };
 };
 

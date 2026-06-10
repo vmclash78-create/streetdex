@@ -105,16 +105,21 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       return false;
     }
 
-    // Se o CEP retornou um logradouro específico, verificamos se ele está contido no que o usuário digitou
+    // Se o CEP retornou um logradouro específico, verificamos se ele existe no que o usuário digitou
     if (officialStreet && officialStreet.trim() !== "") {
-      const typedStreet = address.street.trim().toLowerCase();
-      const official = officialStreet.trim().toLowerCase();
+      const typedStreet = address.street.trim().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove accents
+      const official = officialStreet.trim().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove accents
       
-      // Verificação simples: se o nome oficial não estiver contido no digitado (ou vice-versa)
-      if (!typedStreet.includes(official) && !official.includes(typedStreet)) {
+      // Verificação mais flexível para evitar bloqueios indevidos por abreviações
+      const officialWords = official.split(/\s+/).filter(w => w.length > 2);
+      const isMatch = officialWords.length === 0 || officialWords.some(word => typedStreet.includes(word)) || typedStreet.includes(official) || official.includes(typedStreet);
+
+      if (!isMatch) {
         toast({ 
           title: "Rua divergente", 
-          description: `O CEP informado pertence à rua "${officialStreet}". Por favor, verifique se digitou corretamente.`, 
+          description: `O CEP informado pertence à rua "${officialStreet}". Por favor, verifique se digitou corretamente ou use o endereço sugerido.`, 
           variant: "destructive" 
         });
         return false;
@@ -327,7 +332,16 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             </div>
             <div>
               <Label>WhatsApp (Telefone) *</Label>
-              <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
+              <Input 
+                value={customer.phone} 
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "");
+                  setCustomer({ ...customer, phone: val });
+                }} 
+                placeholder="85999999999" 
+                maxLength={11} 
+                className="mt-1" 
+              />
               <p className="text-[10px] text-muted-foreground mt-1">É neste número que você receberá o comprovante do pedido.</p>
             </div>
 
