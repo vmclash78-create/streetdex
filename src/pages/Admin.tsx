@@ -277,8 +277,9 @@ const DashboardView = () => {
   const totalRevenue = sales?.reduce((s, sale) => s + Number(sale.total), 0) || 0;
   const totalSales = sales?.length || 0;
   const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
-  const totalCost = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
-  const totalExpenses = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const supplierExpenses = expenses?.filter(e => e.category === "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalCost = (saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0) + supplierExpenses;
+  const totalExpenses = (expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0) - supplierExpenses;
   const estimatedProfit = totalRevenue - totalCost - totalExpenses;
 
   const lowStock = products?.filter((p) => (p.stock ?? 0) <= 5 && p.status === "active") || [];
@@ -1262,8 +1263,9 @@ const FinancesView = () => {
   const [filterDateTo, setFilterDateTo] = useState("");
 
   const totalRevenue = sales?.reduce((s, sale) => s + Number(sale.total), 0) || 0;
-  const totalCost = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
-  const totalExp = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const supplierExpenses = expenses?.filter(e => e.category === "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalCost = (saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0) + supplierExpenses;
+  const totalExp = (expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0) - supplierExpenses;
   const netProfit = totalRevenue - totalCost - totalExp;
 
   const filteredSales = useMemo(() => {
