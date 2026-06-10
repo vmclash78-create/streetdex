@@ -42,6 +42,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [step, setStep] = useState<Step>(1);
   const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
   const [address, setAddress] = useState({ cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" });
+  const [officialStreet, setOfficialStreet] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [notes, setNotes] = useState("");
   const [pixConfirmed, setPixConfirmed] = useState(false);
@@ -104,6 +105,22 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       return false;
     }
 
+    // Se o CEP retornou um logradouro específico, verificamos se ele está contido no que o usuário digitou
+    if (officialStreet && officialStreet.trim() !== "") {
+      const typedStreet = address.street.trim().toLowerCase();
+      const official = officialStreet.trim().toLowerCase();
+      
+      // Verificação simples: se o nome oficial não estiver contido no digitado (ou vice-versa)
+      if (!typedStreet.includes(official) && !official.includes(typedStreet)) {
+        toast({ 
+          title: "Rua divergente", 
+          description: `O CEP informado pertence à rua "${officialStreet}". Por favor, verifique se digitou corretamente.`, 
+          variant: "destructive" 
+        });
+        return false;
+      }
+    }
+
     if (!address.number.trim()) {
       toast({ title: "Número faltando", description: "Por favor, informe o número da residência.", variant: "destructive" });
       return false;
@@ -138,6 +155,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         neighborhood: data.bairro || prev.neighborhood,
         city: data.localidade || prev.city
       }));
+      setOfficialStreet(data.logradouro || null);
 
       toast({
         title: "CEP localizado",

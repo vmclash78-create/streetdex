@@ -77,24 +77,29 @@ const Admin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [audioPermission, setAudioPermission] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastOrderRef = useRef<string | null>(null);
 
   const { data: settings } = useStoreSettings();
 
   useEffect(() => {
-    // Check if we already have permission from session
-    if (typeof window !== "undefined" && (window as any).audioEnabled) {
+    // Check if we already have permission from session or localStorage
+    const savedPermission = localStorage.getItem("audio_notifications_enabled") === "true";
+    if (typeof window !== "undefined" && ((window as any).audioEnabled || savedPermission)) {
       setAudioPermission(true);
+      (window as any).audioEnabled = true;
     }
   }, []);
 
   const enableNotifications = () => {
     // Browser requires user interaction to play audio
+    // We create a silent audio and play it to unlock audio capabilities
     const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
     silentAudio.play()
       .then(() => {
         setAudioPermission(true);
         (window as any).audioEnabled = true;
+        localStorage.setItem("audio_notifications_enabled", "true");
         toast({
           title: "Notificações ativadas! 🔊",
           description: "Você ouvirá um som quando novos pedidos chegarem.",
@@ -104,7 +109,7 @@ const Admin = () => {
         console.error("Erro ao ativar som:", err);
         toast({
           title: "Erro",
-          description: "Não foi possível ativar as notificações sonoras.",
+          description: "Não foi possível ativar as notificações sonoras. Tente clicar em qualquer lugar da página primeiro.",
           variant: "destructive"
         });
       });
@@ -139,8 +144,20 @@ const Admin = () => {
           if (audioPermission || (window as any).audioEnabled) {
             try {
               const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
-              const audio = new Audio(soundUrl);
-              audio.play().catch(err => console.warn("Could not play notification sound:", err));
+              
+              if (!audioRef.current) {
+                audioRef.current = new Audio(soundUrl);
+              } else if (audioRef.current.src !== soundUrl) {
+                audioRef.current.src = soundUrl;
+              }
+              
+              audioRef.current.currentTime = 0;
+              audioRef.current.play().catch(err => {
+                console.warn("Could not play notification sound:", err);
+                // If it fails, maybe permission was revoked or lost
+                setAudioPermission(false);
+                (window as any).audioEnabled = false;
+              });
             } catch (error) {
               console.error("Error playing notification sound:", error);
             }
