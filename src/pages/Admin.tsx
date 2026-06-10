@@ -1782,7 +1782,7 @@ const SettingsView = () => {
 };
 
 // ─── ORDERS ADMIN ───
-const OrdersAdminView = () => {
+const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: boolean; testarNotificacao: () => void }) => {
   const { data: orders, isLoading } = useOrders();
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
