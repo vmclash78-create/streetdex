@@ -207,8 +207,21 @@ const Admin = () => {
           toast({
             title: "🔔 NOVO PEDIDO RECEBIDO!",
             description: `Pedido #${payload.new.order_number} - ${formatPrice(payload.new.total)}`,
-            duration: 10000, // 10 segundos para dar tempo de ver
+            duration: 10000,
           });
+
+          // Notificação Desktop (Browser)
+          if ("Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification("🔔 Novo Pedido Street Dex!", {
+                body: `Pedido #${payload.new.order_number} - ${formatPrice(payload.new.total)}`,
+                tag: 'new-order', // Evita múltiplas notificações iguais se houver spam
+                requireInteraction: true // Mantém a notificação visível até o usuário interagir
+              });
+            } catch (err) {
+              console.error("Erro ao disparar notificação desktop:", err);
+            }
+          }
 
           tocarSomPedido();
 
