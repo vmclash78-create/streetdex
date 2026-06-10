@@ -88,7 +88,7 @@ export const useOrderById = (orderId?: string) => {
         .rpc("get_order_for_tracking", { p_order_id: orderId! })
         .maybeSingle();
       if (error) throw error;
-      return data as (DBOrder & { order_items: DBOrderItem[] }) | null;
+      return data as unknown as (DBOrder & { order_items: DBOrderItem[] }) | null;
     },
   });
 };
