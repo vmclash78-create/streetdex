@@ -277,8 +277,9 @@ const DashboardView = () => {
   const totalRevenue = sales?.reduce((s, sale) => s + Number(sale.total), 0) || 0;
   const totalSales = sales?.length || 0;
   const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
-  const totalCost = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
-  const totalExpenses = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const supplierExpenses = expenses?.filter(e => e.category === "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalCost = (saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0) + supplierExpenses;
+  const totalExpenses = (expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0) - supplierExpenses;
   const estimatedProfit = totalRevenue - totalCost - totalExpenses;
 
   const lowStock = products?.filter((p) => (p.stock ?? 0) <= 5 && p.status === "active") || [];
@@ -1262,8 +1263,9 @@ const FinancesView = () => {
   const [filterDateTo, setFilterDateTo] = useState("");
 
   const totalRevenue = sales?.reduce((s, sale) => s + Number(sale.total), 0) || 0;
-  const totalCost = saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0;
-  const totalExp = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const supplierExpenses = expenses?.filter(e => e.category === "Fornecedores").reduce((s, e) => s + Number(e.amount), 0) || 0;
+  const totalCost = (saleItems?.reduce((s, item) => s + Number(item.unit_cost) * item.quantity, 0) || 0) + supplierExpenses;
+  const totalExp = (expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0) - supplierExpenses;
   const netProfit = totalRevenue - totalCost - totalExp;
 
   const filteredSales = useMemo(() => {
@@ -1279,7 +1281,13 @@ const FinancesView = () => {
     if (!sales || !expenses) return [];
     const months: Record<string, { receita: number; despesa: number }> = {};
     sales.forEach((s) => { const key = s.sale_date.substring(0, 7); if (!months[key]) months[key] = { receita: 0, despesa: 0 }; months[key].receita += Number(s.total); });
-    expenses.forEach((e) => { const key = e.expense_date.substring(0, 7); if (!months[key]) months[key] = { receita: 0, despesa: 0 }; months[key].despesa += Number(e.amount); });
+    expenses.forEach((e) => { 
+      const key = e.expense_date.substring(0, 7); 
+      if (!months[key]) months[key] = { receita: 0, despesa: 0 }; 
+      if (e.category !== "Fornecedores") {
+        months[key].despesa += Number(e.amount); 
+      }
+    });
     return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12)
       .map(([month, data]) => ({ month: new Date(month + "-15").toLocaleDateString("pt-BR", { month: "short" }), ...data }));
   }, [sales, expenses]);
