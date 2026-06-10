@@ -327,7 +327,16 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             </div>
             <div>
               <Label>WhatsApp (Telefone) *</Label>
-              <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/[^0-9]/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
+              <Input 
+                value={customer.phone} 
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "");
+                  setCustomer({ ...customer, phone: val });
+                }} 
+                placeholder="85999999999" 
+                maxLength={11} 
+                className="mt-1" 
+              />
               <p className="text-[10px] text-muted-foreground mt-1">É neste número que você receberá o comprovante do pedido.</p>
             </div>
 
