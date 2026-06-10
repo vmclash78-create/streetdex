@@ -76,71 +76,74 @@ const Admin = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [audioPermission, setAudioPermission] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [somLiberado, setSomLiberado] = useState(false);
+  const audioPedidoRef = useRef<HTMLAudioElement | null>(null);
   const lastOrderRef = useRef<string | null>(null);
 
   const { data: settings } = useStoreSettings();
 
   useEffect(() => {
-    const unlockAudio = () => {
-      const audio = document.getElementById("somPedido") as HTMLAudioElement;
-      if (audio) {
-        audio.volume = 0;
-        audio.play()
-          .then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.volume = 1;
-            setAudioPermission(true);
-            (window as any).audioEnabled = true;
-            localStorage.setItem("audio_notifications_enabled", "true");
-            console.log("Áudio liberado pelo clique do usuário");
-          })
-          .catch(err => {
-            console.log("Erro ao liberar áudio:", err);
-          });
+    const liberarAudio = async () => {
+      try {
+        const audio = new Audio("/sons/notificacao.mp3");
+        audio.volume = 1;
+        
+        // Tenta tocar e pausar imediatamente para "desbloquear"
+        await audio.play();
+        audio.pause();
+        audio.currentTime = 0;
+        
+        audioPedidoRef.current = audio;
+        setSomLiberado(true);
+        console.log("Som liberado pelo clique do usuário");
+      } catch (erro) {
+        console.log("Erro ao liberar som:", erro);
       }
     };
 
-    // Use multiple interaction events for better coverage
-    document.addEventListener("click", unlockAudio, { once: true });
-    document.addEventListener("keydown", unlockAudio, { once: true });
-    document.addEventListener("touchstart", unlockAudio, { once: true });
-    
-    // Check if we already have permission from localStorage (visual state only)
-    if (localStorage.getItem("audio_notifications_enabled") === "true") {
-      setAudioPermission(true);
-      (window as any).audioEnabled = true;
-    }
+    const handleFirstClick = () => {
+      liberarAudio();
+      document.removeEventListener("click", handleFirstClick);
+    };
 
+    document.addEventListener("click", handleFirstClick);
+    
     return () => {
-      document.removeEventListener("click", unlockAudio);
-      document.removeEventListener("keydown", unlockAudio);
-      document.removeEventListener("touchstart", unlockAudio);
+      document.removeEventListener("click", handleFirstClick);
     };
   }, []);
 
   const tocarSomPedido = () => {
-    const audio = document.getElementById("somPedido") as HTMLAudioElement;
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(err => {
-        console.log("Navegador bloqueou a reprodução:", err);
-      });
+    if (!somLiberado || !audioPedidoRef.current) {
+      console.log("Usuário ainda não clicou ou som não liberado");
+      return;
     }
+
+    const audio = audioPedidoRef.current;
+    audio.currentTime = 0;
+    audio.play()
+      .then(() => {
+        console.log("Som tocando");
+      })
+      .catch(err => {
+        console.log("Erro ao tocar:", err);
+      });
   };
 
-  const enableNotifications = () => {
-    tocarSomPedido();
-    if (!audioPermission) {
-      setAudioPermission(true);
-      (window as any).audioEnabled = true;
-      localStorage.setItem("audio_notifications_enabled", "true");
+  const testarNotificacao = () => {
+    if (!somLiberado) {
+      toast({
+        title: "Atenção",
+        description: "Por favor, clique em qualquer lugar da página primeiro para liberar o áudio.",
+        variant: "destructive"
+      });
+      return;
     }
+    
+    tocarSomPedido();
     toast({
-      title: "Notificações ativadas! 🔊",
-      description: "O som foi testado e as notificações estão prontas.",
+      title: "Teste de Som",
+      description: "Se você ouviu o som, as notificações estão funcionando!",
     });
   };
 
