@@ -1891,6 +1891,17 @@ const OrdersAdminView = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
+        <div className="flex items-center gap-2">
+          {!somLiberado && (
+            <Badge variant="outline" className="text-[10px] py-0 px-1 border-yellow-500/50 text-yellow-500/80 animate-pulse">
+              Aguardando interação para ativar áudio
+            </Badge>
+          )}
+          <Button variant="outline" size="sm" onClick={testarNotificacao} className="gap-2 h-8 text-xs">
+            <Volume2 size={14} />
+            Testar Alerta
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6 bg-card p-4 rounded-lg border border-border shadow-sm">
