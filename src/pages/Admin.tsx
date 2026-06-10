@@ -121,19 +121,36 @@ const Admin = () => {
       liberarAudio();
       
       // Pedir permissão para notificações do navegador
-      if ("Notification" in window && Notification.permission !== "granted") {
+      if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission().then(permission => {
-          console.log("Permissão de notificação:", permission);
+          console.log("Permissão de notificação solicitada:", permission);
+          if (permission === "granted") {
+            toast({
+              title: "Notificações Ativadas",
+              description: "Você receberá avisos sonoros e visuais de novos pedidos.",
+            });
+          }
         });
       }
       
       document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("keydown", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
     };
 
     document.addEventListener("click", handleInteraction);
+    document.addEventListener("keydown", handleInteraction);
+    document.addEventListener("touchstart", handleInteraction);
     
+    // Tenta pedir permissão imediatamente (pode ser bloqueado pelo browser sem interação)
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+
     return () => {
       document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("keydown", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
     };
   }, []);
 
