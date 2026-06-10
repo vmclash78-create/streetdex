@@ -101,7 +101,6 @@ const Admin = () => {
       
       try {
         console.log("Tentando desbloquear áudio...");
-        // Alguns navegadores exigem que o áudio seja tocado em resposta a um clique
         audioPedidoRef.current.muted = true;
         await audioPedidoRef.current.play();
         audioPedidoRef.current.pause();
@@ -117,38 +116,37 @@ const Admin = () => {
     };
 
     const handleInteraction = () => {
-      console.log("Interação detectada, liberando recursos...");
       liberarAudio();
       
-      // Pedir permissão para notificações do navegador
+      // Pedir permissão para notificações
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission().then(permission => {
-          console.log("Permissão de notificação solicitada:", permission);
           if (permission === "granted") {
             toast({
               title: "Notificações Ativadas",
-              description: "Você receberá avisos sonoros e visuais de novos pedidos.",
+              description: "Você receberá alertas sonoros e visuais de novos pedidos.",
             });
           }
         });
       }
       
-      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("mousedown", handleInteraction);
       document.removeEventListener("keydown", handleInteraction);
       document.removeEventListener("touchstart", handleInteraction);
     };
 
-    document.addEventListener("click", handleInteraction);
+    // Registrar ouvintes para capturar a primeira interação real
+    document.addEventListener("mousedown", handleInteraction);
     document.addEventListener("keydown", handleInteraction);
     document.addEventListener("touchstart", handleInteraction);
     
-    // Tenta pedir permissão imediatamente (pode ser bloqueado pelo browser sem interação)
+    // Tentar pedir permissão imediatamente ao carregar
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
 
     return () => {
-      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("mousedown", handleInteraction);
       document.removeEventListener("keydown", handleInteraction);
       document.removeEventListener("touchstart", handleInteraction);
     };
