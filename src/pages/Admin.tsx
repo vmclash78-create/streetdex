@@ -343,7 +343,7 @@ const Admin = () => {
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
           {view === "banners" && <BannersView />}
-          {view === "orders" && <OrdersAdminView />}
+          {view === "orders" && <OrdersAdminView somLiberado={somLiberado} testarNotificacao={testarNotificacao} />}
           {view === "sales" && <SalesView />}
           {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
