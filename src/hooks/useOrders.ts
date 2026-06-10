@@ -145,8 +145,13 @@ export const useCreateOrder = () => {
         p_notes: payload.order.notes || "",
         p_items: payload.items,
       });
+
       if (error) throw error;
-      const result = data as unknown as { id: string; order_number: number };
+      
+      const result = Array.isArray(data) ? data[0] : data;
+      if (!result || !result.id) {
+        throw new Error("Erro ao processar o pedido no servidor: Retorno inválido.");
+      }
       return { id: result.id, order_number: result.order_number } as DBOrder;
     },
     onSuccess: () => {
