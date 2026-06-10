@@ -85,7 +85,7 @@ const Admin = () => {
   useEffect(() => {
     // Check if we already have permission from session or localStorage
     const savedPermission = localStorage.getItem("audio_notifications_enabled") === "true";
-    if (typeof window !== "undefined" && ((window as any).audioEnabled || savedPermission)) {
+    if (savedPermission) {
       setAudioPermission(true);
       (window as any).audioEnabled = true;
     }
