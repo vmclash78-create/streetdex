@@ -117,8 +117,16 @@ const Admin = () => {
     };
 
     const handleInteraction = () => {
+      console.log("Interação detectada, liberando recursos...");
       liberarAudio();
-      // Removemos o listener após o primeiro clique bem-sucedido (ou tentativa)
+      
+      // Pedir permissão para notificações do navegador
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+          console.log("Permissão de notificação:", permission);
+        });
+      }
+      
       document.removeEventListener("click", handleInteraction);
     };
 
@@ -159,6 +167,18 @@ const Admin = () => {
   };
 
   const testarNotificacao = () => {
+    // Pedir permissão para notificações do navegador se ainda não tiver
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          toast({
+            title: "Permissão Concedida",
+            description: "Agora você receberá notificações desktop de novos pedidos.",
+          });
+        }
+      });
+    }
+
     if (!somLiberadoRef.current) {
       toast({
         title: "Áudio bloqueado",
@@ -173,6 +193,14 @@ const Admin = () => {
       title: "Teste de Som",
       description: "O sinal sonoro foi enviado. Você ouviu?",
     });
+
+    // Enviar notificação de teste
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Teste de Notificação Street Dex", {
+        body: "As notificações estão funcionando corretamente!",
+        icon: "/favicon.ico"
+      });
+    }
   };
 
   useEffect(() => {
@@ -199,8 +227,21 @@ const Admin = () => {
           toast({
             title: "🔔 NOVO PEDIDO RECEBIDO!",
             description: `Pedido #${payload.new.order_number} - ${formatPrice(payload.new.total)}`,
-            duration: 10000, // 10 segundos para dar tempo de ver
+            duration: 10000,
           });
+
+          // Notificação Desktop (Browser)
+          if ("Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification("🔔 Novo Pedido Street Dex!", {
+                body: `Pedido #${payload.new.order_number} - ${formatPrice(payload.new.total)}`,
+                tag: 'new-order', // Evita múltiplas notificações iguais se houver spam
+                requireInteraction: true // Mantém a notificação visível até o usuário interagir
+              });
+            } catch (err) {
+              console.error("Erro ao disparar notificação desktop:", err);
+            }
+          }
 
           tocarSomPedido();
 
