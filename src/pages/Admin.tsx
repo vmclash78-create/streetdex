@@ -117,6 +117,17 @@ const Admin = () => {
 
   useEffect(() => {
     console.log("Setting up real-time order notifications...");
+    
+    // Test if audio is pre-loadable
+    if (audioPermission) {
+      const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+      const testAudio = new Audio(soundUrl);
+      testAudio.volume = 0;
+      testAudio.play().then(() => {
+        console.log("Audio system warmed up");
+      }).catch(e => console.log("Audio warm up suppressed:", e.message));
+    }
+
     const channel = supabase
       .channel('admin-order-notifications')
       .on(
@@ -126,49 +137,49 @@ const Admin = () => {
           schema: 'public',
           table: 'orders',
         },
-        (payload) => {
+        async (payload) => {
           console.log('New order detected via real-time:', payload);
           
-          // Avoid duplicate triggers for the same order if subscription resets
           if (lastOrderRef.current === payload.new.id) return;
           lastOrderRef.current = payload.new.id;
 
-          // Show toast notification
           toast({
             title: "Novo Pedido Recebido! 🔔",
             description: `O pedido #${payload.new.order_number} acaba de ser realizado.`,
             variant: "default",
           });
 
-          // Play notification sound
           const isAudioEnabled = audioPermission || (window as any).audioEnabled || localStorage.getItem("audio_notifications_enabled") === "true";
           
           if (isAudioEnabled) {
             try {
-              // Ensure we have the latest settings for the sound URL
-              const currentSettings = queryClient.getQueryData<any>(["store-settings"]);
-              const soundUrl = currentSettings?.notification_sound || settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              // Get fresh settings just in case
+              const { data: latestSettings } = await supabase
+                .from('store_settings')
+                .select('value')
+                .eq('key', 'notification_sound')
+                .maybeSingle();
+
+              const soundUrl = latestSettings?.value || settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
               
-              console.log("Attempting to play sound:", soundUrl);
+              console.log("Playing notification sound:", soundUrl);
               
               const notificationAudio = new Audio(soundUrl);
               notificationAudio.volume = 1.0;
-              notificationAudio.crossOrigin = "anonymous"; // Try to avoid some CORS issues if relevant
+              notificationAudio.crossOrigin = "anonymous";
               
               const playPromise = notificationAudio.play();
               if (playPromise !== undefined) {
                 playPromise.catch(err => {
-                  console.warn("Could not play notification sound (browser restriction):", err);
-                  // Don't auto-reset permission here as it might be a transient error
-                  // but we should inform the user if possible or try again on next interaction
+                  console.error("Playback failed:", err);
+                  // If playback fails even with permission, maybe try a shorter/different sound or alert user
                 });
               }
             } catch (error) {
-              console.error("Error playing notification sound:", error);
+              console.error("Error in audio playback logic:", error);
             }
           }
 
-          // Refresh the orders data
           queryClient.invalidateQueries({ queryKey: ["orders"] });
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
         }
