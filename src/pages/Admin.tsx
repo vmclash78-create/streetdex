@@ -174,7 +174,8 @@ const Admin = () => {
           
           if (isAudioEnabled) {
             try {
-              // Get fresh settings just in case
+              // Get FRESH sound URL directly from store_settings table using common JS client
+              // (settings from hook might be stale or missing during the event)
               const { data: latestSettings } = await supabase
                 .from('store_settings')
                 .select('value')
@@ -183,17 +184,21 @@ const Admin = () => {
 
               const soundUrl = latestSettings?.value || settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
               
-              console.log("Playing notification sound:", soundUrl);
+              console.log("Attempting to play sound:", soundUrl);
               
               const notificationAudio = new Audio(soundUrl);
               notificationAudio.volume = 1.0;
               notificationAudio.crossOrigin = "anonymous";
               
-              const playPromise = notificationAudio.play();
-              if (playPromise !== undefined) {
-                playPromise.catch(err => {
-                  console.error("Playback failed:", err);
-                  // If playback fails even with permission, maybe try a shorter/different sound or alert user
+              // Key: Browsers often need a clean trigger
+              const playResult = notificationAudio.play();
+              if (playResult !== undefined) {
+                playResult.catch(err => {
+                  console.error("Auto-play blocked or failed:", err);
+                  // Retry once if it was a permission issue that might have been solved
+                  setTimeout(() => {
+                    notificationAudio.play().catch(e => console.error("Retry failed:", e));
+                  }, 1000);
                 });
               }
             } catch (error) {
@@ -205,11 +210,13 @@ const Admin = () => {
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
         }
       )
-      .subscribe((status) => {
+      .subscribe((status, err) => {
         console.log("Supabase real-time status:", status);
+        if (err) console.error("Real-time subscription error:", err);
       });
 
     return () => {
+      console.log("Cleaning up real-time channel");
       supabase.removeChannel(channel);
     };
   }, [toast, queryClient, settings?.notification_sound, audioPermission]);
