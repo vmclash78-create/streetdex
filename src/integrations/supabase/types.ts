@@ -250,6 +250,35 @@ export type Database = {
           },
         ]
       }
+      product_costs: {
+        Row: {
+          cost: number | null
+          created_at: string | null
+          product_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string | null
+          product_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string | null
+          product_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_costs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string | null
@@ -514,6 +543,25 @@ export type Database = {
           p_total?: number
         }
         Returns: Json
+      }
+      get_order_for_tracking: {
+        Args: { p_order_id: string }
+        Returns: {
+          address_cep: string
+          address_city: string
+          address_complement: string
+          address_neighborhood: string
+          address_number: string
+          address_street: string
+          created_at: string
+          id: string
+          notes: string
+          order_items: Json
+          order_number: string
+          payment_method: string
+          status: string
+          total: number
+        }[]
       }
       has_role: {
         Args: {
