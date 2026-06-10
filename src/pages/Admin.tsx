@@ -115,22 +115,24 @@ const Admin = () => {
   }, [audioPermission]);
 
   const enableNotifications = () => {
-    const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
-    silentAudio.play()
+    const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
+    const notificationAudio = new Audio(soundUrl);
+    notificationAudio.volume = 0.5;
+    notificationAudio.play()
       .then(() => {
         setAudioPermission(true);
         (window as any).audioEnabled = true;
         localStorage.setItem("audio_notifications_enabled", "true");
         toast({
           title: "Notificações ativadas! 🔊",
-          description: "Você ouvirá um som quando novos pedidos chegarem.",
+          description: "O som de teste foi reproduzido e as notificações estão prontas.",
         });
       })
       .catch(err => {
         console.error("Erro ao ativar som:", err);
         toast({
-          title: "Erro",
-          description: "Não foi possível ativar as notificações sonoras. Tente clicar em qualquer lugar da página primeiro.",
+          title: "Atenção",
+          description: "O navegador bloqueou o áudio. Clique em qualquer lugar da página e tente novamente.",
           variant: "destructive"
         });
       });
@@ -141,11 +143,11 @@ const Admin = () => {
     
     // Test if audio is pre-loadable
     if (audioPermission) {
-      const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+      const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
       const testAudio = new Audio(soundUrl);
       testAudio.volume = 0;
       testAudio.play().then(() => {
-        console.log("Audio system warmed up");
+        console.log("Audio system warmed up with:", soundUrl);
       }).catch(e => console.log("Audio warm up suppressed:", e.message));
     }
 
@@ -182,7 +184,7 @@ const Admin = () => {
                 .eq('key', 'notification_sound')
                 .maybeSingle();
 
-              const soundUrl = latestSettings?.value || settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              const soundUrl = latestSettings?.value || settings?.notification_sound || '/sons/notificacao.mp3';
               
               console.log("Attempting to play sound:", soundUrl);
               
@@ -191,14 +193,17 @@ const Admin = () => {
               notificationAudio.crossOrigin = "anonymous";
               
               // Key: Browsers often need a clean trigger
+              notificationAudio.currentTime = 0;
               const playResult = notificationAudio.play();
               if (playResult !== undefined) {
                 playResult.catch(err => {
                   console.error("Auto-play blocked or failed:", err);
-                  // Retry once if it was a permission issue that might have been solved
-                  setTimeout(() => {
-                    notificationAudio.play().catch(e => console.error("Retry failed:", e));
-                  }, 1000);
+                  // Retry with interaction unlock if needed
+                  const retryOnInteraction = () => {
+                    notificationAudio.play();
+                    document.removeEventListener('click', retryOnInteraction);
+                  };
+                  document.addEventListener('click', retryOnInteraction);
                 });
               }
             } catch (error) {
@@ -281,16 +286,15 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            {!audioPermission && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2 border-yellow-500/50 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10"
-                onClick={enableNotifications}
-              >
-                <Volume2 size={16} /> Ativar Som
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={`gap-2 ${!audioPermission ? "border-yellow-500/50 text-yellow-600 dark:text-yellow-400 animate-pulse" : "text-muted-foreground"}`}
+              onClick={enableNotifications}
+            >
+              <Volume2 size={16} /> 
+              {audioPermission ? "Som Ativo" : "Ativar Som"}
+            </Button>
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
           </div>
