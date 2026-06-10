@@ -11,21 +11,21 @@ export const validatePhone = (phone: string): { isValid: boolean; error?: string
   const cleaned = phone.replace(/\D/g, "");
   
   if (cleaned.length !== 11) {
-    return { isValid: false, error: "O número deve ter 11 dígitos (DDD + 9 dígitos)." };
+    return { isValid: false, error: "O número deve ter 11 dígitos: 2 do DDD + o 9 + 8 do telefone." };
   }
 
   // Check for invalid repeating digits
   if (/^(\d)\1+$/.test(cleaned)) {
-    return { isValid: false, error: "Número de telefone inválido." };
+    return { isValid: false, error: "Número de telefone inválido (digitos repetidos)." };
   }
 
   const ddd = cleaned.substring(0, 2);
   if (!BRAZIL_DDDS.includes(ddd)) {
-    return { isValid: false, error: "DDD inválido." };
+    return { isValid: false, error: "DDD inválido. Verifique os dois primeiros dígitos." };
   }
 
   if (cleaned[2] !== "9") {
-    return { isValid: false, error: "O número de celular deve começar com 9." };
+    return { isValid: false, error: "O número de celular deve começar com o dígito 9 após o DDD." };
   }
 
   return { isValid: true };
