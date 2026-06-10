@@ -130,27 +130,39 @@ const Admin = () => {
   }, []);
 
   const tocarSomPedido = () => {
-    if (!somLiberado || !audioPedidoRef.current) {
-      console.log("Usuário ainda não clicou ou som não liberado");
+    console.log("Chamando tocarSomPedido. somLiberadoRef:", somLiberadoRef.current);
+    
+    if (!audioPedidoRef.current) {
+      console.log("Erro: Objeto de áudio não inicializado");
+      return;
+    }
+
+    if (!somLiberadoRef.current) {
+      console.log("Aviso: Áudio ainda não foi liberado pelo usuário");
       return;
     }
 
     const audio = audioPedidoRef.current;
     audio.currentTime = 0;
+    audio.volume = 1;
+    
     audio.play()
       .then(() => {
-        console.log("Som tocando");
+        console.log("Som de novo pedido reproduzido com sucesso");
       })
       .catch(err => {
-        console.log("Erro ao tocar:", err);
+        console.log("Erro crítico ao reproduzir som:", err);
+        // Tenta re-desbloquear se falhar
+        setSomLiberado(false);
+        somLiberadoRef.current = false;
       });
   };
 
   const testarNotificacao = () => {
-    if (!somLiberado) {
+    if (!somLiberadoRef.current) {
       toast({
-        title: "Atenção",
-        description: "Por favor, clique em qualquer lugar da página primeiro para liberar o áudio.",
+        title: "Áudio bloqueado",
+        description: "Por favor, clique em 'Clique para Ativar Som' no topo ou em qualquer lugar da tela.",
         variant: "destructive"
       });
       return;
@@ -159,15 +171,15 @@ const Admin = () => {
     tocarSomPedido();
     toast({
       title: "Teste de Som",
-      description: "Se você ouviu o som, as notificações estão funcionando!",
+      description: "O sinal sonoro foi enviado. Você ouviu?",
     });
   };
 
   useEffect(() => {
-    console.log("Iniciando monitoramento de novos pedidos...");
+    console.log("Configurando canal de notificações de pedidos...");
     
     const channel = supabase
-      .channel('admin-order-notifications')
+      .channel('admin-order-notifications-v2')
       .on(
         'postgres_changes',
         {
@@ -176,30 +188,35 @@ const Admin = () => {
           table: 'orders',
         },
         async (payload) => {
-          console.log('Novo pedido detectado:', payload);
+          console.log('RECEBIDO: Novo pedido no banco de dados:', payload);
           
-          if (lastOrderRef.current === payload.new.id) return;
+          if (lastOrderRef.current === payload.new.id) {
+            console.log('Ignorando notificação duplicada para o ID:', payload.new.id);
+            return;
+          }
           lastOrderRef.current = payload.new.id;
 
           toast({
-            title: "Novo Pedido Recebido! 🔔",
-            description: `O pedido #${payload.new.order_number} acaba de ser realizado.`,
-            variant: "default",
+            title: "🔔 NOVO PEDIDO RECEBIDO!",
+            description: `Pedido #${payload.new.order_number} - ${formatPrice(payload.new.total)}`,
+            duration: 10000, // 10 segundos para dar tempo de ver
           });
 
-          // Tocar som de notificação
           tocarSomPedido();
 
           queryClient.invalidateQueries({ queryKey: ["orders"] });
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Status da conexão Realtime:", status);
+      });
 
     return () => {
+      console.log("Removendo canal de notificações");
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient, somLiberado]);
+  }, [toast, queryClient]); // Removi somLiberado das dependências para evitar re-subscribe desnecessário
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
