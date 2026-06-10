@@ -334,6 +334,11 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
+            {!somLiberado && (
+              <Badge variant="outline" className="hidden sm:flex text-[10px] py-0 px-1.5 h-6 border-yellow-500/50 text-yellow-500/80 animate-pulse bg-yellow-500/5">
+                Áudio aguardando clique
+              </Badge>
+            )}
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
           </div>
