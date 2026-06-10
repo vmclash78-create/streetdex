@@ -115,22 +115,24 @@ const Admin = () => {
   }, [audioPermission]);
 
   const enableNotifications = () => {
-    const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
-    silentAudio.play()
+    const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
+    const notificationAudio = new Audio(soundUrl);
+    notificationAudio.volume = 0.5;
+    notificationAudio.play()
       .then(() => {
         setAudioPermission(true);
         (window as any).audioEnabled = true;
         localStorage.setItem("audio_notifications_enabled", "true");
         toast({
           title: "Notificações ativadas! 🔊",
-          description: "Você ouvirá um som quando novos pedidos chegarem.",
+          description: "O som de teste foi reproduzido e as notificações estão prontas.",
         });
       })
       .catch(err => {
         console.error("Erro ao ativar som:", err);
         toast({
-          title: "Erro",
-          description: "Não foi possível ativar as notificações sonoras. Tente clicar em qualquer lugar da página primeiro.",
+          title: "Atenção",
+          description: "O navegador bloqueou o áudio. Clique em qualquer lugar da página e tente novamente.",
           variant: "destructive"
         });
       });
