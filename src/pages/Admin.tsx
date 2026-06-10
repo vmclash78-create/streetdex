@@ -141,11 +141,11 @@ const Admin = () => {
     
     // Test if audio is pre-loadable
     if (audioPermission) {
-      const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+      const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
       const testAudio = new Audio(soundUrl);
       testAudio.volume = 0;
       testAudio.play().then(() => {
-        console.log("Audio system warmed up");
+        console.log("Audio system warmed up with:", soundUrl);
       }).catch(e => console.log("Audio warm up suppressed:", e.message));
     }
 
@@ -182,7 +182,7 @@ const Admin = () => {
                 .eq('key', 'notification_sound')
                 .maybeSingle();
 
-              const soundUrl = latestSettings?.value || settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              const soundUrl = latestSettings?.value || settings?.notification_sound || '/sons/notificacao.mp3';
               
               console.log("Attempting to play sound:", soundUrl);
               
