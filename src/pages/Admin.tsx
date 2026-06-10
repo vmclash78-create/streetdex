@@ -183,7 +183,7 @@ const Admin = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient, audioPermission]);
+  }, [toast, queryClient, somLiberado]);
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
@@ -248,11 +248,11 @@ const Admin = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className={`gap-2 ${!audioPermission ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "text-muted-foreground"}`}
-              onClick={enableNotifications}
+              className={`gap-2 ${!somLiberado ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "text-muted-foreground"}`}
+              onClick={testarNotificacao}
             >
               <Volume2 size={16} /> 
-              {audioPermission ? "Som Ativo" : "Clique para Ativar Som"}
+              {somLiberado ? "Som Ativo" : "Clique para Ativar Som"}
             </Button>
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
