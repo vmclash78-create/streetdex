@@ -241,7 +241,7 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            {!audioPermission && !(window as any).audioEnabled && (
+            {!audioPermission && (
               <Button 
                 variant="outline" 
                 size="sm" 
