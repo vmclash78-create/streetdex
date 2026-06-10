@@ -101,7 +101,6 @@ const Admin = () => {
       
       try {
         console.log("Tentando desbloquear áudio...");
-        // Alguns navegadores exigem que o áudio seja tocado em resposta a um clique
         audioPedidoRef.current.muted = true;
         await audioPedidoRef.current.play();
         audioPedidoRef.current.pause();
@@ -117,38 +116,37 @@ const Admin = () => {
     };
 
     const handleInteraction = () => {
-      console.log("Interação detectada, liberando recursos...");
       liberarAudio();
       
-      // Pedir permissão para notificações do navegador
+      // Pedir permissão para notificações
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission().then(permission => {
-          console.log("Permissão de notificação solicitada:", permission);
           if (permission === "granted") {
             toast({
               title: "Notificações Ativadas",
-              description: "Você receberá avisos sonoros e visuais de novos pedidos.",
+              description: "Você receberá alertas sonoros e visuais de novos pedidos.",
             });
           }
         });
       }
       
-      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("mousedown", handleInteraction);
       document.removeEventListener("keydown", handleInteraction);
       document.removeEventListener("touchstart", handleInteraction);
     };
 
-    document.addEventListener("click", handleInteraction);
+    // Registrar ouvintes para capturar a primeira interação real
+    document.addEventListener("mousedown", handleInteraction);
     document.addEventListener("keydown", handleInteraction);
     document.addEventListener("touchstart", handleInteraction);
     
-    // Tenta pedir permissão imediatamente (pode ser bloqueado pelo browser sem interação)
+    // Tentar pedir permissão imediatamente ao carregar
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
 
     return () => {
-      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("mousedown", handleInteraction);
       document.removeEventListener("keydown", handleInteraction);
       document.removeEventListener("touchstart", handleInteraction);
     };
@@ -336,6 +334,11 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
+            {!somLiberado && (
+              <Badge variant="outline" className="hidden sm:flex text-[10px] py-0 px-1.5 h-6 border-yellow-500/50 text-yellow-500/80 animate-pulse bg-yellow-500/5">
+                Áudio aguardando clique
+              </Badge>
+            )}
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
           </div>
@@ -345,7 +348,7 @@ const Admin = () => {
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
           {view === "banners" && <BannersView />}
-          {view === "orders" && <OrdersAdminView />}
+          {view === "orders" && <OrdersAdminView somLiberado={somLiberado} testarNotificacao={testarNotificacao} />}
           {view === "sales" && <SalesView />}
           {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
@@ -1784,7 +1787,7 @@ const SettingsView = () => {
 };
 
 // ─── ORDERS ADMIN ───
-const OrdersAdminView = () => {
+const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: boolean; testarNotificacao: () => void }) => {
   const { data: orders, isLoading } = useOrders();
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
@@ -1893,6 +1896,17 @@ const OrdersAdminView = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
+        <div className="flex items-center gap-2">
+          {!somLiberado && (
+            <Badge variant="outline" className="text-[10px] py-0 px-1 border-yellow-500/50 text-yellow-500/80 animate-pulse">
+              Aguardando interação para ativar áudio
+            </Badge>
+          )}
+          <Button variant="outline" size="sm" onClick={testarNotificacao} className="gap-2 h-8 text-xs">
+            <Volume2 size={14} />
+            Testar Alerta
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6 bg-card p-4 rounded-lg border border-border shadow-sm">
