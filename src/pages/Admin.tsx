@@ -83,84 +83,70 @@ const Admin = () => {
   const { data: settings } = useStoreSettings();
 
   useEffect(() => {
-    // Check if we already have permission from session or localStorage
-    const savedPermission = localStorage.getItem("audio_notifications_enabled") === "true";
-    if (savedPermission) {
+    const unlockAudio = () => {
+      const audio = document.getElementById("somPedido") as HTMLAudioElement;
+      if (audio) {
+        audio.volume = 0;
+        audio.play()
+          .then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.volume = 1;
+            setAudioPermission(true);
+            (window as any).audioEnabled = true;
+            localStorage.setItem("audio_notifications_enabled", "true");
+            console.log("Áudio liberado pelo clique do usuário");
+          })
+          .catch(err => {
+            console.log("Erro ao liberar áudio:", err);
+          });
+      }
+    };
+
+    // Use multiple interaction events for better coverage
+    document.addEventListener("click", unlockAudio, { once: true });
+    document.addEventListener("keydown", unlockAudio, { once: true });
+    document.addEventListener("touchstart", unlockAudio, { once: true });
+    
+    // Check if we already have permission from localStorage (visual state only)
+    if (localStorage.getItem("audio_notifications_enabled") === "true") {
       setAudioPermission(true);
       (window as any).audioEnabled = true;
     }
-    
-    // Auto-enable if user interacts with the page anywhere
-    const handleFirstInteraction = () => {
-      console.log("User interacted, checking audio permission...");
-      
-      const testAudio = new Audio("/sons/notificacao.mp3");
-      testAudio.volume = 0; // Silent play to unlock
-      
-      testAudio.play().then(() => {
-        console.log("Audio unlocked successfully");
-        setAudioPermission(true);
-        (window as any).audioEnabled = true;
-        localStorage.setItem("audio_notifications_enabled", "true");
-        
-        // Remove listeners after successful unlock
-        document.removeEventListener('mousedown', handleFirstInteraction);
-        document.removeEventListener('keydown', handleFirstInteraction);
-        document.removeEventListener('touchstart', handleFirstInteraction);
-      }).catch((err) => {
-        console.warn("Audio still locked, will try on next interaction:", err);
-      });
-    };
-
-    // Use mousedown instead of click for faster response, and add touchstart for mobile
-    document.addEventListener('mousedown', handleFirstInteraction);
-    document.addEventListener('keydown', handleFirstInteraction);
-    document.addEventListener('touchstart', handleFirstInteraction);
 
     return () => {
-      document.removeEventListener('mousedown', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
+      document.removeEventListener("click", unlockAudio);
+      document.removeEventListener("keydown", unlockAudio);
+      document.removeEventListener("touchstart", unlockAudio);
     };
   }, []);
 
-  const enableNotifications = () => {
-    const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
-    const notificationAudio = new Audio(soundUrl);
-    notificationAudio.volume = 0.5;
-    notificationAudio.play()
-      .then(() => {
-        setAudioPermission(true);
-        (window as any).audioEnabled = true;
-        localStorage.setItem("audio_notifications_enabled", "true");
-        toast({
-          title: "Notificações ativadas! 🔊",
-          description: "O som de teste foi reproduzido e as notificações estão prontas.",
-        });
-      })
-      .catch(err => {
-        console.error("Erro ao ativar som:", err);
-        toast({
-          title: "Atenção",
-          description: "O navegador bloqueou o áudio. Clique em qualquer lugar da página e tente novamente.",
-          variant: "destructive"
-        });
+  const tocarSomPedido = () => {
+    const audio = document.getElementById("somPedido") as HTMLAudioElement;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(err => {
+        console.log("Navegador bloqueou a reprodução:", err);
       });
+    }
+  };
+
+  const enableNotifications = () => {
+    tocarSomPedido();
+    if (!audioPermission) {
+      setAudioPermission(true);
+      (window as any).audioEnabled = true;
+      localStorage.setItem("audio_notifications_enabled", "true");
+    }
+    toast({
+      title: "Notificações ativadas! 🔊",
+      description: "O som foi testado e as notificações estão prontas.",
+    });
   };
 
   useEffect(() => {
-    console.log("Setting up real-time order notifications...");
+    console.log("Iniciando monitoramento de novos pedidos...");
     
-    // Test if audio is pre-loadable
-    if (audioPermission) {
-      const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
-      const testAudio = new Audio(soundUrl);
-      testAudio.volume = 0;
-      testAudio.play().then(() => {
-        console.log("Audio system warmed up with:", soundUrl);
-      }).catch(e => console.log("Audio warm up suppressed:", e.message));
-    }
-
     const channel = supabase
       .channel('admin-order-notifications')
       .on(
@@ -171,7 +157,7 @@ const Admin = () => {
           table: 'orders',
         },
         async (payload) => {
-          console.log('New order detected via real-time:', payload);
+          console.log('Novo pedido detectado:', payload);
           
           if (lastOrderRef.current === payload.new.id) return;
           lastOrderRef.current = payload.new.id;
@@ -182,56 +168,19 @@ const Admin = () => {
             variant: "default",
           });
 
-          const isAudioEnabled = audioPermission || (window as any).audioEnabled || localStorage.getItem("audio_notifications_enabled") === "true";
-          
-          if (isAudioEnabled) {
-            try {
-              // Get FRESH sound URL directly from store_settings table using common JS client
-              // (settings from hook might be stale or missing during the event)
-              const { data: latestSettings } = await supabase
-                .from('store_settings')
-                .select('value')
-                .eq('key', 'notification_sound')
-                .maybeSingle();
-
-              const soundUrl = latestSettings?.value || settings?.notification_sound || '/sons/notificacao.mp3';
-              
-              console.log("Attempting to play sound:", soundUrl);
-              
-              const notificationAudio = new Audio(soundUrl);
-              notificationAudio.volume = 1.0;
-              notificationAudio.crossOrigin = "anonymous";
-              
-              // Browsers need the audio element to be in the DOM sometimes for mobile
-              const audio = new Audio(soundUrl);
-              audio.volume = 1.0;
-              audio.play().catch(err => {
-                console.error("Playback failed:", err);
-                toast({
-                  title: "Atenção",
-                  description: "O navegador bloqueou o áudio. Clique em qualquer lugar da página para habilitar.",
-                  variant: "destructive"
-                });
-              });
-            } catch (error) {
-              console.error("Error in audio playback logic:", error);
-            }
-          }
+          // Tocar som de notificação
+          tocarSomPedido();
 
           queryClient.invalidateQueries({ queryKey: ["orders"] });
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
         }
       )
-      .subscribe((status, err) => {
-        console.log("Supabase real-time status:", status);
-        if (err) console.error("Real-time subscription error:", err);
-      });
+      .subscribe();
 
     return () => {
-      console.log("Cleaning up real-time channel");
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient, settings?.notification_sound, audioPermission]);
+  }, [toast, queryClient, audioPermission]);
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
@@ -318,6 +267,9 @@ const Admin = () => {
           {view === "settings" && <SettingsView />}
         </main>
       </div>
+      <audio id="somPedido" key={settings?.notification_sound || "/sons/notificacao.mp3"} preload="auto">
+        <source src={settings?.notification_sound || "/sons/notificacao.mp3"} type="audio/mpeg" />
+      </audio>
     </div>
   );
 };
