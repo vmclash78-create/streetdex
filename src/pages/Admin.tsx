@@ -1281,7 +1281,13 @@ const FinancesView = () => {
     if (!sales || !expenses) return [];
     const months: Record<string, { receita: number; despesa: number }> = {};
     sales.forEach((s) => { const key = s.sale_date.substring(0, 7); if (!months[key]) months[key] = { receita: 0, despesa: 0 }; months[key].receita += Number(s.total); });
-    expenses.forEach((e) => { const key = e.expense_date.substring(0, 7); if (!months[key]) months[key] = { receita: 0, despesa: 0 }; months[key].despesa += Number(e.amount); });
+    expenses.forEach((e) => { 
+      const key = e.expense_date.substring(0, 7); 
+      if (!months[key]) months[key] = { receita: 0, despesa: 0 }; 
+      if (e.category !== "Fornecedores") {
+        months[key].despesa += Number(e.amount); 
+      }
+    });
     return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-12)
       .map(([month, data]) => ({ month: new Date(month + "-15").toLocaleDateString("pt-BR", { month: "short" }), ...data }));
   }, [sales, expenses]);
