@@ -85,9 +85,7 @@ export const useOrderById = (orderId?: string) => {
     enabled: !!orderId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("orders")
-        .select("*, order_items(*)")
-        .eq("id", orderId!)
+        .rpc("get_order_for_tracking", { p_order_id: orderId! })
         .maybeSingle();
       if (error) throw error;
       return data as (DBOrder & { order_items: DBOrderItem[] }) | null;
