@@ -89,11 +89,32 @@ const Admin = () => {
       setAudioPermission(true);
       (window as any).audioEnabled = true;
     }
-  }, []);
+    
+    // Auto-enable if user interacts with the page anywhere
+    const handleFirstInteraction = () => {
+      if (!audioPermission && !(window as any).audioEnabled) {
+        console.log("User interacted, unlocking audio...");
+        const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
+        silentAudio.play().then(() => {
+          setAudioPermission(true);
+          (window as any).audioEnabled = true;
+          localStorage.setItem("audio_notifications_enabled", "true");
+        }).catch(() => {});
+      }
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('keydown', handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, [audioPermission]);
 
   const enableNotifications = () => {
-    // Browser requires user interaction to play audio
-    // We create a silent audio and play it to unlock audio capabilities
     const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
     silentAudio.play()
       .then(() => {
