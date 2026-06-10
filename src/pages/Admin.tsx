@@ -117,8 +117,16 @@ const Admin = () => {
     };
 
     const handleInteraction = () => {
+      console.log("Interação detectada, liberando recursos...");
       liberarAudio();
-      // Removemos o listener após o primeiro clique bem-sucedido (ou tentativa)
+      
+      // Pedir permissão para notificações do navegador
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+          console.log("Permissão de notificação:", permission);
+        });
+      }
+      
       document.removeEventListener("click", handleInteraction);
     };
 
