@@ -85,7 +85,7 @@ const Admin = () => {
   useEffect(() => {
     // Check if we already have permission from session or localStorage
     const savedPermission = localStorage.getItem("audio_notifications_enabled") === "true";
-    if (typeof window !== "undefined" && ((window as any).audioEnabled || savedPermission)) {
+    if (savedPermission) {
       setAudioPermission(true);
       (window as any).audioEnabled = true;
     }
@@ -141,22 +141,25 @@ const Admin = () => {
           });
 
           // Play notification sound
-          if (audioPermission || (window as any).audioEnabled) {
+          const isAudioEnabled = audioPermission || (window as any).audioEnabled || localStorage.getItem("audio_notifications_enabled") === "true";
+          
+          if (isAudioEnabled) {
             try {
               const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
               console.log("Attempting to play sound:", soundUrl);
               
-              // We create a new audio object every time to ensure it plays independently
               const notificationAudio = new Audio(soundUrl);
               notificationAudio.volume = 1.0;
               
               const playPromise = notificationAudio.play();
               if (playPromise !== undefined) {
                 playPromise.catch(err => {
-                  console.warn("Could not play notification sound:", err);
-                  // If it fails, maybe permission was revoked or lost
-                  setAudioPermission(false);
-                  (window as any).audioEnabled = false;
+                  console.warn("Could not play notification sound (browser restriction):", err);
+                  // Only reset if it's clearly a permission issue
+                  if (err.name === 'NotAllowedError') {
+                    setAudioPermission(false);
+                    (window as any).audioEnabled = false;
+                  }
                 });
               }
             } catch (error) {
@@ -238,7 +241,7 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            {!audioPermission && !(window as any).audioEnabled && (
+            {!audioPermission && (
               <Button 
                 variant="outline" 
                 size="sm" 
