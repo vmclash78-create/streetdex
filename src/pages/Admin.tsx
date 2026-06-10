@@ -1651,14 +1651,24 @@ const SettingsView = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {(() => {
+                    const defaultSounds = [
+                      { name: "Clássico", url: "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" },
+                      { name: "Sino Digital", url: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" },
+                      { name: "Alerta Suave", url: "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3" },
+                      { name: "Notificação Elegante", url: "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" },
+                      { name: "Dinheiro", url: "https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3" },
+                    ];
+                    
                     try {
-                      const sounds = JSON.parse(getValue("notification_sounds") || "[]");
-                      if (sounds.length === 0) throw new Error();
-                      return sounds.map((s: any) => (
+                      const savedSounds = JSON.parse(getValue("notification_sounds") || "[]");
+                      const allSounds = savedSounds.length > 0 ? savedSounds : defaultSounds;
+                      return allSounds.map((s: any) => (
                         <SelectItem key={s.url} value={s.url}>{s.name}</SelectItem>
                       ));
                     } catch (e) {
-                      return <SelectItem value="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3">Clássico</SelectItem>;
+                      return defaultSounds.map((s: any) => (
+                        <SelectItem key={s.url} value={s.url}>{s.name}</SelectItem>
+                      ));
                     }
                   })()}
                 </SelectContent>
