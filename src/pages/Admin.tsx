@@ -286,16 +286,15 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            {!audioPermission && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2 border-yellow-500/50 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10"
-                onClick={enableNotifications}
-              >
-                <Volume2 size={16} /> Ativar Som
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={`gap-2 ${!audioPermission ? "border-yellow-500/50 text-yellow-600 dark:text-yellow-400 animate-pulse" : "text-muted-foreground"}`}
+              onClick={enableNotifications}
+            >
+              <Volume2 size={16} /> 
+              {audioPermission ? "Som Ativo" : "Ativar Som"}
+            </Button>
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
           </div>
