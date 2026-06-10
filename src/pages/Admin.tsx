@@ -198,8 +198,8 @@ const Admin = () => {
 
     if (!somLiberadoRef.current) {
       toast({
-        title: "Áudio bloqueado",
-        description: "Por favor, clique em 'Clique para Ativar Som' no topo ou em qualquer lugar da tela.",
+        title: "Áudio aguardando interação",
+        description: "O áudio será ativado automaticamente após sua primeira interação com a página.",
         variant: "destructive"
       });
       return;
