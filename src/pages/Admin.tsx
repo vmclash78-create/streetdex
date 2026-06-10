@@ -77,64 +77,92 @@ const Admin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [somLiberado, setSomLiberado] = useState(false);
+  const somLiberadoRef = useRef(false);
   const audioPedidoRef = useRef<HTMLAudioElement | null>(null);
   const lastOrderRef = useRef<string | null>(null);
 
   const { data: settings } = useStoreSettings();
 
+  // Inicializa e atualiza o áudio quando as configurações mudam
+  useEffect(() => {
+    const soundUrl = settings?.notification_sound || "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3";
+    
+    if (!audioPedidoRef.current) {
+      audioPedidoRef.current = new Audio(soundUrl);
+    } else if (audioPedidoRef.current.src !== soundUrl) {
+      audioPedidoRef.current.src = soundUrl;
+      audioPedidoRef.current.load();
+    }
+  }, [settings?.notification_sound]);
+
   useEffect(() => {
     const liberarAudio = async () => {
+      if (!audioPedidoRef.current || somLiberadoRef.current) return;
+      
       try {
-        const audio = new Audio("/sons/notificacao.mp3");
-        audio.volume = 1;
+        console.log("Tentando desbloquear áudio...");
+        // Alguns navegadores exigem que o áudio seja tocado em resposta a um clique
+        audioPedidoRef.current.muted = true;
+        await audioPedidoRef.current.play();
+        audioPedidoRef.current.pause();
+        audioPedidoRef.current.muted = false;
+        audioPedidoRef.current.currentTime = 0;
         
-        // Tenta tocar e pausar imediatamente para "desbloquear"
-        await audio.play();
-        audio.pause();
-        audio.currentTime = 0;
-        
-        audioPedidoRef.current = audio;
+        somLiberadoRef.current = true;
         setSomLiberado(true);
-        console.log("Som liberado pelo clique do usuário");
+        console.log("Áudio desbloqueado com sucesso!");
       } catch (erro) {
-        console.log("Erro ao liberar som:", erro);
+        console.log("Erro ao desbloquear áudio:", erro);
       }
     };
 
-    const handleFirstClick = () => {
+    const handleInteraction = () => {
       liberarAudio();
-      document.removeEventListener("click", handleFirstClick);
+      // Removemos o listener após o primeiro clique bem-sucedido (ou tentativa)
+      document.removeEventListener("click", handleInteraction);
     };
 
-    document.addEventListener("click", handleFirstClick);
+    document.addEventListener("click", handleInteraction);
     
     return () => {
-      document.removeEventListener("click", handleFirstClick);
+      document.removeEventListener("click", handleInteraction);
     };
   }, []);
 
   const tocarSomPedido = () => {
-    if (!somLiberado || !audioPedidoRef.current) {
-      console.log("Usuário ainda não clicou ou som não liberado");
+    console.log("Chamando tocarSomPedido. somLiberadoRef:", somLiberadoRef.current);
+    
+    if (!audioPedidoRef.current) {
+      console.log("Erro: Objeto de áudio não inicializado");
+      return;
+    }
+
+    if (!somLiberadoRef.current) {
+      console.log("Aviso: Áudio ainda não foi liberado pelo usuário");
       return;
     }
 
     const audio = audioPedidoRef.current;
     audio.currentTime = 0;
+    audio.volume = 1;
+    
     audio.play()
       .then(() => {
-        console.log("Som tocando");
+        console.log("Som de novo pedido reproduzido com sucesso");
       })
       .catch(err => {
-        console.log("Erro ao tocar:", err);
+        console.log("Erro crítico ao reproduzir som:", err);
+        // Tenta re-desbloquear se falhar
+        setSomLiberado(false);
+        somLiberadoRef.current = false;
       });
   };
 
   const testarNotificacao = () => {
-    if (!somLiberado) {
+    if (!somLiberadoRef.current) {
       toast({
-        title: "Atenção",
-        description: "Por favor, clique em qualquer lugar da página primeiro para liberar o áudio.",
+        title: "Áudio bloqueado",
+        description: "Por favor, clique em 'Clique para Ativar Som' no topo ou em qualquer lugar da tela.",
         variant: "destructive"
       });
       return;
@@ -143,15 +171,15 @@ const Admin = () => {
     tocarSomPedido();
     toast({
       title: "Teste de Som",
-      description: "Se você ouviu o som, as notificações estão funcionando!",
+      description: "O sinal sonoro foi enviado. Você ouviu?",
     });
   };
 
   useEffect(() => {
-    console.log("Iniciando monitoramento de novos pedidos...");
+    console.log("Configurando canal de notificações de pedidos...");
     
     const channel = supabase
-      .channel('admin-order-notifications')
+      .channel('admin-order-notifications-v2')
       .on(
         'postgres_changes',
         {
@@ -160,30 +188,35 @@ const Admin = () => {
           table: 'orders',
         },
         async (payload) => {
-          console.log('Novo pedido detectado:', payload);
+          console.log('RECEBIDO: Novo pedido no banco de dados:', payload);
           
-          if (lastOrderRef.current === payload.new.id) return;
+          if (lastOrderRef.current === payload.new.id) {
+            console.log('Ignorando notificação duplicada para o ID:', payload.new.id);
+            return;
+          }
           lastOrderRef.current = payload.new.id;
 
           toast({
-            title: "Novo Pedido Recebido! 🔔",
-            description: `O pedido #${payload.new.order_number} acaba de ser realizado.`,
-            variant: "default",
+            title: "🔔 NOVO PEDIDO RECEBIDO!",
+            description: `Pedido #${payload.new.order_number} - ${formatPrice(payload.new.total)}`,
+            duration: 10000, // 10 segundos para dar tempo de ver
           });
 
-          // Tocar som de notificação
           tocarSomPedido();
 
           queryClient.invalidateQueries({ queryKey: ["orders"] });
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Status da conexão Realtime:", status);
+      });
 
     return () => {
+      console.log("Removendo canal de notificações");
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient, somLiberado]);
+  }, [toast, queryClient]); // Removi somLiberado das dependências para evitar re-subscribe desnecessário
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
@@ -270,9 +303,6 @@ const Admin = () => {
           {view === "settings" && <SettingsView />}
         </main>
       </div>
-      <audio id="somPedido" key={settings?.notification_sound || "/sons/notificacao.mp3"} preload="auto">
-        <source src={settings?.notification_sound || "/sons/notificacao.mp3"} type="audio/mpeg" />
-      </audio>
     </div>
   );
 };
