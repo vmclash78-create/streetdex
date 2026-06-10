@@ -92,27 +92,37 @@ const Admin = () => {
     
     // Auto-enable if user interacts with the page anywhere
     const handleFirstInteraction = () => {
-      if (!audioPermission && !(window as any).audioEnabled) {
-        console.log("User interacted, unlocking audio...");
-        const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
-        silentAudio.play().then(() => {
-          setAudioPermission(true);
-          (window as any).audioEnabled = true;
-          localStorage.setItem("audio_notifications_enabled", "true");
-        }).catch(() => {});
-      }
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
+      console.log("User interacted, checking audio permission...");
+      
+      const testAudio = new Audio("/sons/notificacao.mp3");
+      testAudio.volume = 0; // Silent play to unlock
+      
+      testAudio.play().then(() => {
+        console.log("Audio unlocked successfully");
+        setAudioPermission(true);
+        (window as any).audioEnabled = true;
+        localStorage.setItem("audio_notifications_enabled", "true");
+        
+        // Remove listeners after successful unlock
+        document.removeEventListener('mousedown', handleFirstInteraction);
+        document.removeEventListener('keydown', handleFirstInteraction);
+        document.removeEventListener('touchstart', handleFirstInteraction);
+      }).catch((err) => {
+        console.warn("Audio still locked, will try on next interaction:", err);
+      });
     };
 
-    document.addEventListener('click', handleFirstInteraction);
+    // Use mousedown instead of click for faster response, and add touchstart for mobile
+    document.addEventListener('mousedown', handleFirstInteraction);
     document.addEventListener('keydown', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
 
     return () => {
-      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('mousedown', handleFirstInteraction);
       document.removeEventListener('keydown', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [audioPermission]);
+  }, []);
 
   const enableNotifications = () => {
     const soundUrl = settings?.notification_sound || '/sons/notificacao.mp3';
@@ -192,20 +202,17 @@ const Admin = () => {
               notificationAudio.volume = 1.0;
               notificationAudio.crossOrigin = "anonymous";
               
-              // Key: Browsers often need a clean trigger
-              notificationAudio.currentTime = 0;
-              const playResult = notificationAudio.play();
-              if (playResult !== undefined) {
-                playResult.catch(err => {
-                  console.error("Auto-play blocked or failed:", err);
-                  // Retry with interaction unlock if needed
-                  const retryOnInteraction = () => {
-                    notificationAudio.play();
-                    document.removeEventListener('click', retryOnInteraction);
-                  };
-                  document.addEventListener('click', retryOnInteraction);
+              // Browsers need the audio element to be in the DOM sometimes for mobile
+              const audio = new Audio(soundUrl);
+              audio.volume = 1.0;
+              audio.play().catch(err => {
+                console.error("Playback failed:", err);
+                toast({
+                  title: "Atenção",
+                  description: "O navegador bloqueou o áudio. Clique em qualquer lugar da página para habilitar.",
+                  variant: "destructive"
                 });
-              }
+              });
             } catch (error) {
               console.error("Error in audio playback logic:", error);
             }
@@ -289,11 +296,11 @@ const Admin = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className={`gap-2 ${!audioPermission ? "border-yellow-500/50 text-yellow-600 dark:text-yellow-400 animate-pulse" : "text-muted-foreground"}`}
+              className={`gap-2 ${!audioPermission ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "text-muted-foreground"}`}
               onClick={enableNotifications}
             >
               <Volume2 size={16} /> 
-              {audioPermission ? "Som Ativo" : "Ativar Som"}
+              {audioPermission ? "Som Ativo" : "Clique para Ativar Som"}
             </Button>
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
