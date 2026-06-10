@@ -267,8 +267,8 @@ const Admin = () => {
           {view === "settings" && <SettingsView />}
         </main>
       </div>
-      <audio id="somPedido" preload="auto">
-        <source src="/sons/notificacao.mp3" type="audio/mpeg" />
+      <audio id="somPedido" key={settings?.notification_sound || "/sons/notificacao.mp3"} preload="auto">
+        <source src={settings?.notification_sound || "/sons/notificacao.mp3"} type="audio/mpeg" />
       </audio>
     </div>
   );
