@@ -77,39 +77,55 @@ const Admin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [somLiberado, setSomLiberado] = useState(false);
+  const somLiberadoRef = useRef(false);
   const audioPedidoRef = useRef<HTMLAudioElement | null>(null);
   const lastOrderRef = useRef<string | null>(null);
 
   const { data: settings } = useStoreSettings();
 
+  // Inicializa e atualiza o áudio quando as configurações mudam
+  useEffect(() => {
+    const soundUrl = settings?.notification_sound || "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3";
+    
+    if (!audioPedidoRef.current) {
+      audioPedidoRef.current = new Audio(soundUrl);
+    } else if (audioPedidoRef.current.src !== soundUrl) {
+      audioPedidoRef.current.src = soundUrl;
+      audioPedidoRef.current.load();
+    }
+  }, [settings?.notification_sound]);
+
   useEffect(() => {
     const liberarAudio = async () => {
+      if (!audioPedidoRef.current || somLiberadoRef.current) return;
+      
       try {
-        const audio = new Audio("/sons/notificacao.mp3");
-        audio.volume = 1;
+        console.log("Tentando desbloquear áudio...");
+        // Alguns navegadores exigem que o áudio seja tocado em resposta a um clique
+        audioPedidoRef.current.muted = true;
+        await audioPedidoRef.current.play();
+        audioPedidoRef.current.pause();
+        audioPedidoRef.current.muted = false;
+        audioPedidoRef.current.currentTime = 0;
         
-        // Tenta tocar e pausar imediatamente para "desbloquear"
-        await audio.play();
-        audio.pause();
-        audio.currentTime = 0;
-        
-        audioPedidoRef.current = audio;
+        somLiberadoRef.current = true;
         setSomLiberado(true);
-        console.log("Som liberado pelo clique do usuário");
+        console.log("Áudio desbloqueado com sucesso!");
       } catch (erro) {
-        console.log("Erro ao liberar som:", erro);
+        console.log("Erro ao desbloquear áudio:", erro);
       }
     };
 
-    const handleFirstClick = () => {
+    const handleInteraction = () => {
       liberarAudio();
-      document.removeEventListener("click", handleFirstClick);
+      // Removemos o listener após o primeiro clique bem-sucedido (ou tentativa)
+      document.removeEventListener("click", handleInteraction);
     };
 
-    document.addEventListener("click", handleFirstClick);
+    document.addEventListener("click", handleInteraction);
     
     return () => {
-      document.removeEventListener("click", handleFirstClick);
+      document.removeEventListener("click", handleInteraction);
     };
   }, []);
 
