@@ -557,7 +557,7 @@ export type Database = {
           id: string
           notes: string
           order_items: Json
-          order_number: string
+          order_number: number
           payment_method: string
           status: string
           total: number
