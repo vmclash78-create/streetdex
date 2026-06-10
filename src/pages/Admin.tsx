@@ -319,15 +319,6 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={`gap-2 ${!somLiberado ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "text-muted-foreground"}`}
-              onClick={testarNotificacao}
-            >
-              <Volume2 size={16} /> 
-              {somLiberado ? "Som Ativo" : "Clique para Ativar Som"}
-            </Button>
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
           </div>
