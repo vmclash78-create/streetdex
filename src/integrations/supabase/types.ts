@@ -542,7 +542,10 @@ export type Database = {
           p_payment_method?: string
           p_total?: number
         }
-        Returns: Json
+        Returns: {
+          id: string
+          order_number: number
+        }[]
       }
       get_order_for_tracking: {
         Args: { p_order_id: string }
