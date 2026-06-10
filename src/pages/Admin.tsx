@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Package, ShoppingBag, Settings, LogOut,
@@ -6,7 +6,7 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image, ClipboardList, Eye, ChevronRight, Upload,
+  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
@@ -76,8 +76,39 @@ const Admin = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [audioPermission, setAudioPermission] = useState(false);
+  const lastOrderRef = useRef<string | null>(null);
 
   const { data: settings } = useStoreSettings();
+
+  useEffect(() => {
+    // Check if we already have permission from session
+    if (typeof window !== "undefined" && (window as any).audioEnabled) {
+      setAudioPermission(true);
+    }
+  }, []);
+
+  const enableNotifications = () => {
+    // Browser requires user interaction to play audio
+    const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhAAQACABAAAABkYXRhAgAAAAEA");
+    silentAudio.play()
+      .then(() => {
+        setAudioPermission(true);
+        (window as any).audioEnabled = true;
+        toast({
+          title: "Notificações ativadas! 🔊",
+          description: "Você ouvirá um som quando novos pedidos chegarem.",
+        });
+      })
+      .catch(err => {
+        console.error("Erro ao ativar som:", err);
+        toast({
+          title: "Erro",
+          description: "Não foi possível ativar as notificações sonoras.",
+          variant: "destructive"
+        });
+      });
+  };
 
   useEffect(() => {
     console.log("Setting up real-time order notifications...");
@@ -93,6 +124,10 @@ const Admin = () => {
         (payload) => {
           console.log('New order detected via real-time:', payload);
           
+          // Avoid duplicate triggers for the same order if subscription resets
+          if (lastOrderRef.current === payload.new.id) return;
+          lastOrderRef.current = payload.new.id;
+
           // Show toast notification
           toast({
             title: "Novo Pedido Recebido! 🔔",
@@ -101,12 +136,14 @@ const Admin = () => {
           });
 
           // Play notification sound
-          try {
-            const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
-            const audio = new Audio(soundUrl);
-            audio.play().catch(err => console.warn("Could not play notification sound:", err));
-          } catch (error) {
-            console.error("Error playing notification sound:", error);
+          if (audioPermission || (window as any).audioEnabled) {
+            try {
+              const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              const audio = new Audio(soundUrl);
+              audio.play().catch(err => console.warn("Could not play notification sound:", err));
+            } catch (error) {
+              console.error("Error playing notification sound:", error);
+            }
           }
 
           // Refresh the orders data
@@ -121,7 +158,7 @@ const Admin = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient, settings?.notification_sound]);
+  }, [toast, queryClient, settings?.notification_sound, audioPermission]);
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
@@ -183,6 +220,16 @@ const Admin = () => {
             <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
+            {!audioPermission && !(window as any).audioEnabled && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 border-yellow-500/50 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10"
+                onClick={enableNotifications}
+              >
+                <Volume2 size={16} /> Ativar Som
+              </Button>
+            )}
             <ThemeToggle />
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">AD</div>
           </div>
