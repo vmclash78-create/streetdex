@@ -145,21 +145,22 @@ const Admin = () => {
           
           if (isAudioEnabled) {
             try {
-              const soundUrl = settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              // Ensure we have the latest settings for the sound URL
+              const currentSettings = queryClient.getQueryData<any>(["store-settings"]);
+              const soundUrl = currentSettings?.notification_sound || settings?.notification_sound || 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+              
               console.log("Attempting to play sound:", soundUrl);
               
               const notificationAudio = new Audio(soundUrl);
               notificationAudio.volume = 1.0;
+              notificationAudio.crossOrigin = "anonymous"; // Try to avoid some CORS issues if relevant
               
               const playPromise = notificationAudio.play();
               if (playPromise !== undefined) {
                 playPromise.catch(err => {
                   console.warn("Could not play notification sound (browser restriction):", err);
-                  // Only reset if it's clearly a permission issue
-                  if (err.name === 'NotAllowedError') {
-                    setAudioPermission(false);
-                    (window as any).audioEnabled = false;
-                  }
+                  // Don't auto-reset permission here as it might be a transient error
+                  // but we should inform the user if possible or try again on next interaction
                 });
               }
             } catch (error) {

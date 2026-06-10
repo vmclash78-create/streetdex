@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useOrderById, getStatusInfo, ORDER_STATUSES } from "@/hooks/useOrders";
 import { ShoppingBag, Check, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
-import DuarttLogo from "@/components/store/DuarttLogo";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 import { formatPrice, fallbackImg } from "@/components/store/storeData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -45,7 +45,7 @@ const OrderTracking = () => {
         <Button variant="ghost" size="icon" asChild>
           <Link to="/"><ArrowLeft size={20} /></Link>
         </Button>
-        <div className="flex-1 flex justify-center"><DuarttLogo size="sm" /></div>
+        <div className="flex-1 flex justify-center"><StreetDexLogo size="sm" /></div>
         <div className="w-8" />
       </header>
 
