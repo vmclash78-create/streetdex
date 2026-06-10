@@ -191,14 +191,17 @@ const Admin = () => {
               notificationAudio.crossOrigin = "anonymous";
               
               // Key: Browsers often need a clean trigger
+              notificationAudio.currentTime = 0;
               const playResult = notificationAudio.play();
               if (playResult !== undefined) {
                 playResult.catch(err => {
                   console.error("Auto-play blocked or failed:", err);
-                  // Retry once if it was a permission issue that might have been solved
-                  setTimeout(() => {
-                    notificationAudio.play().catch(e => console.error("Retry failed:", e));
-                  }, 1000);
+                  // Retry with interaction unlock if needed
+                  const retryOnInteraction = () => {
+                    notificationAudio.play();
+                    document.removeEventListener('click', retryOnInteraction);
+                  };
+                  document.addEventListener('click', retryOnInteraction);
                 });
               }
             } catch (error) {
