@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Package, ShoppingBag, Settings, LogOut,
@@ -6,7 +6,7 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image, ClipboardList, Eye, ChevronRight, Upload,
+  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2,
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
