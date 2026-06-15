@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Package, ShoppingBag, Settings, LogOut,
@@ -100,7 +100,7 @@ const Admin = () => {
     }
   }, [settings?.notification_sound]);
 
-  const obterAudioContext = () => {
+  const obterAudioContext = useCallback(() => {
     try {
       if (audioCtxRef.current && audioCtxRef.current.state !== "closed") return audioCtxRef.current;
       const AudioContextCtor = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -111,9 +111,9 @@ const Admin = () => {
       console.log("Erro ao criar AudioContext:", e);
       return null;
     }
-  };
+  }, []);
 
-  const desbloquearAudioComGesto = () => {
+  const desbloquearAudioComGesto = useCallback(() => {
     if (somLiberadoRef.current) return;
 
     try {
@@ -154,10 +154,10 @@ const Admin = () => {
     } catch (erro) {
       console.log("Erro ao preparar áudio no gesto do usuário:", erro);
     }
-  };
+  }, [obterAudioContext]);
 
   // Beep sintetizado via WebAudio — não depende de arquivo externo nem CORS
-  const tocarBeepSintetizado = async () => {
+  const tocarBeepSintetizado = useCallback(async () => {
     try {
       const ctx = obterAudioContext();
       if (!ctx) return false;
@@ -195,7 +195,7 @@ const Admin = () => {
       console.log("Erro no beep sintetizado:", e);
       return false;
     }
-  };
+  }, [obterAudioContext]);
 
   useEffect(() => {
     const eventos = ["pointerdown", "mousedown", "click", "keydown", "touchstart"] as const;
@@ -227,7 +227,7 @@ const Admin = () => {
     return removerListeners;
   }, [toast]);
 
-  const tocarSomPedido = async () => {
+  const tocarSomPedido = useCallback(async () => {
     console.log("Chamando tocarSomPedido. somLiberado:", somLiberadoRef.current);
 
     const beepOk = await tocarBeepSintetizado();
@@ -249,7 +249,7 @@ const Admin = () => {
         somLiberadoRef.current = false;
         setSomLiberado(false);
       });
-  };
+  }, [tocarBeepSintetizado]);
 
   const testarNotificacao = async () => {
     desbloquearAudioComGesto();
