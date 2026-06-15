@@ -225,7 +225,7 @@ const Admin = () => {
     eventos.forEach((evento) => document.addEventListener(evento, handleInteraction, options));
 
     return removerListeners;
-  }, [toast]);
+  }, [desbloquearAudioComGesto, toast]);
 
   const tocarSomPedido = useCallback(async () => {
     console.log("Chamando tocarSomPedido. somLiberado:", somLiberadoRef.current);
@@ -319,7 +319,7 @@ const Admin = () => {
             }
           }
 
-          tocarSomPedido();
+          void tocarSomPedido();
 
           queryClient.invalidateQueries({ queryKey: ["orders"] });
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
@@ -333,7 +333,7 @@ const Admin = () => {
       console.log("Removendo canal de notificações");
       supabase.removeChannel(channel);
     };
-  }, [toast, queryClient]); // Removi somLiberado das dependências para evitar re-subscribe desnecessário
+  }, [toast, queryClient, tocarSomPedido]); // Removi somLiberado das dependências para evitar re-subscribe desnecessário
 
   const navItems: { icon: typeof LayoutDashboard; label: string; key: AdminView }[] = [
     { icon: LayoutDashboard, label: "Dashboard", key: "dashboard" },
