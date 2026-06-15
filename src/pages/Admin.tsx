@@ -87,147 +87,59 @@ const Admin = () => {
   const queryClient = useQueryClient();
   const [somLiberado, setSomLiberado] = useState(false);
   const somLiberadoRef = useRef(false);
-  const audioPedidoRef = useRef<HTMLAudioElement | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
   const lastOrderRef = useRef<string | null>(null);
 
   const { data: settings } = useStoreSettings();
 
-  // Inicializa e atualiza o áudio quando as configurações mudam
-  useEffect(() => {
-    const soundUrl = settings?.notification_sound || "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3";
-
-    if (!audioPedidoRef.current) {
-      const a = new Audio();
-      a.crossOrigin = "anonymous";
-      a.preload = "auto";
-      a.src = soundUrl;
-      audioPedidoRef.current = a;
-    } else if (audioPedidoRef.current.src !== soundUrl) {
-      audioPedidoRef.current.src = soundUrl;
-      audioPedidoRef.current.load();
-    }
+  // Preset de som selecionado (com migração transparente de valores legados em URL)
+  const presetSelecionado: SoundPresetId = useMemo(() => {
+    const raw = settings?.notification_sound;
+    if (!raw || isLegacyUrlValue(raw)) return "classico";
+    return normalizePresetId(raw);
   }, [settings?.notification_sound]);
 
-  const obterAudioContext = useCallback(() => {
-    try {
-      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") return audioCtxRef.current;
-      const AudioContextCtor = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AudioContextCtor) return null;
-      audioCtxRef.current = new AudioContextCtor({ latencyHint: "interactive" });
-      return audioCtxRef.current;
-    } catch (e) {
-      console.log("Erro ao criar AudioContext:", e);
-      return null;
+  // Volume 0..1 (padrão 0.8). Persistido em settings.notification_volume.
+  const volumeNotificacao = useMemo(() => {
+    const raw = settings?.notification_volume;
+    const n = typeof raw === "string" ? parseFloat(raw) : Number(raw ?? 0.8);
+    if (!Number.isFinite(n)) return 0.8;
+    return Math.max(0, Math.min(1, n));
+  }, [settings?.notification_volume]);
+
+  // Refs sempre atualizadas, para uso dentro de callbacks estáveis
+  const presetRef = useRef<SoundPresetId>(presetSelecionado);
+  const volumeRef = useRef<number>(volumeNotificacao);
+  useEffect(() => { presetRef.current = presetSelecionado; }, [presetSelecionado]);
+  useEffect(() => { volumeRef.current = volumeNotificacao; }, [volumeNotificacao]);
+
+  const desbloquearAudioComGesto = useCallback(async () => {
+    if (somLiberadoRef.current) return;
+    const ok = await unlockAudioContext();
+    if (ok) {
+      somLiberadoRef.current = true;
+      setSomLiberado(true);
     }
   }, []);
 
-  const desbloquearAudioComGesto = useCallback(() => {
-    if (somLiberadoRef.current) return;
-
-    try {
-      const ctx = obterAudioContext();
-      if (ctx) {
-        if (ctx.state === "suspended") void ctx.resume();
-
-        const source = ctx.createBufferSource();
-        const gain = ctx.createGain();
-        source.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
-        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-        source.connect(gain).connect(ctx.destination);
-        source.start(0);
-      }
-
-      const audio = audioPedidoRef.current;
-      if (audio) {
-        audio.muted = true;
-        const tentativa = audio.play();
-        if (tentativa) {
-          tentativa
-            .then(() => {
-              audio.pause();
-              audio.currentTime = 0;
-              audio.muted = false;
-            })
-            .catch(() => {
-              audio.muted = false;
-            });
-        } else {
-          audio.muted = false;
-        }
-      }
-
-      somLiberadoRef.current = true;
-      setSomLiberado(true);
-      console.log("Áudio preparado no primeiro uso do painel.");
-    } catch (erro) {
-      console.log("Erro ao preparar áudio no gesto do usuário:", erro);
+  const tocarSomPedido = useCallback(async (presetOverride?: SoundPresetId) => {
+    const preset = presetOverride ?? presetRef.current;
+    const ok = await playNotificationSound(preset, volumeRef.current);
+    if (!ok) {
+      somLiberadoRef.current = false;
+      setSomLiberado(false);
     }
-  }, [obterAudioContext]);
-
-  // Beep sintetizado via WebAudio — não depende de arquivo externo nem CORS
-  const tocarBeepSintetizado = useCallback(async () => {
-    try {
-      const ctx = obterAudioContext();
-      if (!ctx) return false;
-
-      if (ctx.state === "suspended") await ctx.resume();
-      if (ctx.state !== "running") return false;
-
-      const now = ctx.currentTime + 0.03;
-      const master = ctx.createGain();
-      master.gain.setValueAtTime(0.55, now);
-      master.connect(ctx.destination);
-
-      // Sino suave: nota com fundamental sine + harmônico para brilho
-      const tocarSino = (freq: number, start: number, dur: number) => {
-        const t0 = now + start;
-        const env = ctx.createGain();
-        env.gain.setValueAtTime(0.0001, t0);
-        env.gain.exponentialRampToValueAtTime(0.9, t0 + 0.012);
-        env.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-        env.connect(master);
-
-        const osc1 = ctx.createOscillator();
-        osc1.type = "sine";
-        osc1.frequency.setValueAtTime(freq, t0);
-        osc1.connect(env);
-        osc1.start(t0);
-        osc1.stop(t0 + dur + 0.05);
-
-        const osc2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
-        osc2.type = "sine";
-        osc2.frequency.setValueAtTime(freq * 2, t0);
-        g2.gain.setValueAtTime(0.22, t0);
-        osc2.connect(g2).connect(env);
-        osc2.start(t0);
-        osc2.stop(t0 + dur + 0.05);
-      };
-
-      tocarSino(1318.51, 0, 1.1);    // Mi6
-      tocarSino(1567.98, 0.18, 1.3); // Sol6
-      window.setTimeout(() => master.disconnect(), 1800);
-      return true;
-    } catch (e) {
-      console.log("Erro no beep sintetizado:", e);
-      return false;
-    }
-  }, [obterAudioContext]);
+    return ok;
+  }, []);
 
   useEffect(() => {
     const eventos = ["pointerdown", "mousedown", "click", "keydown", "touchstart"] as const;
     const options: AddEventListenerOptions = { capture: true, passive: true };
 
-    const removerListeners = () => {
-      eventos.forEach((evento) => document.removeEventListener(evento, handleInteraction, options));
-    };
-
     const handleInteraction = () => {
-      desbloquearAudioComGesto();
+      void desbloquearAudioComGesto();
 
       if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission().then(permission => {
+        Notification.requestPermission().then((permission) => {
           if (permission === "granted") {
             toast({
               title: "Notificações Ativadas",
@@ -237,65 +149,37 @@ const Admin = () => {
         });
       }
 
-      removerListeners();
+      eventos.forEach((evento) => document.removeEventListener(evento, handleInteraction, options));
     };
 
     eventos.forEach((evento) => document.addEventListener(evento, handleInteraction, options));
-
-    return removerListeners;
+    return () => eventos.forEach((evento) => document.removeEventListener(evento, handleInteraction, options));
   }, [desbloquearAudioComGesto, toast]);
 
-  const tocarSomPedido = useCallback(async () => {
-    console.log("Chamando tocarSomPedido. somLiberado:", somLiberadoRef.current);
-
-    const beepOk = await tocarBeepSintetizado();
-    if (beepOk) return;
-
-    const audio = audioPedidoRef.current;
-    if (!audio) {
-      somLiberadoRef.current = false;
-      setSomLiberado(false);
-      return;
-    }
-
-    audio.currentTime = 0;
-    audio.volume = 1;
-    audio.play()
-      .then(() => console.log("MP3 reproduzido"))
-      .catch(err => {
-        console.log("Som bloqueado pelo navegador ou falhou:", err);
-        somLiberadoRef.current = false;
-        setSomLiberado(false);
-      });
-  }, [tocarBeepSintetizado]);
-
   const testarNotificacao = async () => {
-    desbloquearAudioComGesto();
+    await desbloquearAudioComGesto();
 
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          toast({
-            title: "Permissão Concedida",
-            description: "Agora você receberá notificações desktop de novos pedidos.",
-          });
-        }
-      });
+      Notification.requestPermission();
     }
 
-    await tocarSomPedido();
+    const ok = await tocarSomPedido();
     toast({
-      title: "Teste de Som",
-      description: "O sinal sonoro foi enviado. Você ouviu?",
+      title: ok ? "Teste de Som" : "Som bloqueado",
+      description: ok
+        ? "Sinal sonoro enviado. Você ouviu o alerta?"
+        : "Interaja com a página (clique em qualquer lugar) e tente novamente.",
+      variant: ok ? "default" : "destructive",
     });
 
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification("Teste de Notificação Street Dex", {
         body: "As notificações estão funcionando corretamente!",
-        icon: "/favicon.ico"
+        icon: "/favicon.ico",
       });
     }
   };
+
 
   useEffect(() => {
     console.log("Configurando canal de notificações de pedidos...");
