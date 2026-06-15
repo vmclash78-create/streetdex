@@ -100,31 +100,96 @@ const Admin = () => {
     }
   }, [settings?.notification_sound]);
 
-  // Beep sintetizado via WebAudio — sempre funciona após gesto do usuário
-  const tocarBeepSintetizado = () => {
+  const obterAudioContext = () => {
     try {
-      const ctx = audioCtxRef.current;
-      if (!ctx) return false;
-      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") return audioCtxRef.current;
+      const AudioContextCtor = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextCtor) return null;
+      audioCtxRef.current = new AudioContextCtor({ latencyHint: "interactive" });
+      return audioCtxRef.current;
+    } catch (e) {
+      console.log("Erro ao criar AudioContext:", e);
+      return null;
+    }
+  };
 
-      const now = ctx.currentTime;
+  const desbloquearAudioComGesto = () => {
+    if (somLiberadoRef.current) return;
+
+    try {
+      const ctx = obterAudioContext();
+      if (ctx) {
+        if (ctx.state === "suspended") void ctx.resume();
+
+        const source = ctx.createBufferSource();
+        const gain = ctx.createGain();
+        source.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        source.connect(gain).connect(ctx.destination);
+        source.start(0);
+      }
+
+      const audio = audioPedidoRef.current;
+      if (audio) {
+        audio.muted = true;
+        const tentativa = audio.play();
+        if (tentativa) {
+          tentativa
+            .then(() => {
+              audio.pause();
+              audio.currentTime = 0;
+              audio.muted = false;
+            })
+            .catch(() => {
+              audio.muted = false;
+            });
+        } else {
+          audio.muted = false;
+        }
+      }
+
+      somLiberadoRef.current = true;
+      setSomLiberado(true);
+      console.log("Áudio preparado no primeiro uso do painel.");
+    } catch (erro) {
+      console.log("Erro ao preparar áudio no gesto do usuário:", erro);
+    }
+  };
+
+  // Beep sintetizado via WebAudio — não depende de arquivo externo nem CORS
+  const tocarBeepSintetizado = async () => {
+    try {
+      const ctx = obterAudioContext();
+      if (!ctx) return false;
+
+      if (ctx.state === "suspended") await ctx.resume();
+      if (ctx.state !== "running") return false;
+
+      const now = ctx.currentTime + 0.03;
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.9, now + 0.02);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
+      master.connect(ctx.destination);
+
       const tocarNota = (freq: number, start: number, dur: number) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
+        osc.type = "square";
+        osc.frequency.setValueAtTime(freq, now + start);
         gain.gain.setValueAtTime(0.0001, now + start);
-        gain.gain.exponentialRampToValueAtTime(0.5, now + start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.65, now + start + 0.015);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(master);
         osc.start(now + start);
-        osc.stop(now + start + dur + 0.05);
+        osc.stop(now + start + dur + 0.04);
       };
-      // Sequência tipo "ding-dong" de notificação (toca 3x para chamar atenção)
-      tocarNota(880, 0, 0.25);
-      tocarNota(1175, 0.18, 0.35);
-      tocarNota(880, 0.6, 0.25);
-      tocarNota(1175, 0.78, 0.35);
+
+      tocarNota(988, 0, 0.2);
+      tocarNota(1319, 0.18, 0.24);
+      tocarNota(988, 0.52, 0.2);
+      tocarNota(1319, 0.7, 0.34);
+      window.setTimeout(() => master.disconnect(), 1600);
       return true;
     } catch (e) {
       console.log("Erro no beep sintetizado:", e);
@@ -133,46 +198,15 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    const liberarAudio = async () => {
-      if (somLiberadoRef.current) return;
+    const eventos = ["pointerdown", "mousedown", "click", "keydown", "touchstart"] as const;
+    const options: AddEventListenerOptions = { capture: true, passive: true };
 
-      try {
-        console.log("Tentando desbloquear áudio...");
-
-        // 1) WebAudio context (criado dentro do gesto do usuário)
-        if (!audioCtxRef.current) {
-          const AC = (window.AudioContext || (window as any).webkitAudioContext);
-          if (AC) {
-            audioCtxRef.current = new AC();
-          }
-        }
-        if (audioCtxRef.current?.state === "suspended") {
-          await audioCtxRef.current.resume();
-        }
-
-        // 2) HTMLAudio (silencioso) para destravar o elemento mp3
-        if (audioPedidoRef.current) {
-          audioPedidoRef.current.muted = true;
-          try {
-            await audioPedidoRef.current.play();
-            audioPedidoRef.current.pause();
-          } catch (e) {
-            console.log("Falha ao destravar HTMLAudio (vamos usar WebAudio):", e);
-          }
-          audioPedidoRef.current.muted = false;
-          audioPedidoRef.current.currentTime = 0;
-        }
-
-        somLiberadoRef.current = true;
-        setSomLiberado(true);
-        console.log("Áudio desbloqueado com sucesso!");
-      } catch (erro) {
-        console.log("Erro ao desbloquear áudio:", erro);
-      }
+    const removerListeners = () => {
+      eventos.forEach((evento) => document.removeEventListener(evento, handleInteraction, options));
     };
 
     const handleInteraction = () => {
-      liberarAudio();
+      desbloquearAudioComGesto();
 
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission().then(permission => {
@@ -185,50 +219,41 @@ const Admin = () => {
         });
       }
 
-      document.removeEventListener("mousedown", handleInteraction);
-      document.removeEventListener("keydown", handleInteraction);
-      document.removeEventListener("touchstart", handleInteraction);
+      removerListeners();
     };
 
-    document.addEventListener("mousedown", handleInteraction);
-    document.addEventListener("keydown", handleInteraction);
-    document.addEventListener("touchstart", handleInteraction);
+    eventos.forEach((evento) => document.addEventListener(evento, handleInteraction, options));
 
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().catch(() => {});
-    }
+    return removerListeners;
+  }, [toast]);
 
-    return () => {
-      document.removeEventListener("mousedown", handleInteraction);
-      document.removeEventListener("keydown", handleInteraction);
-      document.removeEventListener("touchstart", handleInteraction);
-    };
-  }, []);
-
-  const tocarSomPedido = () => {
+  const tocarSomPedido = async () => {
     console.log("Chamando tocarSomPedido. somLiberado:", somLiberadoRef.current);
 
-    // 1) Beep sintetizado via WebAudio (sempre funciona, sem depender de arquivo)
-    const beepOk = tocarBeepSintetizado();
+    const beepOk = await tocarBeepSintetizado();
+    if (beepOk) return;
 
-    // 2) Também tenta o mp3 configurado em paralelo
     const audio = audioPedidoRef.current;
-    if (audio) {
-      audio.currentTime = 0;
-      audio.volume = 1;
-      audio.play()
-        .then(() => console.log("MP3 reproduzido"))
-        .catch(err => {
-          console.log("MP3 falhou (beep sintetizado cobre):", err);
-          if (!beepOk) {
-            somLiberadoRef.current = false;
-            setSomLiberado(false);
-          }
-        });
+    if (!audio) {
+      somLiberadoRef.current = false;
+      setSomLiberado(false);
+      return;
     }
+
+    audio.currentTime = 0;
+    audio.volume = 1;
+    audio.play()
+      .then(() => console.log("MP3 reproduzido"))
+      .catch(err => {
+        console.log("Som bloqueado pelo navegador ou falhou:", err);
+        somLiberadoRef.current = false;
+        setSomLiberado(false);
+      });
   };
 
-  const testarNotificacao = () => {
+  const testarNotificacao = async () => {
+    desbloquearAudioComGesto();
+
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then(permission => {
         if (permission === "granted") {
@@ -240,7 +265,7 @@ const Admin = () => {
       });
     }
 
-    tocarSomPedido();
+    await tocarSomPedido();
     toast({
       title: "Teste de Som",
       description: "O sinal sonoro foi enviado. Você ouviu?",
