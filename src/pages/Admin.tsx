@@ -167,29 +167,38 @@ const Admin = () => {
 
       const now = ctx.currentTime + 0.03;
       const master = ctx.createGain();
-      master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.9, now + 0.02);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
+      master.gain.setValueAtTime(0.55, now);
       master.connect(ctx.destination);
 
-      const tocarNota = (freq: number, start: number, dur: number) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "square";
-        osc.frequency.setValueAtTime(freq, now + start);
-        gain.gain.setValueAtTime(0.0001, now + start);
-        gain.gain.exponentialRampToValueAtTime(0.65, now + start + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur);
-        osc.connect(gain).connect(master);
-        osc.start(now + start);
-        osc.stop(now + start + dur + 0.04);
+      // Sino suave: nota com fundamental sine + harmônico para brilho
+      const tocarSino = (freq: number, start: number, dur: number) => {
+        const t0 = now + start;
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(0.0001, t0);
+        env.gain.exponentialRampToValueAtTime(0.9, t0 + 0.012);
+        env.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        env.connect(master);
+
+        const osc1 = ctx.createOscillator();
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(freq, t0);
+        osc1.connect(env);
+        osc1.start(t0);
+        osc1.stop(t0 + dur + 0.05);
+
+        const osc2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(freq * 2, t0);
+        g2.gain.setValueAtTime(0.22, t0);
+        osc2.connect(g2).connect(env);
+        osc2.start(t0);
+        osc2.stop(t0 + dur + 0.05);
       };
 
-      tocarNota(988, 0, 0.2);
-      tocarNota(1319, 0.18, 0.24);
-      tocarNota(988, 0.52, 0.2);
-      tocarNota(1319, 0.7, 0.34);
-      window.setTimeout(() => master.disconnect(), 1600);
+      tocarSino(1318.51, 0, 1.1);    // Mi6
+      tocarSino(1567.98, 0.18, 1.3); // Sol6
+      window.setTimeout(() => master.disconnect(), 1800);
       return true;
     } catch (e) {
       console.log("Erro no beep sintetizado:", e);
