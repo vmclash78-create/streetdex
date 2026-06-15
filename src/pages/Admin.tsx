@@ -1695,49 +1695,79 @@ const SettingsView = () => {
           {/* Configurações de Notificação */}
           <div className="space-y-4 pt-4 border-t border-border">
             <h3 className="text-sm font-bold uppercase tracking-wider">Notificações</h3>
+
             <div>
               <Label>Som de Novo Pedido</Label>
-              <Select 
-                value={getValue("notification_sound")} 
+              <Select
+                value={normalizePresetId(getValue("notification_sound"))}
                 onValueChange={(v) => {
                   setLocalSettings({ ...localSettings, notification_sound: v });
-                  try {
-                    const audio = new Audio(v);
-                    audio.play().catch(err => console.warn("Could not play sound preview:", err));
-                  } catch (e) {
-                    console.error("Error playing sound preview:", e);
-                  }
+                  const vol = (() => {
+                    const raw = getValue("notification_volume");
+                    const n = raw ? parseFloat(raw) : 0.8;
+                    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.8;
+                  })();
+                  void unlockAudioContext().then(() => playNotificationSound(v as SoundPresetId, vol));
                 }}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecione um som" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(() => {
-                    const defaultSounds = [
-                      { name: "Clássico", url: "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" },
-                      { name: "Sino Digital", url: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" },
-                      { name: "Alerta Suave", url: "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3" },
-                      { name: "Notificação Elegante", url: "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" },
-                      { name: "Dinheiro", url: "https://assets.mixkit.co/active_storage/sfx/1070/1070-preview.mp3" },
-                    ];
-                    
-                    try {
-                      const savedSounds = JSON.parse(getValue("notification_sounds") || "[]");
-                      const allSounds = savedSounds.length > 0 ? savedSounds : defaultSounds;
-                      return allSounds.map((s: any) => (
-                        <SelectItem key={s.url} value={s.url}>{s.name}</SelectItem>
-                      ));
-                    } catch (e) {
-                      return defaultSounds.map((s: any) => (
-                        <SelectItem key={s.url} value={s.url}>{s.name}</SelectItem>
-                      ));
-                    }
-                  })()}
+                  {SOUND_PRESETS.map((preset) => (
+                    <SelectItem key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sons sintetizados em tempo real — sem dependência de arquivos externos, compatíveis com todos os navegadores.
+              </p>
             </div>
+
+            <div>
+              <Label className="flex items-center justify-between">
+                <span>Volume da Notificação</span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {Math.round(((parseFloat(getValue("notification_volume")) || 0.8)) * 100)}%
+                </span>
+              </Label>
+              <Slider
+                className="mt-2"
+                min={0}
+                max={1}
+                step={0.05}
+                value={[parseFloat(getValue("notification_volume")) || 0.8]}
+                onValueChange={([v]) => {
+                  setLocalSettings({ ...localSettings, notification_volume: String(v) });
+                }}
+                onValueCommit={([v]) => {
+                  const preset = normalizePresetId(getValue("notification_sound"));
+                  void unlockAudioContext().then(() => playNotificationSound(preset, v));
+                }}
+                aria-label="Volume da notificação"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                O sistema operacional/navegador também respeita o mudo geral.
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => {
+                const preset = normalizePresetId(getValue("notification_sound"));
+                const vol = parseFloat(getValue("notification_volume")) || 0.8;
+                void unlockAudioContext().then(() => playNotificationSound(preset, vol));
+              }}
+            >
+              <Volume2 size={16} /> Testar Som Selecionado
+            </Button>
           </div>
+
+
 
           <Button onClick={handleSave} disabled={updateSetting.isPending || Object.keys(localSettings).length === 0} className="w-full gap-2 mt-4" size="lg">
             {updateSetting.isPending && <Loader2 size={16} className="animate-spin" />}
