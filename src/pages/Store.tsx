@@ -253,6 +253,13 @@ const Store = () => {
         </div>
       </div>
 
+      {!isLoading && (
+        <NewDropSection
+          products={newDropProducts.map(toProduct)}
+          onSelect={openProductById}
+        />
+      )}
+
       {/* Products */}
       <main id="best-sellers" className="max-w-[1200px] mx-auto px-4 pt-8 pb-10">
         <div className="text-center mb-6">
