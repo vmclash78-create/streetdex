@@ -311,15 +311,20 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
 };
 
 // ─── Product description / measurements ────────────────────────────────────
-const ProductDescription = () => {
+const DEFAULT_MEASUREMENTS: Measurement[] = [
+  { size: "P", chest: 54, length: 73, sleeve: 20 },
+  { size: "M", chest: 58, length: 75, sleeve: 22 },
+  { size: "G", chest: 62, length: 79, sleeve: 24 },
+  { size: "GG", chest: 66, length: 81, sleeve: 25 },
+  { size: "XG", chest: 70, length: 83, sleeve: 26 },
+];
+
+const ProductDescription = ({ description, measurements }: { description?: string; measurements?: Measurement[] }) => {
   const [open, setOpen] = useState(false);
-  const measurements = [
-    { size: "P", chest: 54, length: 73, sleeve: 20 },
-    { size: "M", chest: 58, length: 75, sleeve: 22 },
-    { size: "G", chest: 62, length: 79, sleeve: 24 },
-    { size: "GG", chest: 66, length: 81, sleeve: 25 },
-    { size: "XG", chest: 70, length: 83, sleeve: 26 },
-  ];
+  const rows = (measurements && measurements.length ? measurements : DEFAULT_MEASUREMENTS).filter(
+    (m) => m.chest != null || m.length != null || m.sleeve != null
+  );
+  const list = rows.length ? rows : DEFAULT_MEASUREMENTS;
   return (
     <div className="mt-4 rounded-xl border border-border/50 bg-card/60">
       <button
@@ -348,26 +353,32 @@ const ProductDescription = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {measurements.map((m) => (
+                  {list.map((m) => (
                     <tr key={m.size} className="border-t border-border/40">
                       <td className="px-2 py-1.5 font-bold text-foreground">{m.size}</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{m.chest} cm</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{m.length} cm</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{m.sleeve} cm</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.chest != null ? `${m.chest} cm` : "—"}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.length != null ? `${m.length} cm` : "—"}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.sleeve != null ? `${m.sleeve} cm` : "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-          <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
-            <p>Modelagem <span className="text-foreground font-semibold">oversized</span>. Modelo tem 1,80m e veste tamanho G.</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Camiseta <span className="text-foreground font-semibold">100% algodão</span>, gola canelada com 3cm.
-            Todas as peças são produzidas no Brasil.
-          </p>
+          {description ? (
+            <p className="text-xs text-muted-foreground whitespace-pre-line">{description}</p>
+          ) : (
+            <>
+              <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                <p>Modelagem <span className="text-foreground font-semibold">oversized</span>. Modelo tem 1,80m e veste tamanho G.</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Camiseta <span className="text-foreground font-semibold">100% algodão</span>, gola canelada com 3cm.
+                Todas as peças são produzidas no Brasil.
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>
