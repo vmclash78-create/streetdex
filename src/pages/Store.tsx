@@ -10,6 +10,8 @@ import CheckoutView from "@/components/store/CheckoutView";
 import OrderSuccessView from "@/components/store/OrderSuccessView";
 import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
+import FAQSection from "@/components/store/FAQSection";
+import NewDropSection from "@/components/store/NewDropSection";
 import { type CartItem, type AppView, infoStripImg, formatPrice, WHATSAPP } from "@/components/store/storeData";
 import { getWhatsAppLink } from "@/utils/whatsapp";
 import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
@@ -104,6 +106,22 @@ const Store = () => {
   }, [dbProducts, searchQuery, selectedCategory, selectedSizes, selectedPriceRange]);
 
   const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null || selectedCategory !== null;
+
+  const newDropProducts = useMemo(() => {
+    if (!dbProducts) return [];
+    return [...dbProducts]
+      .filter((p) => p.status === "active")
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 4);
+  }, [dbProducts]);
+
+  const openProductById = useCallback((pid: number) => {
+    const found = dbProducts?.find((p) => parseInt(p.id.slice(0, 8), 16) === pid);
+    if (found) {
+      setSelectedProduct(found);
+      setView("product");
+    }
+  }, [dbProducts]);
 
   const clearFilters = () => {
     setSelectedSizes([]);
@@ -235,6 +253,13 @@ const Store = () => {
         </div>
       </div>
 
+      {!isLoading && (
+        <NewDropSection
+          products={newDropProducts.map(toProduct)}
+          onSelect={openProductById}
+        />
+      )}
+
       {/* Products */}
       <main id="best-sellers" className="max-w-[1200px] mx-auto px-4 pt-8 pb-10">
         <div className="text-center mb-6">
@@ -332,6 +357,9 @@ const Store = () => {
           </div>
         )}
       </main>
+
+
+      <FAQSection />
 
       <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsappSupport} storeName={storeName} />
 
