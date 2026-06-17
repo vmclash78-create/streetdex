@@ -169,36 +169,13 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
           </div>
         </div>
 
-        {/* Display row */}
-        <div className="relative my-6 py-6 border-y border-border/40 overflow-hidden">
-          <div className="text-center">
-            <p className="font-display text-4xl md:text-6xl font-black uppercase tracking-[0.15em] text-foreground/[0.07] leading-none select-none">
-              STAY STREET · STAY {storeName?.toUpperCase() || "STREET DEX"} ·
-            </p>
-          </div>
-        </div>
-
-        {/* Payments + Copy */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-[0.6rem] uppercase tracking-[0.25em] text-muted-foreground font-bold">
-              Pagamento
-            </span>
-            <div className="flex items-center gap-1.5">
-              {["PIX", "VISA", "MASTER", "ELO", "AMEX"].map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[0.6rem] font-bold tracking-wider px-2 py-1 rounded border border-border/60 bg-background/40 text-muted-foreground"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-          <p className="text-[0.65rem] text-muted-foreground tracking-wider text-center md:text-right">
+        {/* Copy */}
+        <div className="pt-6 border-t border-border/40">
+          <p className="text-[0.65rem] text-muted-foreground tracking-wider text-center">
             © {year} <span className="text-foreground font-bold">{storeName || "Street Dex"}</span> — Todos os direitos reservados.
           </p>
         </div>
+
       </div>
     </footer>
   );
