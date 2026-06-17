@@ -108,6 +108,9 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
                 <span className="text-green-500 font-bold">{pixPrice(product.price, discount)}</span>{" "}
                 <span className="text-muted-foreground">com Pix</span>
               </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                ou até <span className="text-foreground font-semibold">2x de {formatPrice(product.price / 2)}</span> sem juros
+              </p>
             </div>
 
             {/* Sizes */}
