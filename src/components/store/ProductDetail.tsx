@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X, Truck, Ruler, Info, ChevronDown } from "lucide-react";
-import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
+import { type Product, type CartItem, type Measurement, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { getWhatsAppLink } from "@/utils/whatsapp";
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
@@ -161,10 +161,16 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </a>
 
             {/* Shipping (CEP) calculator */}
-            <ShippingCalculator freeShipping={!!product.freeShipping} />
+            <ShippingCalculator
+              freeShipping={!!product.freeShipping}
+              shippingConfigRaw={settings?.shipping_config}
+            />
 
             {/* Description / measurements */}
-            <ProductDescription />
+            <ProductDescription
+              description={product.description}
+              measurements={product.measurements}
+            />
           </div>
         </div>
 
@@ -196,11 +202,32 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 };
 
 // ─── Shipping (CEP) calculator ──────────────────────────────────────────────
-const ShippingCalculator = ({ freeShipping }: { freeShipping: boolean }) => {
+type RegionCfg = { pac_price: number; pac_days: string; sedex_price: number; sedex_days: string };
+const DEFAULT_SHIPPING: Record<string, RegionCfg> = {
+  NE: { pac_price: 19.9, pac_days: "5 a 8", sedex_price: 34.9, sedex_days: "2 a 4" },
+  SE: { pac_price: 24.9, pac_days: "6 a 9", sedex_price: 39.9, sedex_days: "3 a 5" },
+  S:  { pac_price: 29.9, pac_days: "8 a 11", sedex_price: 49.9, sedex_days: "4 a 6" },
+  CO: { pac_price: 27.9, pac_days: "7 a 10", sedex_price: 44.9, sedex_days: "3 a 5" },
+  N:  { pac_price: 34.9, pac_days: "10 a 15", sedex_price: 59.9, sedex_days: "5 a 8" },
+};
+const ufToRegion = (uf: string): keyof typeof DEFAULT_SHIPPING => {
+  if (["CE","PE","BA","MA","PI","RN","PB","AL","SE"].includes(uf)) return "NE";
+  if (["SP","RJ","MG","ES"].includes(uf)) return "SE";
+  if (["PR","SC","RS"].includes(uf)) return "S";
+  if (["GO","MT","MS","DF"].includes(uf)) return "CO";
+  return "N";
+};
+
+const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping: boolean; shippingConfigRaw?: string }) => {
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<null | { city: string; state: string; options: { name: string; days: string; price: string }[] }>(null);
   const [error, setError] = useState("");
+
+  let cfg: Record<string, RegionCfg> = DEFAULT_SHIPPING;
+  if (shippingConfigRaw) {
+    try { cfg = { ...DEFAULT_SHIPPING, ...JSON.parse(shippingConfigRaw) }; } catch { /* ignore */ }
+  }
 
   const formatCep = (v: string) => {
     const d = v.replace(/\D/g, "").slice(0, 8);
@@ -208,22 +235,13 @@ const ShippingCalculator = ({ freeShipping }: { freeShipping: boolean }) => {
   };
 
   const estimate = (uf: string) => {
-    const NE = ["CE", "PE", "BA", "MA", "PI", "RN", "PB", "AL", "SE"];
-    const N = ["AM", "PA", "AC", "RO", "RR", "AP", "TO"];
-    const CO = ["GO", "MT", "MS", "DF"];
-    const SE = ["SP", "RJ", "MG", "ES"];
-    const S = ["PR", "SC", "RS"];
-    let pac = 29.9, sedex = 49.9, dPac = "8 a 12", dSedex = "3 a 5";
-    if (NE.includes(uf)) { pac = 19.9; sedex = 34.9; dPac = "5 a 8"; dSedex = "2 a 4"; }
-    else if (SE.includes(uf)) { pac = 24.9; sedex = 39.9; dPac = "6 a 9"; dSedex = "3 a 5"; }
-    else if (S.includes(uf)) { pac = 29.9; sedex = 49.9; dPac = "8 a 11"; dSedex = "4 a 6"; }
-    else if (CO.includes(uf)) { pac = 27.9; sedex = 44.9; dPac = "7 a 10"; dSedex = "3 a 5"; }
-    else if (N.includes(uf)) { pac = 34.9; sedex = 59.9; dPac = "10 a 15"; dSedex = "5 a 8"; }
+    const r = cfg[ufToRegion(uf)] || DEFAULT_SHIPPING.SE;
     return [
-      { name: "PAC", days: `${dPac} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(pac) },
-      { name: "SEDEX", days: `${dSedex} dias úteis`, price: formatPrice(sedex) },
+      { name: "PAC", days: `${r.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(r.pac_price) },
+      { name: "SEDEX", days: `${r.sedex_days} dias úteis`, price: formatPrice(r.sedex_price) },
     ];
   };
+
 
   const handleCalc = async () => {
     const digits = cep.replace(/\D/g, "");
@@ -293,15 +311,20 @@ const ShippingCalculator = ({ freeShipping }: { freeShipping: boolean }) => {
 };
 
 // ─── Product description / measurements ────────────────────────────────────
-const ProductDescription = () => {
+const DEFAULT_MEASUREMENTS: Measurement[] = [
+  { size: "P", chest: 54, length: 73, sleeve: 20 },
+  { size: "M", chest: 58, length: 75, sleeve: 22 },
+  { size: "G", chest: 62, length: 79, sleeve: 24 },
+  { size: "GG", chest: 66, length: 81, sleeve: 25 },
+  { size: "XG", chest: 70, length: 83, sleeve: 26 },
+];
+
+const ProductDescription = ({ description, measurements }: { description?: string; measurements?: Measurement[] }) => {
   const [open, setOpen] = useState(false);
-  const measurements = [
-    { size: "P", chest: 54, length: 73, sleeve: 20 },
-    { size: "M", chest: 58, length: 75, sleeve: 22 },
-    { size: "G", chest: 62, length: 79, sleeve: 24 },
-    { size: "GG", chest: 66, length: 81, sleeve: 25 },
-    { size: "XG", chest: 70, length: 83, sleeve: 26 },
-  ];
+  const rows = (measurements && measurements.length ? measurements : DEFAULT_MEASUREMENTS).filter(
+    (m) => m.chest != null || m.length != null || m.sleeve != null
+  );
+  const list = rows.length ? rows : DEFAULT_MEASUREMENTS;
   return (
     <div className="mt-4 rounded-xl border border-border/50 bg-card/60">
       <button
@@ -330,26 +353,32 @@ const ProductDescription = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {measurements.map((m) => (
+                  {list.map((m) => (
                     <tr key={m.size} className="border-t border-border/40">
                       <td className="px-2 py-1.5 font-bold text-foreground">{m.size}</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{m.chest} cm</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{m.length} cm</td>
-                      <td className="px-2 py-1.5 text-muted-foreground">{m.sleeve} cm</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.chest != null ? `${m.chest} cm` : "—"}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.length != null ? `${m.length} cm` : "—"}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.sleeve != null ? `${m.sleeve} cm` : "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-          <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
-            <p>Modelagem <span className="text-foreground font-semibold">oversized</span>. Modelo tem 1,80m e veste tamanho G.</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Camiseta <span className="text-foreground font-semibold">100% algodão</span>, gola canelada com 3cm.
-            Todas as peças são produzidas no Brasil.
-          </p>
+          {description ? (
+            <p className="text-xs text-muted-foreground whitespace-pre-line">{description}</p>
+          ) : (
+            <>
+              <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                <p>Modelagem <span className="text-foreground font-semibold">oversized</span>. Modelo tem 1,80m e veste tamanho G.</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Camiseta <span className="text-foreground font-semibold">100% algodão</span>, gola canelada com 3cm.
+                Todas as peças são produzidas no Brasil.
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>

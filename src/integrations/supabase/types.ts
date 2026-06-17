@@ -285,10 +285,12 @@ export type Database = {
           colors: string[] | null
           cost: number | null
           created_at: string
+          description: string | null
           free_shipping: boolean | null
           id: string
           img: string
           img2: string | null
+          measurements: Json | null
           name: string
           old_price: number | null
           price: number
@@ -303,10 +305,12 @@ export type Database = {
           colors?: string[] | null
           cost?: number | null
           created_at?: string
+          description?: string | null
           free_shipping?: boolean | null
           id?: string
           img: string
           img2?: string | null
+          measurements?: Json | null
           name: string
           old_price?: number | null
           price: number
@@ -321,10 +325,12 @@ export type Database = {
           colors?: string[] | null
           cost?: number | null
           created_at?: string
+          description?: string | null
           free_shipping?: boolean | null
           id?: string
           img?: string
           img2?: string | null
+          measurements?: Json | null
           name?: string
           old_price?: number | null
           price?: number

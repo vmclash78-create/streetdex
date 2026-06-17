@@ -3,6 +3,7 @@ const CDN = "https://acdn-us.mitiendanube.com/stores/005/091/071";
 export const WHATSAPP = "88999999999"; // Número padrão para fallback (11 dígitos, DDD 88)
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
+export type Measurement = { size: string; chest?: number; length?: number; sleeve?: number };
 export type Product = {
   id: number;
   name: string;
@@ -13,6 +14,8 @@ export type Product = {
   sizes: string[];
   freeShipping?: boolean;
   colors?: string[];
+  description?: string;
+  measurements?: Measurement[];
 };
 
 export type CartItem = { cartId: string; product: Product; size: string; qty: number };
