@@ -161,10 +161,16 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </a>
 
             {/* Shipping (CEP) calculator */}
-            <ShippingCalculator freeShipping={!!product.freeShipping} />
+            <ShippingCalculator
+              freeShipping={!!product.freeShipping}
+              shippingConfigRaw={settings?.shipping_config}
+            />
 
             {/* Description / measurements */}
-            <ProductDescription />
+            <ProductDescription
+              description={product.description}
+              measurements={product.measurements}
+            />
           </div>
         </div>
 
