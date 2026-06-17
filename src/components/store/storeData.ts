@@ -16,6 +16,7 @@ export type Product = {
   colors?: string[];
   description?: string;
   measurements?: Measurement[];
+  stock?: number;
 };
 
 export type CartItem = { cartId: string; product: Product; size: string; qty: number };
