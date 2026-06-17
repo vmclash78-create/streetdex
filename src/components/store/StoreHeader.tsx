@@ -281,12 +281,15 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-primary/10 transition-colors"
+              className="h-9 w-9 rounded-full hover:bg-primary/10 hover:text-primary hover:scale-105 active:scale-95 transition-all duration-200 relative group"
               aria-label="Abrir menu de navegação"
+              aria-expanded={sidebarOpen}
               onClick={toggleSidebar}
             >
-              <Menu size={20} strokeWidth={1.5} />
+              <Menu size={20} strokeWidth={2} />
+              <span className="absolute inset-0 rounded-full ring-1 ring-primary/0 group-hover:ring-primary/40 transition-all" />
             </Button>
+
             <StreetDexLogo size="sm" />
           </div>
 
