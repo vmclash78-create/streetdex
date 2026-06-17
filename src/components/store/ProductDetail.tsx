@@ -62,9 +62,9 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
         {/* Mobile-visible sticky close button (the default X scrolls away on mobile) */}
         <DialogClose
           aria-label="Fechar"
-          className="md:hidden fixed top-3 right-3 z-50 h-10 w-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-foreground hover:bg-background active:scale-95 transition"
+          className="md:hidden fixed top-2 right-2 z-50 h-8 w-8 rounded-full bg-background/90 backdrop-blur-sm border border-border/60 shadow-md flex items-center justify-center text-foreground hover:bg-background active:scale-95 transition"
         >
-          <X className="h-5 w-5" />
+          <X className="h-3.5 w-3.5" />
         </DialogClose>
         <div className="flex flex-col md:flex-row">
           {/* Image section */}
