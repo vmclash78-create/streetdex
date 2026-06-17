@@ -159,6 +159,12 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
             </a>
+
+            {/* Shipping (CEP) calculator */}
+            <ShippingCalculator freeShipping={!!product.freeShipping} />
+
+            {/* Description / measurements */}
+            <ProductDescription />
           </div>
         </div>
 
