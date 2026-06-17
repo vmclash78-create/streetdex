@@ -1770,6 +1770,14 @@ const SettingsView = () => {
             </div>
           </div>
 
+          {/* Configuração de Frete por Região */}
+          <ShippingConfigEditor
+            getValue={getValue}
+            setLocal={(patch) => setLocalSettings({ ...localSettings, ...patch })}
+          />
+
+
+
           {/* Configurações de Notificação */}
           <div className="space-y-4 pt-4 border-t border-border">
             <h3 className="text-sm font-bold uppercase tracking-wider">Notificações</h3>
