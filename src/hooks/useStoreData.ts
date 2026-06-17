@@ -32,6 +32,8 @@ export type DBProduct = {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  description?: string | null;
+  measurements?: { size: string; chest?: number; length?: number; sleeve?: number }[] | null;
 };
 
 export type DBSale = {
