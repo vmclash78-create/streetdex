@@ -865,7 +865,27 @@ const ProductsView = () => {
                   />
                   <Label htmlFor="free_shipping" className="text-sm cursor-pointer">Oferecer Frete Grátis</Label>
                 </div>
+
+                {/* Descrição livre */}
+                <div className="pt-4 border-t border-border">
+                  <Label className="text-sm font-medium">Descrição do Produto</Label>
+                  <Textarea
+                    value={(editingProduct as any).description || ""}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value } as any)}
+                    className="mt-1 min-h-[100px]"
+                    placeholder="Ex: Camiseta 100% algodão, gola canelada com 3cm. Modelagem oversized. Modelo tem 1,80m e veste G."
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1">Aparece na seção "Descrição & Medidas" do produto na loja.</p>
+                </div>
+
+                {/* Tabela de medidas */}
+                <MeasurementsEditor
+                  sizes={editingProduct.sizes || []}
+                  value={((editingProduct as any).measurements as MeasurementRow[] | null) || []}
+                  onChange={(rows) => setEditingProduct({ ...editingProduct, measurements: rows } as any)}
+                />
               </div>
+
 
               <DialogFooter className="pt-4">
                 <Button variant="outline" onClick={() => setEditingProduct(null)}>Cancelar</Button>
