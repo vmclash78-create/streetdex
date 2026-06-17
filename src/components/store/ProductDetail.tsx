@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { MessageCircle, ShoppingCart, Heart, Check, Loader2 } from "lucide-react";
+import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { getWhatsAppLink } from "@/utils/whatsapp";
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
