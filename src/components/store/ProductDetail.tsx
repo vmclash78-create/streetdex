@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { MessageCircle, ShoppingCart, Heart, Check, Loader2 } from "lucide-react";
+import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { getWhatsAppLink } from "@/utils/whatsapp";
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,13 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
     <Dialog open onOpenChange={() => onBack()}>
       <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto bg-card border-border/50">
         <DialogTitle className="sr-only">{product.name}</DialogTitle>
+        {/* Mobile-visible sticky close button (the default X scrolls away on mobile) */}
+        <DialogClose
+          aria-label="Fechar"
+          className="md:hidden fixed top-3 right-3 z-50 h-10 w-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-foreground hover:bg-background active:scale-95 transition"
+        >
+          <X className="h-5 w-5" />
+        </DialogClose>
         <div className="flex flex-col md:flex-row">
           {/* Image section */}
           <div className="md:w-1/2 p-4">
