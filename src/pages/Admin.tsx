@@ -884,25 +884,21 @@ const ProductsView = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label className="text-sm font-medium">URL da Imagem Principal *</Label>
-                  <Input 
-                    value={editingProduct.img || ""} 
-                    onChange={(e) => setEditingProduct({ ...editingProduct, img: e.target.value })} 
-                    className="mt-1" 
-                    placeholder="https://exemplo.com/imagem.jpg"
-                  />
-                </div>
+                <ImageUploadField
+                  label="Imagem Principal"
+                  required
+                  value={editingProduct.img || ""}
+                  onChange={(url) => setEditingProduct({ ...editingProduct, img: url })}
+                  folder="products"
+                />
 
-                <div>
-                  <Label className="text-sm font-medium">URL da Imagem 2</Label>
-                  <Input 
-                    value={editingProduct.img2 || ""} 
-                    onChange={(e) => setEditingProduct({ ...editingProduct, img2: e.target.value || null })} 
-                    className="mt-1" 
-                    placeholder="https://exemplo.com/imagem2.jpg"
-                  />
-                </div>
+                <ImageUploadField
+                  label="Imagem 2 (opcional)"
+                  value={editingProduct.img2 || ""}
+                  onChange={(url) => setEditingProduct({ ...editingProduct, img2: url || null as any })}
+                  folder="products"
+                />
+
 
                 <div>
                   <Label className="text-sm font-medium">Categoria</Label>
