@@ -1057,16 +1057,20 @@ const BannersView = () => {
                 </div>
               )}
 
-              <div>
-                <Label>URL da Imagem *</Label>
-                <Input value={editing.img || ""} onChange={(e) => setEditing({ ...editing, img: e.target.value })} placeholder="https://..." className="mt-1" />
-              </div>
+              <ImageUploadField
+                label="Imagem do Banner"
+                required
+                value={editing.img || ""}
+                onChange={(url) => setEditing({ ...editing, img: url })}
+                folder="banners"
+              />
 
               {editing.img && (
                 <div className="rounded-lg border border-border overflow-hidden aspect-[16/9]">
                   <img src={editing.img} alt="Preview" className="w-full h-full object-cover" />
                 </div>
               )}
+
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
