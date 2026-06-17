@@ -107,6 +107,22 @@ const Store = () => {
 
   const hasActiveFilters = selectedSizes.length > 0 || selectedPriceRange !== null || selectedCategory !== null;
 
+  const newDropProducts = useMemo(() => {
+    if (!dbProducts) return [];
+    return [...dbProducts]
+      .filter((p) => p.status === "active")
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 4);
+  }, [dbProducts]);
+
+  const openProductById = useCallback((pid: number) => {
+    const found = dbProducts?.find((p) => parseInt(p.id.slice(0, 8), 16) === pid);
+    if (found) {
+      setSelectedProduct(found);
+      setView("product");
+    }
+  }, [dbProducts]);
+
   const clearFilters = () => {
     setSelectedSizes([]);
     setSelectedPriceRange(null);
