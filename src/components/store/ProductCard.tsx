@@ -100,7 +100,7 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 });
 
