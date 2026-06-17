@@ -195,4 +195,165 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
   );
 };
 
+// ─── Shipping (CEP) calculator ──────────────────────────────────────────────
+const ShippingCalculator = ({ freeShipping }: { freeShipping: boolean }) => {
+  const [cep, setCep] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<null | { city: string; state: string; options: { name: string; days: string; price: string }[] }>(null);
+  const [error, setError] = useState("");
+
+  const formatCep = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 8);
+    return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+  };
+
+  const estimate = (uf: string) => {
+    const NE = ["CE", "PE", "BA", "MA", "PI", "RN", "PB", "AL", "SE"];
+    const N = ["AM", "PA", "AC", "RO", "RR", "AP", "TO"];
+    const CO = ["GO", "MT", "MS", "DF"];
+    const SE = ["SP", "RJ", "MG", "ES"];
+    const S = ["PR", "SC", "RS"];
+    let pac = 29.9, sedex = 49.9, dPac = "8 a 12", dSedex = "3 a 5";
+    if (NE.includes(uf)) { pac = 19.9; sedex = 34.9; dPac = "5 a 8"; dSedex = "2 a 4"; }
+    else if (SE.includes(uf)) { pac = 24.9; sedex = 39.9; dPac = "6 a 9"; dSedex = "3 a 5"; }
+    else if (S.includes(uf)) { pac = 29.9; sedex = 49.9; dPac = "8 a 11"; dSedex = "4 a 6"; }
+    else if (CO.includes(uf)) { pac = 27.9; sedex = 44.9; dPac = "7 a 10"; dSedex = "3 a 5"; }
+    else if (N.includes(uf)) { pac = 34.9; sedex = 59.9; dPac = "10 a 15"; dSedex = "5 a 8"; }
+    return [
+      { name: "PAC", days: `${dPac} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(pac) },
+      { name: "SEDEX", days: `${dSedex} dias úteis`, price: formatPrice(sedex) },
+    ];
+  };
+
+  const handleCalc = async () => {
+    const digits = cep.replace(/\D/g, "");
+    setError(""); setResult(null);
+    if (digits.length !== 8) { setError("Digite um CEP válido (8 dígitos)."); return; }
+    setLoading(true);
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await r.json();
+      if (data.erro) { setError("CEP não encontrado."); return; }
+      setResult({ city: data.localidade, state: data.uf, options: estimate(data.uf) });
+    } catch {
+      setError("Erro ao consultar o CEP. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 rounded-xl border border-border/50 bg-card/60 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Truck size={16} className="text-primary" />
+        <p className="text-sm font-bold uppercase tracking-wider text-foreground">Meios de envio</p>
+      </div>
+      <div className="flex gap-2">
+        <Input
+          inputMode="numeric"
+          placeholder="Seu CEP"
+          value={cep}
+          onChange={(e) => setCep(formatCep(e.target.value))}
+          onKeyDown={(e) => e.key === "Enter" && handleCalc()}
+          maxLength={9}
+          className="flex-1"
+        />
+        <Button onClick={handleCalc} disabled={loading} className="font-bold tracking-wider uppercase">
+          {loading ? <Loader2 size={16} className="animate-spin" /> : "Calcular"}
+        </Button>
+      </div>
+      <a
+        href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-primary underline mt-2 inline-block"
+      >
+        Não sei meu CEP
+      </a>
+
+      {error && <p className="text-xs text-destructive mt-2">{error}</p>}
+
+      {result && (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs text-muted-foreground">Entrega para <span className="text-foreground font-semibold">{result.city} - {result.state}</span></p>
+          {result.options.map((o) => (
+            <div key={o.name} className="flex items-center justify-between rounded-lg border border-border/40 bg-background/40 px-3 py-2">
+              <div>
+                <p className="text-sm font-bold text-foreground">{o.name}</p>
+                <p className="text-[11px] text-muted-foreground">{o.days}</p>
+              </div>
+              <p className={`text-sm font-bold ${o.price === "Grátis" ? "text-green-500" : "text-foreground"}`}>{o.price}</p>
+            </div>
+          ))}
+          <p className="text-[10px] text-muted-foreground">* Valores estimados. O frete final é confirmado no checkout.</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Product description / measurements ────────────────────────────────────
+const ProductDescription = () => {
+  const [open, setOpen] = useState(false);
+  const measurements = [
+    { size: "P", chest: 54, length: 73, sleeve: 20 },
+    { size: "M", chest: 58, length: 75, sleeve: 22 },
+    { size: "G", chest: 62, length: 79, sleeve: 24 },
+    { size: "GG", chest: 66, length: 81, sleeve: 25 },
+    { size: "XG", chest: 70, length: 83, sleeve: 26 },
+  ];
+  return (
+    <div className="mt-4 rounded-xl border border-border/50 bg-card/60">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between p-4"
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-2">
+          <Ruler size={16} className="text-primary" />
+          <p className="text-sm font-bold uppercase tracking-wider text-foreground">Descrição & Medidas</p>
+        </div>
+        <ChevronDown size={18} className={`text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="px-4 pb-4 space-y-4">
+          <div>
+            <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wider">Tabela de medidas (cm)</p>
+            <div className="overflow-hidden rounded-lg border border-border/40">
+              <table className="w-full text-xs">
+                <thead className="bg-muted/40">
+                  <tr>
+                    <th className="px-2 py-1.5 text-left font-bold">Tam.</th>
+                    <th className="px-2 py-1.5 text-left font-bold">Largura</th>
+                    <th className="px-2 py-1.5 text-left font-bold">Compr.</th>
+                    <th className="px-2 py-1.5 text-left font-bold">Manga</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {measurements.map((m) => (
+                    <tr key={m.size} className="border-t border-border/40">
+                      <td className="px-2 py-1.5 font-bold text-foreground">{m.size}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.chest} cm</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.length} cm</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{m.sleeve} cm</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="flex items-start gap-2 text-xs text-muted-foreground">
+            <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
+            <p>Modelagem <span className="text-foreground font-semibold">oversized</span>. Modelo tem 1,80m e veste tamanho G.</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Camiseta <span className="text-foreground font-semibold">100% algodão</span>, gola canelada com 3cm.
+            Todas as peças são produzidas no Brasil.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default ProductDetail;
