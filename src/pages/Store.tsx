@@ -10,6 +10,8 @@ import CheckoutView from "@/components/store/CheckoutView";
 import OrderSuccessView from "@/components/store/OrderSuccessView";
 import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
+import FAQSection from "@/components/store/FAQSection";
+import NewDropSection from "@/components/store/NewDropSection";
 import { type CartItem, type AppView, infoStripImg, formatPrice, WHATSAPP } from "@/components/store/storeData";
 import { getWhatsAppLink } from "@/utils/whatsapp";
 import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
