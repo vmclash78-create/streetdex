@@ -14,6 +14,8 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
   const [hovered, setHovered] = useState(false);
   const { data: settings } = useStoreSettings();
   const discount = Number(settings?.pix_discount || "0");
+  const soldOut = typeof product.stock === "number" && product.stock <= 0;
+  const installments = product.price >= 60 ? 2 : 0;
 
   return (
     <div
@@ -22,11 +24,6 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
       onMouseLeave={() => setHovered(false)}
       className="group bg-card border border-border/50 overflow-hidden cursor-pointer relative flex flex-col rounded-lg card-glow transition-all duration-300"
     >
-  const soldOut = typeof product.stock === "number" && product.stock <= 0;
-  const installments = product.price >= 60 ? 2 : 0;
-
-  return (
-    <>
       {/* Image */}
       <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
