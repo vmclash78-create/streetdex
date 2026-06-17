@@ -43,6 +43,15 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
     document.body.style.overflow = "unset";
   };
 
+  // Close on ESC
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeSidebar();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarOpen]);
+
   return (
     <>
       {/* Sidebar Overlay */}
@@ -53,109 +62,211 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
               onClick={closeSidebar}
-              className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[100] cursor-pointer"
+              className="fixed inset-0 bg-background/70 backdrop-blur-md z-[100] cursor-pointer"
             />
-            <motion.div
+            <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-[300px] bg-background border-r border-border/50 z-[101] shadow-2xl flex flex-col"
+              transition={{ type: "spring", damping: 28, stiffness: 240 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu de navegação"
+              className="fixed inset-y-0 left-0 w-[88vw] max-w-[340px] z-[101] flex flex-col bg-background border-r border-primary/20 shadow-[8px_0_40px_-12px_hsl(var(--primary)/0.4)]"
             >
-              <div className="flex items-center justify-between p-5 border-b border-border/50">
-                <StreetDexLogo size="sm" />
-                <Button variant="ghost" size="icon" onClick={closeSidebar} aria-label="Fechar menu">
-                  <X size={20} />
-                </Button>
+              {/* Neon edge */}
+              <div className="absolute top-0 right-0 h-full w-px bg-gradient-to-b from-transparent via-primary/60 to-transparent" />
+
+              {/* Header with gradient */}
+              <div className="relative overflow-hidden border-b border-border/50">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent" />
+                <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/20 blur-3xl" />
+                <div className="relative flex items-center justify-between p-5">
+                  <div className="flex flex-col gap-1">
+                    <StreetDexLogo size="sm" />
+                    <p className="text-[0.6rem] uppercase tracking-[0.3em] text-primary/80 font-bold flex items-center gap-1">
+                      <Sparkles size={10} /> Streetwear Drop
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={closeSidebar}
+                    aria-label="Fechar menu"
+                    className="rounded-full hover:bg-primary/10 hover:rotate-90 transition-all duration-300"
+                  >
+                    <X size={20} />
+                  </Button>
+                </div>
+
+                {/* Quick search */}
+                <div className="relative px-5 pb-5">
+                  <Search size={14} className="absolute left-8 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type="text"
+                    placeholder="O que você procura?"
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="h-10 pl-9 pr-3 rounded-full bg-background/60 border-border/60 focus:border-primary/60 text-sm backdrop-blur-sm"
+                  />
+                </div>
               </div>
 
-              <nav className="flex-1 overflow-y-auto py-6">
-                <ul className="space-y-1">
-                  {navLinks.map((link) => {
-                    const isContact = link.key === "Contato";
-                    return (
-                      <li key={link.key}>
-                        {isContact ? (
-                          <a
-                            href={getWhatsAppLink(whatsappNumber)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={closeSidebar}
-                            className="flex items-center justify-between px-6 py-3.5 text-sm font-bold text-foreground hover:bg-primary/5 hover:text-primary transition-all duration-200 tracking-wider uppercase group"
+              <nav className="flex-1 overflow-y-auto py-4 scrollbar-none">
+                {/* Categorias em destaque (vem primeiro no mobile) */}
+                {categories.length > 0 && (
+                  <div className="px-5 mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tag size={12} className="text-primary" />
+                      <p className="text-[0.6rem] uppercase font-black text-primary tracking-[0.3em]">Categorias</p>
+                      <div className="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent" />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        onClick={() => { onCategoryChange(null); closeSidebar(); }}
+                        className={`group relative flex items-center justify-between py-2.5 px-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
+                          selectedCategory === null
+                            ? "bg-primary/10 text-primary"
+                            : "text-foreground/70 hover:text-primary hover:bg-primary/5"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {selectedCategory === null && (
+                            <motion.span layoutId="cat-indicator" className="w-1 h-4 bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary))]" />
+                          )}
+                          Todos os produtos
+                        </span>
+                        <ChevronRight size={12} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                      </button>
+                      {categories.map((cat, i) => {
+                        const active = selectedCategory === cat;
+                        return (
+                          <motion.button
+                            key={cat}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.05 + i * 0.025 }}
+                            onClick={() => { onCategoryChange(active ? null : cat); closeSidebar(); }}
+                            className={`group relative flex items-center justify-between py-2.5 px-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
+                              active
+                                ? "bg-primary/10 text-primary"
+                                : "text-foreground/70 hover:text-primary hover:bg-primary/5"
+                            }`}
                           >
-                            <span>{link.label}</span>
-                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-200" />
-                          </a>
-                        ) : (
-                          <button
-                            onClick={closeSidebar}
-                            className="flex items-center justify-between w-full text-left px-6 py-3.5 text-sm font-bold text-foreground hover:bg-primary/5 hover:text-primary transition-all duration-200 tracking-wider uppercase group"
-                          >
-                            <span>{link.label}</span>
-                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-200" />
-                          </button>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                            <span className="flex items-center gap-2">
+                              {active && (
+                                <motion.span layoutId="cat-indicator" className="w-1 h-4 bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary))]" />
+                              )}
+                              {cat}
+                            </span>
+                            <ChevronRight size={12} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-                <div className="mt-8 pt-8 border-t border-border/50">
-                  <ul className="space-y-1">
+                {/* Nav principal */}
+                <div className="px-5 mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <p className="text-[0.6rem] uppercase font-black text-muted-foreground tracking-[0.3em]">Navegação</p>
+                    <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+                  </div>
+                  <ul className="flex flex-col gap-0.5">
+                    {navLinks.map((link, i) => {
+                      const isContact = link.key === "Contato";
+                      const baseCls = "group flex items-center justify-between py-2.5 px-3 rounded-lg text-sm font-bold text-foreground/80 hover:text-primary hover:bg-primary/5 transition-all duration-200 tracking-wider uppercase";
+                      return (
+                        <motion.li
+                          key={link.key}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 + i * 0.04 }}
+                        >
+                          {isContact ? (
+                            <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" onClick={closeSidebar} className={baseCls}>
+                              <span>{link.label}</span>
+                              <ChevronRight size={12} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                            </a>
+                          ) : (
+                            <button onClick={closeSidebar} className={`${baseCls} w-full text-left`}>
+                              <span>{link.label}</span>
+                              <ChevronRight size={12} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                            </button>
+                          )}
+                        </motion.li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                {/* Acessos rápidos */}
+                <div className="px-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <p className="text-[0.6rem] uppercase font-black text-muted-foreground tracking-[0.3em]">Atalhos</p>
+                    <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+                  </div>
+                  <ul className="flex flex-col gap-1.5">
                     <li>
-                      <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3.5 hover:bg-primary/5 transition-all duration-200 group">
-                        <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+                      <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-primary/5 transition-all duration-200 group">
+                        <div className="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 group-hover:scale-105 transition-all">
                           <MessageCircle size={16} className="text-green-500" />
                         </div>
-                        <span className="text-sm font-bold text-foreground tracking-wide uppercase">WhatsApp</span>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-foreground tracking-wide uppercase">WhatsApp</span>
+                          <span className="text-[0.65rem] text-muted-foreground">Tire suas dúvidas</span>
+                        </div>
                       </a>
                     </li>
                     <li>
-                      <a href="/rastrear" onClick={closeSidebar} className="flex items-center gap-3 px-6 py-3.5 hover:bg-primary/5 transition-all duration-200 group">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <a href="/rastrear" onClick={closeSidebar} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-primary/5 transition-all duration-200 group">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-105 transition-all">
                           <Truck size={16} className="text-primary" />
                         </div>
-                        <span className="text-sm font-bold text-foreground tracking-wide uppercase">Rastrear pedido</span>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-foreground tracking-wide uppercase">Rastrear pedido</span>
+                          <span className="text-[0.65rem] text-muted-foreground">Acompanhe a entrega</span>
+                        </div>
                       </a>
                     </li>
                     <li>
-                      <button className="flex items-center gap-3 w-full px-6 py-3.5 hover:bg-primary/5 transition-all duration-200 group">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <button className="flex items-center gap-3 w-full p-2.5 rounded-lg hover:bg-primary/5 transition-all duration-200 group">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-105 transition-all">
                           <Heart size={16} className="text-primary" />
                         </div>
-                        <span className="text-sm font-bold text-foreground tracking-wide uppercase">Lista de desejos</span>
+                        <div className="flex flex-col text-left">
+                          <span className="text-xs font-bold text-foreground tracking-wide uppercase">Lista de desejos</span>
+                          <span className="text-[0.65rem] text-muted-foreground">Seus favoritos</span>
+                        </div>
                       </button>
                     </li>
                   </ul>
                 </div>
-
-                {categories.length > 0 && (
-                  <div className="mt-8 px-6">
-                    <p className="text-[0.65rem] uppercase font-black text-primary tracking-[0.3em] mb-4">Categorias</p>
-                    <div className="flex flex-col gap-1">
-                      {categories.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => {
-                            onCategoryChange(selectedCategory === cat ? null : cat);
-                            closeSidebar();
-                          }}
-                          className={`text-left py-2 text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
-                            selectedCategory === cat ? "text-primary neon-text" : "text-foreground/60 hover:text-primary"
-                          }`}
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </nav>
-            </motion.div>
+
+              {/* Footer */}
+              <div className="border-t border-border/50 p-5 bg-muted/20">
+                <p className="text-[0.6rem] uppercase tracking-[0.25em] text-muted-foreground mb-3 font-bold">Siga-nos</p>
+                <div className="flex items-center gap-2">
+                  <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:border-primary hover:bg-primary/10 hover:text-primary transition-all">
+                    <MessageCircle size={14} />
+                  </a>
+                  <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:border-primary hover:bg-primary/10 hover:text-primary transition-all">
+                    <Instagram size={14} />
+                  </a>
+                  <div className="ml-auto text-right">
+                    <p className="text-[0.6rem] uppercase tracking-wider text-muted-foreground">© Street Dex</p>
+                  </div>
+                </div>
+              </div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
+
 
       {/* Announcement bar */}
       <div className="bg-primary text-primary-foreground text-center py-1.5 text-[0.65rem] font-semibold tracking-[0.15em] uppercase">
