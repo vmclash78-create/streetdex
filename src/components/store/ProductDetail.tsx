@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X } from "lucide-react";
+import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X, Truck, Ruler, Info, ChevronDown } from "lucide-react";
 import { type Product, type CartItem, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { getWhatsAppLink } from "@/utils/whatsapp";
