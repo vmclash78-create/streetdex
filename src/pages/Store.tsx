@@ -61,6 +61,7 @@ const Store = () => {
     colors: p.colors || undefined,
     description: (p as any).description || undefined,
     measurements: (p as any).measurements || undefined,
+    stock: typeof p.stock === "number" ? p.stock : undefined,
   }), []);
 
   const addToCart = (item: CartItem) => {

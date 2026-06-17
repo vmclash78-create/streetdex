@@ -14,6 +14,8 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
   const [hovered, setHovered] = useState(false);
   const { data: settings } = useStoreSettings();
   const discount = Number(settings?.pix_discount || "0");
+  const soldOut = typeof product.stock === "number" && product.stock <= 0;
+  const installments = product.price >= 60 ? 2 : 0;
 
   return (
     <div
@@ -25,12 +27,12 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
       {/* Image */}
       <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
-          {product.oldPrice && (
+          {product.oldPrice && !soldOut && (
             <Badge variant="destructive" className="text-[0.6rem] px-2 py-0.5 rounded-sm font-bold tracking-wide">
               -{discountPct(product.oldPrice, product.price)}%
             </Badge>
           )}
-          {product.freeShipping && (
+          {product.freeShipping && !soldOut && (
             <Badge className="text-[0.6rem] px-2 py-0.5 rounded-sm bg-green-500 hover:bg-green-500 text-white font-semibold">
               Frete grátis
             </Badge>
@@ -41,26 +43,37 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
           src={hovered && product.img2 ? product.img2 : product.img}
           alt={product.name}
           loading="lazy"
-          className="w-full h-full object-cover product-img-zoom transition-opacity duration-300"
+          className={`w-full h-full object-cover product-img-zoom transition-opacity duration-300 ${soldOut ? "grayscale opacity-70" : ""}`}
           onError={(e) => { (e.target as HTMLImageElement).src = fallbackImg; }}
         />
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-end pb-3 gap-2">
-          <div className="flex flex-wrap gap-1 justify-center px-2">
-            {product.sizes.map((s) => (
-              <span key={s} className="text-[0.6rem] font-bold text-foreground/80 bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
-                {s}
-              </span>
-            ))}
+        {/* Sold-out overlay */}
+        {soldOut && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="bg-background/90 text-foreground border border-border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.25em] rounded-sm shadow-md">
+              Esgotado
+            </span>
           </div>
-          <Button size="sm" className="text-xs font-bold px-6 tracking-wider uppercase neon-glow gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
-            <ShoppingCart size={13} /> Comprar
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs font-medium px-5 text-foreground/80 hover:text-foreground gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
-            <Eye size={13} /> Espiar
-          </Button>
-        </div>
+        )}
+
+        {/* Hover overlay (hidden when sold out) */}
+        {!soldOut && (
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-end pb-3 gap-2">
+            <div className="flex flex-wrap gap-1 justify-center px-2">
+              {product.sizes.map((s) => (
+                <span key={s} className="text-[0.6rem] font-bold text-foreground/80 bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
+                  {s}
+                </span>
+              ))}
+            </div>
+            <Button size="sm" className="text-xs font-bold px-6 tracking-wider uppercase neon-glow gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
+              <ShoppingCart size={13} /> Comprar
+            </Button>
+            <Button variant="ghost" size="sm" className="text-xs font-medium px-5 text-foreground/80 hover:text-foreground gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
+              <Eye size={13} /> Espiar
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Info */}
@@ -80,6 +93,11 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
             <span className="text-green-500 font-bold">{pixPrice(product.price, discount)}</span>{" "}
             <span className="text-muted-foreground">com Pix</span>
           </p>
+          {installments > 0 && (
+            <p className="text-[0.65rem] text-muted-foreground mt-0.5">
+              ou <span className="text-foreground font-semibold">{installments}x de {formatPrice(product.price / installments)}</span> sem juros
+            </p>
+          )}
         </div>
       </div>
     </div>
