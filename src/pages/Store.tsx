@@ -59,6 +59,8 @@ const Store = () => {
     sizes: p.sizes,
     freeShipping: p.free_shipping,
     colors: p.colors || undefined,
+    description: (p as any).description || undefined,
+    measurements: (p as any).measurements || undefined,
   }), []);
 
   const addToCart = (item: CartItem) => {
