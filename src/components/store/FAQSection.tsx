@@ -34,7 +34,7 @@ const FAQS = [
 
 const FAQSection = () => {
   return (
-    <section className="bg-card/30 border-y border-border/50">
+    <section id="faq" className="bg-card/30 border-y border-border/50">
       <div className="max-w-[900px] mx-auto px-4 py-12">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
