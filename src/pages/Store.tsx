@@ -358,6 +358,9 @@ const Store = () => {
         )}
       </main>
 
+
+      <FAQSection />
+
       <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsappSupport} storeName={storeName} />
 
       {/* WhatsApp floating button */}
