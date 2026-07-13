@@ -1,20 +1,41 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Crown, Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const { user, isAdmin, loading, signIn } = useAuth();
   const navigate = useNavigate();
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Informe seu e-mail no campo acima para receber o link de recuperação.");
+      return;
+    }
+    setError("");
+    setResetLoading(true);
+    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetLoading(false);
+    if (resetErr) {
+      setError(resetErr.message);
+      return;
+    }
+    toast.success("Se este e-mail estiver cadastrado, você receberá um link em instantes.");
+  };
 
   useEffect(() => {
     if (!loading && user && isAdmin) {
@@ -93,6 +114,14 @@ const AuthPage = () => {
               {authLoading && <Loader2 size={15} className="animate-spin" />}
               Entrar
             </Button>
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={resetLoading}
+              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors text-center disabled:opacity-50"
+            >
+              {resetLoading ? "Enviando..." : "Esqueci minha senha"}
+            </button>
           </form>
         </CardContent>
         <CardFooter className="justify-center">
