@@ -12,6 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Lazy-load non-critical routes so the initial bundle stays small.
 const Admin = lazy(() => import("./pages/Admin"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const OrderTracking = lazy(() => import("./pages/OrderTracking"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
