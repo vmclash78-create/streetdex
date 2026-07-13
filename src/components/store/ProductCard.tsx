@@ -43,6 +43,7 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
           src={hovered && product.img2 ? product.img2 : product.img}
           alt={product.name}
           loading="lazy"
+          decoding="async"
           className={`w-full h-full object-cover product-img-zoom transition-opacity duration-300 ${soldOut ? "grayscale opacity-70" : ""}`}
           onError={(e) => { (e.target as HTMLImageElement).src = fallbackImg; }}
         />

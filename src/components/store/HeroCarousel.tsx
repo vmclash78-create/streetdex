@@ -43,6 +43,8 @@ const HeroCarousel = () => {
                 src={banner.img}
                 alt={`Carrossel ${i + 1}`}
                 loading={i === 0 ? "eager" : "lazy"}
+                fetchPriority={i === 0 ? "high" : "auto"}
+                decoding={i === 0 ? "sync" : "async"}
                 className="w-full object-cover object-center"
                 style={{ maxHeight: "75vh" }}
               />
