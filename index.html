@@ -33,7 +33,29 @@
     <meta name="twitter:description" content="Street Dex - Streetwear com estilo">
     <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3f2aac56-ca1b-485c-8141-4d80ab8ea3ed/id-preview-098f31f5--02afa7dd-34d1-4c0a-a5c8-341062776a88.lovable.app-1772720337526.png">
     <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3f2aac56-ca1b-485c-8141-4d80ab8ea3ed/id-preview-098f31f5--02afa7dd-34d1-4c0a-a5c8-341062776a88.lovable.app-1772720337526.png">
-  </head>
+  
+<style>
+/* Remove Lovable badge - Estilos para ocultar completamente o elemento e evitar vazamento visual ou de acessibilidade */
+#lovable-badge,
+[class*="lovable-badge"],
+[id*="lovable-badge"],
+iframe[src*="lovable"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  overflow: hidden !important;
+  z-index: -1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+}
+</style>
+</head>
 
 
   <body>
