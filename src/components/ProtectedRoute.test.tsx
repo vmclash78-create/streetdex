@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
-import { screen } from "@testing-library/dom";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -35,23 +34,23 @@ describe("ProtectedRoute", () => {
   });
 
   it("redirects unauthenticated users to /login", () => {
-    renderAt();
-    expect(screen.getByText("Login Page")).toBeInTheDocument();
+    const { getByText } = renderAt();
+    expect(getByText("Login Page")).toBeInTheDocument();
   });
 
   it("blocks authenticated but non-admin users", () => {
     authState.user = { id: "u1" };
     authState.isAdmin = false;
-    renderAt();
-    expect(screen.getByText(/Acesso Negado/i)).toBeInTheDocument();
-    expect(screen.queryByText("Admin Dashboard")).not.toBeInTheDocument();
+    const { getByText, queryByText } = renderAt();
+    expect(getByText(/Acesso Negado/i)).toBeInTheDocument();
+    expect(queryByText("Admin Dashboard")).not.toBeInTheDocument();
   });
 
   it("renders children for admin users", () => {
     authState.user = { id: "u1" };
     authState.isAdmin = true;
-    renderAt();
-    expect(screen.getByText("Admin Dashboard")).toBeInTheDocument();
+    const { getByText } = renderAt();
+    expect(getByText("Admin Dashboard")).toBeInTheDocument();
   });
 
   it("shows loader while auth is resolving", () => {
