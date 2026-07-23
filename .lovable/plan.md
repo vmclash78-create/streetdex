@@ -1,86 +1,141 @@
 
+## Fase 1 — Auditoria Arquitetural
 
-## Plano: Refatoração completa do layout da loja
+Total analisado: **~7.975 linhas** em 40 arquivos (excluindo `components/ui/*`, `integrations/supabase/types.ts` e testes). Nada foi modificado ainda.
 
-O Store.tsx atual tem 860 linhas em um único arquivo monolítico. A refatoração será dividida em componentes e incluirá um sistema de tema Light/Dark Mode.
+---
 
-### Estrutura de arquivos
+### 1. Ofensores por tamanho (violação clara de SRP)
+
+| Arquivo | Linhas | Problema principal |
+|---|---|---|
+| `src/pages/Admin.tsx` | **2.528** | 11 sub-views (`DashboardView`, `ProductsView`, `BannersView`, `SalesView`, `FinancesView`, `SettingsView`, `OrdersAdminView`, `CouponsView`, `MeasurementsEditor`, `ShippingConfigEditor`) declaradas dentro de um único arquivo. 58 hooks React distintos. Layout + roteamento + estado de UI + lógica de som + notificações + formulários. |
+| `src/integrations/supabase/types.ts` | 741 | Auto-gerado — não tocar. |
+| `src/components/store/CheckoutView.tsx` | **610** | Fluxo de 4 steps + validação + cupom + integração ViaCEP + integração Supabase + WhatsApp + estado do PIX, tudo no mesmo componente. |
+| `src/hooks/useStoreData.ts` | **423** | 7 domínios (produtos, banners, sales, expenses, coupons, settings, sale items) em 1 arquivo, com todos os tipos `DB*` co-localizados. |
+| `src/pages/Store.tsx` | 395 | Filtros + busca + categorias + listagem + navegação para checkout — precisa de sub-hook `useStoreCatalog`. |
+| `src/components/store/ProductDetail.tsx` | 387 | Modal + galeria + seletor de tamanho + medidas + CTAs — dividir. |
+| `src/components/store/StoreHeader.tsx` | 365 | Header desktop + menu mobile + busca + navegação de categorias. |
+
+**Meta pós-refactor:** nenhum arquivo de UI > 200 linhas; nenhum hook > 150 linhas.
+
+---
+
+### 2. Lógica de negócio dentro de UI
+
+- `CheckoutView.tsx` — cálculos de desconto (PIX, dinheiro, cupom), validação de cupom via RPC, chamada ViaCEP, montagem de payload do pedido, geração do link WhatsApp. Nada disso é apresentação.
+- `Admin.tsx` — cálculos financeiros (`FinancesView`), agregações de dashboard, desbloqueio de áudio, listeners de Realtime, dedup de pedidos, permissões — tudo misturado com JSX.
+- `Store.tsx` — filtros de preço/categoria/tamanho e ordenação implementados inline no componente da página.
+- `ProductDetail.tsx` — montagem da mensagem WhatsApp e cálculo de parcelamento.
+
+---
+
+### 3. Duplicação detectada
+
+| Padrão duplicado | Onde | Solução |
+|---|---|---|
+| `settings?.whatsapp_store \|\| settings?.whatsapp \|\| WHATSAPP` | CheckoutView, HeroCarousel, OrderSuccessView, StoreHeader (via prop) | Hook `useStoreWhatsapp()` |
+| `formatPrice` importado em 6 arquivos + reimplementado em Admin como local | Admin.tsx (linha 63) + storeData.ts | Mover para `src/lib/format.ts` e reusar |
+| `PAYMENT_METHODS` / `PAYMENT_LABELS` | CheckoutView (loja) e Admin (dashboard) — listas diferentes para o mesmo domínio | `src/constants/payments.ts` unificado |
+| Cálculo de desconto PIX/dinheiro | CheckoutView, CartView, ProductCard, ProductDetail | Utilitário `applyPaymentDiscount()` |
+| Padrão `useQuery`/`useMutation` + toast + invalidate | ~15 lugares em useStoreData/useOrders | Factory `createResource(table, keys)` |
+| Tipos `DB*` (Product, Sale, etc.) escritos à mão | useStoreData.ts | Derivar de `Database['public']['Tables']['x']['Row']` |
+| Fetch ViaCEP | Inline em CheckoutView | `src/services/viacep.ts` |
+| Montagem de link WhatsApp | 4 lugares — parcialmente centralizado em `utils/whatsapp.ts` | Consolidar 100% |
+
+---
+
+### 4. Prop drilling / estado mal posicionado
+
+- `Admin.tsx` passa `somLiberado` + `testarNotificacao` para `OrdersAdminView` — som/notificação deveria ser um hook `useOrderNotifications()`.
+- `Store.tsx` faz drilling de `cart` + `setCart` + `searchQuery` + `selectedCategory` para 4+ componentes → candidato a `StoreContext` ou hook `useCart()` (server-side sync futuro).
+- `StoreHeader` recebe 8 props que são todas do mesmo domínio "estado da loja" → mesmo `StoreContext`.
+
+---
+
+### 5. Naming / clareza
+
+| Atual | Sugerido | Motivo |
+|---|---|---|
+| `useStoreData.ts` (arquivo com 7 domínios) | quebrar em `hooks/products/`, `hooks/sales/`, etc. | Não é um "hook" — é um módulo |
+| `useOrders.ts` exportando `ORDER_STATUSES`, `getStatusInfo`, `DBOrder` | separar tipos e constants | Hook não deve exportar constantes de domínio |
+| `somLiberado` / `testarNotificacao` | `isAudioUnlocked` / `playTestNotification` | Consistência PT/EN + prefixo `is` |
+| `storeData.ts` (componente e dados juntos) | `constants/store.ts` + `types/store.ts` | Mistura tipos, constantes e helpers |
+| `Store.tsx` variável `data` genérica em vários hooks | nomes específicos (`products`, `banners`) | Legibilidade |
+| `MeasurementsEditor` dentro de Admin | próprio arquivo em `features/admin/products/` | Reuso e testes |
+
+---
+
+### 6. Estrutura por feature (proposta — profundidade Completa)
 
 ```text
 src/
-├── components/store/
-│   ├── StoreHeader.tsx        (topbar fixa: logo + busca + carrinho)
-│   ├── HeroCarousel.tsx       (carrossel compacto, max-height: 70vh)
-│   ├── ProductCard.tsx        (cards menores e compactos)
-│   ├── ProductDetail.tsx      (modal/página side-by-side no desktop)
-│   ├── CartView.tsx           (carrinho)
-│   ├── CookieConsent.tsx      (banner cookies)
-│   ├── StoreFooter.tsx        (footer)
-│   └── ThemeToggle.tsx        (botão light/dark mode)
-├── contexts/
-│   └── ThemeContext.tsx        (provider de tema com localStorage)
-├── pages/
-│   └── Store.tsx              (orquestrador simplificado)
+├── app/                          # App.tsx, providers, router
+├── features/
+│   ├── admin/
+│   │   ├── dashboard/            # DashboardView + hooks
+│   │   ├── products/             # ProductsView, ProductForm, MeasurementsEditor
+│   │   ├── banners/
+│   │   ├── sales/
+│   │   ├── finances/
+│   │   ├── coupons/
+│   │   ├── orders/               # OrdersAdminView + useOrderNotifications
+│   │   ├── settings/             # SettingsView, ShippingConfigEditor
+│   │   └── index.ts              # barrel
+│   ├── auth/                     # useAuth, ProtectedRoute, AuthPage, ResetPassword
+│   ├── storefront/
+│   │   ├── catalog/              # Store.tsx (Page), useStoreCatalog, filters
+│   │   ├── product/              # ProductCard, ProductDetail, gallery
+│   │   ├── cart/                 # CartView, useCart
+│   │   ├── checkout/             # CheckoutView + subcomponentes por step
+│   │   ├── order-tracking/
+│   │   ├── layout/               # StoreHeader, StoreFooter, HeroCarousel, FAQ
+│   │   └── index.ts
+│   └── notifications/            # notification-sounds + useOrderNotifications
+├── shared/
+│   ├── components/               # ImageUploadField, ThemeToggle, Logos
+│   ├── ui/                       # shadcn (não tocar)
+│   ├── hooks/                    # use-mobile, use-toast
+│   └── constants/                # payments, sizes, statuses
+├── lib/                          # utils, format, cn
+├── services/                     # supabase client, viacep, whatsapp
+├── types/                        # DB* derivados
+└── pages/                        # apenas mount de features (thin)
 ```
 
-### Mudanças principais
+---
 
-**1. Header compacto e fixo**
-- Remover as duas announcement bars separadas e o nav bar, consolidar em um header `fixed top-0` com altura reduzida (~56px)
-- Layout: Logo à esquerda | Campo de busca centralizado (com ícone Search) | Carrinho à direita
-- Menu hambúrguer movido para dentro do header (mobile only)
-- Announcement bar fica acima do header fixo como um banner dismissível fino
+### 7. Plano de execução proposto (Fases 2–5, após sua aprovação)
 
-**2. Hero Carousel compacto**
-- `max-height: 70vh` com `object-fit: cover` e `object-position: center`
-- Padding-top para compensar header fixo
-- CTA button centralizado com estilo roxo
+Ordem sugerida (menor risco → maior risco), cada bloco commitável isoladamente:
 
-**3. Best Sellers - Grid compacto**
-- Cards menores: reduzir aspect-ratio de `4/5` para `3/4`, padding de `p-3` para `p-2`
-- Grid: `lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1`
-- Imagens com altura máxima menor
-- Reduzir margens da seção (pt-6 pb-8 em vez de pt-8 pb-12)
-- Gap reduzido de `gap-4` para `gap-3`
+1. **Constantes/tipos/serviços** — mover `formatPrice`, `PAYMENT_METHODS`, tipos `DB*`, `viacep.ts`, `whatsapp.ts`. Zero mudança de comportamento.
+2. **Quebrar `useStoreData.ts`** em `hooks/products.ts`, `hooks/sales.ts`, etc. + barrel para manter imports atuais funcionando durante transição.
+3. **Storefront**: extrair `useStoreCatalog`, `useCart`, `useStoreWhatsapp`. Dividir `Store.tsx`, `ProductDetail.tsx`, `StoreHeader.tsx`.
+4. **Checkout**: dividir `CheckoutView` em `Step1Customer`, `Step2Address`, `Step3Payment`, `Step4Confirm` + hook `useCheckoutForm` + `useCoupon`.
+5. **Admin**: extrair cada `*View` para `features/admin/<domain>/*View.tsx`, extrair `useOrderNotifications`, `useFinances`.
+6. **Reorganização por feature** + barrel exports + atualização de todos os imports (codemod com `sed` + verificação `tsgo`).
+7. **Naming pass** final + JSDoc nos hooks públicos.
 
-**4. Product Detail - Layout lado a lado**
-- No desktop: flex row com imagem à esquerda (max-width: 500px) e informações à direita
-- Modal com overlay (z-index: 60), centralizado
-- No mobile: mantém layout vertical compacto
-- Imagem principal limitada a `max-w-[500px]`
+---
 
-**5. Sistema de Tema (Light/Dark Mode)**
-- ThemeContext com provider que lê/salva no localStorage
-- Classe `dark` aplicada no `<html>` element
-- Botão toggle (Sun/Moon icon) no header
-- CSS vars já existem no index.css para `.dark` - ajustar valores:
-  - Light: fundo branco, botões roxo, texto preto
-  - Dark: fundo #0a0a0a, secundário #1a1a1a, destaque roxo, texto branco
-- Transição suave: `transition-colors duration-300` no body
-- Ajustar hardcoded `style={{ background: "hsl(270,...)" }}` para usar CSS vars
+### 8. Riscos e sinalizações
 
-**6. Ajustes gerais**
-- Reduzir espaçamentos globais (seções, gaps, paddings)
-- Padronizar tipografia usando font-sans do Tailwind
-- Remover inline styles e migrar para classes Tailwind/CSS vars para suporte correto ao tema
-- Footer e ticker bar: usar CSS vars em vez de cores hardcoded
+- **Checkout e RPC `create_storefront_order`** — não mudar assinaturas nem ordem de campos. Testar fluxo end-to-end via Playwright após cada mudança.
+- **Realtime de pedidos no Admin** — o canal `admin-order-notifications-v2` deve ser preservado exatamente (Supabase Realtime é sensível a nome/config).
+- **`ProtectedRoute` tem teste** (`ProtectedRoute.test.tsx`) — manter contrato.
+- **`storeData.ts`** exporta `WHATSAPP`, `fallbackImg`, `formatPrice`, `pixPrice`, `discountPct`, `heroBanners`, `type Product`, `type CartItem`, `type Measurement` — importados por 7 arquivos; a transição precisa de re-exports temporários.
+- **`Admin.tsx`** com 58 hooks é um alvo de alta chance de regressão em som/Realtime — separar em PR próprio.
+- **Nada de mudança visual, de rota (`/`, `/loja`, `/admin`, `/auth`, `/reset-password`, `/track-order`, `/order-tracking/:id`), ou de assinatura de RPC.**
 
-### Detalhes técnicos
+---
 
-- O sistema de tema usará `next-themes` (já instalado) com `ThemeProvider` envolvendo o App
-- Todos os inline `style={{ background: "hsl(270, ...)" }}` no Store e Admin serão substituídos por CSS custom properties que respondem ao tema
-- As CSS vars `.dark` no `index.css` serão refinadas para os tons preto/roxo especificados
-- A transição entre temas terá `transition: background-color 0.3s, color 0.3s` no body
+### O que preciso de você antes da Fase 2
 
-### Ordem de implementação
+1. **Aprovação do mapa** acima (ou correções).
+2. **Confirmação de que posso mover arquivos** (a estrutura `features/*` implica renomear/mover ~30 arquivos; git mantém o histórico, mas quero seu OK explícito).
+3. **Escolha de estratégia de transição** para os re-exports:
+   - (a) *Big-bang*: mover tudo e atualizar todos os imports em cada PR — mais limpo, mais volumoso.
+   - (b) *Barrel-bridge*: manter re-exports em `storeData.ts`/`useStoreData.ts` apontando para os novos módulos por 1–2 iterações — mais seguro, deixa dívida temporária.
 
-1. Configurar ThemeProvider (next-themes) no App.tsx e criar ThemeToggle
-2. Ajustar CSS vars em index.css para light/dark adequados (preto + roxo)
-3. Extrair componentes do Store.tsx em arquivos separados
-4. Refatorar Header (fixo, compacto, com busca e toggle de tema)
-5. Refatorar HeroCarousel (compacto, 70vh)
-6. Refatorar ProductCard e grid Best Sellers (compacto)
-7. Refatorar ProductDetail (layout side-by-side desktop, modal)
-8. Migrar inline styles para CSS vars em todo o projeto
-9. Ajustes finais de espaçamento e proporção
-
+Ao aprovar, começo pela Fase 2 na ordem descrita, um bloco por vez, com verificação de build a cada passo.
