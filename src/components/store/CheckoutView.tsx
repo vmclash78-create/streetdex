@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Co
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, formatPrice, fallbackImg, WHATSAPP } from "./storeData";
 import { useCreateOrder } from "@/hooks/useOrders";
-import { useStoreSettings, useCoupons, useUpsertCoupon, type DBCoupon } from "@/hooks/useStoreData";
+import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
+import { supabase } from "@/integrations/supabase/client";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
