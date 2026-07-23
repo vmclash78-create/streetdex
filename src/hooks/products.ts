@@ -31,7 +31,7 @@ export const useProducts = () => {
         .select("*")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data as DBProduct[];
+      return data as unknown as DBProduct[];
     },
   });
 };
@@ -45,7 +45,7 @@ export const useAdminProducts = () => {
         .select("*")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data as DBProduct[];
+      return data as unknown as DBProduct[];
     },
   });
 };
