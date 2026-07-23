@@ -33,8 +33,8 @@ const PIX_KEY = "Sua Chave PIX"; // Default fallback
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
-  const { data: coupons } = useCoupons();
-  const upsertCoupon = useUpsertCoupon();
+
+
   
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
