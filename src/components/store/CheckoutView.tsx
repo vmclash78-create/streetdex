@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Co
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, formatPrice, fallbackImg, WHATSAPP } from "./storeData";
 import { useCreateOrder } from "@/hooks/useOrders";
-import { useStoreSettings, useCoupons, useUpsertCoupon, type DBCoupon } from "@/hooks/useStoreData";
+import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
+import { supabase } from "@/integrations/supabase/client";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,8 @@ const PIX_KEY = "Sua Chave PIX"; // Default fallback
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
-  const { data: coupons } = useCoupons();
-  const upsertCoupon = useUpsertCoupon();
+
+
   
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
@@ -169,51 +170,54 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     }
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
-    
     setIsApplyingCoupon(true);
-    
-    const coupon = coupons?.find(c => c.code.toUpperCase() === couponCode.trim().toUpperCase());
-    
-    if (!coupon) {
-      toast({ title: "Cupom inválido", description: "O código informado não existe.", variant: "destructive" });
+
+    const { data, error } = await supabase.rpc("validate_coupon", {
+      p_code: couponCode.trim(),
+      p_total: total,
+    });
+
+    if (error) {
+      toast({ title: "Erro ao validar cupom", description: error.message, variant: "destructive" });
       setIsApplyingCoupon(false);
       return;
     }
-    
-    if (coupon.status !== "active") {
-      toast({ title: "Cupom inativo", description: "Este cupom não está mais ativo.", variant: "destructive" });
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row || !row.valid) {
+      const reason = row?.reason;
+      const messages: Record<string, { title: string; description: string }> = {
+        not_found: { title: "Cupom inválido", description: "O código informado não existe." },
+        inactive: { title: "Cupom inativo", description: "Este cupom não está mais ativo." },
+        expired: { title: "Cupom expirado", description: "Este cupom já expirou." },
+        limit_reached: { title: "Limite atingido", description: "Este cupom já atingiu o limite de usos." },
+        min_purchase: { title: "Valor mínimo não atingido", description: `O valor mínimo para este cupom é ${formatPrice(row?.min_purchase_amount ?? 0)}.` },
+      };
+      const msg = messages[reason] || { title: "Cupom inválido", description: "Não foi possível aplicar este cupom." };
+      toast({ ...msg, variant: "destructive" });
       setIsApplyingCoupon(false);
       return;
     }
-    
-    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
-      toast({ title: "Cupom expirado", description: "Este cupom já expirou.", variant: "destructive" });
-      setIsApplyingCoupon(false);
-      return;
-    }
-    
-    if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses) {
-      toast({ title: "Limite atingido", description: "Este cupom já atingiu o limite de usos.", variant: "destructive" });
-      setIsApplyingCoupon(false);
-      return;
-    }
-    
-    if (total < coupon.min_purchase_amount) {
-      toast({ 
-        title: "Valor mínimo não atingido", 
-        description: `O valor mínimo para este cupom é ${formatPrice(coupon.min_purchase_amount)}.`, 
-        variant: "destructive" 
-      });
-      setIsApplyingCoupon(false);
-      return;
-    }
-    
-    setAppliedCoupon(coupon);
+
+    setAppliedCoupon({
+      id: row.id,
+      code: row.code,
+      discount_type: row.discount_type,
+      discount_value: Number(row.discount_value),
+      min_purchase_amount: Number(row.min_purchase_amount),
+      max_uses: null,
+      used_count: 0,
+      expires_at: null,
+      status: "active",
+      created_at: "",
+      updated_at: "",
+    } as DBCoupon);
     setIsApplyingCoupon(false);
     toast({ title: "Cupom aplicado!", description: "O desconto foi aplicado ao seu pedido." });
   };
+
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
@@ -256,12 +260,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
       // Update coupon usage if applicable
       if (appliedCoupon) {
-        await upsertCoupon.mutateAsync({
-          id: appliedCoupon.id,
-          used_count: appliedCoupon.used_count + 1,
-          status: appliedCoupon.max_uses !== null && appliedCoupon.used_count + 1 >= appliedCoupon.max_uses ? "inactive" : "active"
-        });
+        await supabase.rpc("redeem_coupon", { p_id: appliedCoupon.id });
       }
+
 
       onOrderComplete(order.id, order.order_number);
 
