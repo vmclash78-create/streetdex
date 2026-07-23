@@ -138,6 +138,11 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       return false;
     }
 
+    if (!selectedShipping) {
+      toast({ title: "Selecione o frete", description: "Confirme o CEP para calcular o frete e escolha uma opção de entrega.", variant: "destructive" });
+      return false;
+    }
+
     return true;
   };
 
