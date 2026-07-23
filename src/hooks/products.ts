@@ -20,6 +20,7 @@ export type DBProduct = {
   updated_at: string;
   description?: string | null;
   measurements?: { size: string; chest?: number; length?: number; sleeve?: number }[] | null;
+  shipping_cost?: number;
 };
 
 export const useProducts = () => {
