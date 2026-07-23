@@ -45,20 +45,26 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [notes, setNotes] = useState("");
   const [pixConfirmed, setPixConfirmed] = useState(false);
-  
+
+  // Shipping (auto by CEP → region)
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [shippingLoc, setShippingLoc] = useState<{ city: string; uf: string } | null>(null);
+
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<DBCoupon | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
-  
+
   const createOrder = useCreateOrder();
   const { toast } = useToast();
 
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
-  
+  const allItemsFreeShipping = cartItems.length > 0 && cartItems.every((i) => !!i.product.freeShipping);
+
   const couponDiscountAmount = useMemo(() => {
     if (!appliedCoupon) return 0;
-    
+
     if (appliedCoupon.discount_type === "percentage") {
       return total * (appliedCoupon.discount_value / 100);
     } else {
@@ -67,12 +73,14 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   }, [appliedCoupon, total]);
 
   const totalAfterCoupon = total - couponDiscountAmount;
+  const shippingCost = selectedShipping ? selectedShipping.price : 0;
 
   const finalTotal = useMemo(() => {
-    if (paymentMethod === "pix") return totalAfterCoupon * (1 - pixDiscount);
-    if (paymentMethod === "dinheiro") return totalAfterCoupon * (1 - cashDiscount);
-    return totalAfterCoupon;
-  }, [totalAfterCoupon, paymentMethod, pixDiscount, cashDiscount]);
+    let subtotal = totalAfterCoupon;
+    if (paymentMethod === "pix") subtotal = subtotal * (1 - pixDiscount);
+    else if (paymentMethod === "dinheiro") subtotal = subtotal * (1 - cashDiscount);
+    return subtotal + shippingCost;
+  }, [totalAfterCoupon, paymentMethod, pixDiscount, cashDiscount, shippingCost]);
 
 
 
