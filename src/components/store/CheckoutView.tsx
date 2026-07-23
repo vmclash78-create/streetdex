@@ -160,7 +160,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }
 
       const data = validation.data;
-      
+
       setAddress(prev => ({
         ...prev,
         street: data.logradouro || prev.street,
@@ -168,6 +168,13 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         city: data.localidade || prev.city
       }));
       setOfficialStreet(data.logradouro || null);
+
+      // Calcula opções de frete automaticamente pela região do CEP
+      const cfg = parseShippingConfig(settings?.shipping_config);
+      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
+      setShippingOptions(opts);
+      setSelectedShipping(opts[0] || null);
+      setShippingLoc({ city: data.localidade, uf: data.uf });
 
       toast({
         title: "CEP localizado",
