@@ -55,24 +55,14 @@ import {
   isLegacyUrlValue,
   type SoundPresetId,
 } from "@/lib/notification-sounds";
+import { formatPrice, formatDate } from "@/lib/format";
+import {
+  ADMIN_PAYMENT_METHODS as PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS as PAYMENT_LABELS,
+} from "@/constants/payments";
+import { EXPENSE_CATEGORIES } from "@/constants/expenses";
 
 type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "coupons" | "finances" | "settings";
-
-const formatPrice = (v: number) => `R$${Number(v).toFixed(2).replace(".", ",")}`;
-const formatDate = (d: string) => {
-  const date = new Date(d + "T12:00:00");
-  return date.toLocaleDateString("pt-BR");
-};
-
-const PAYMENT_METHODS = ["dinheiro", "pix", "cartão crédito", "cartão débito", "transferência"];
-const PAYMENT_LABELS: Record<string, string> = {
-  pix: "PIX",
-  dinheiro: "Dinheiro",
-  "cartão crédito": "Cartão Crédito",
-  "cartão débito": "Cartão Débito",
-  transferência: "Transferência"
-};
-const EXPENSE_CATEGORIES = ["Fornecedores", "Marketing", "Logística", "Aluguel", "Embalagens", "Funcionários", "Impostos", "Outros"];
 
 const statusColors: Record<string, string> = {
   active: "bg-green-500/20 text-green-600 dark:text-green-400",

@@ -23,9 +23,9 @@ export type CartItem = { cartId: string; product: Product; size: string; qty: nu
 export type AppView = "store" | "cart" | "product" | "checkout" | "order-success";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
-export const formatPrice = (v: number) => `R$${v.toFixed(2).replace(".", ",")}`;
-export const pixPrice = (v: number, discountPct: number = 2) => `R$${(v * (1 - discountPct / 100)).toFixed(2).replace(".", ",")}`;
-export const discountPct = (old: number, cur: number) => Math.round(((old - cur) / old) * 100);
+// Fonte real vive em `@/lib/format`. Re-exportamos aqui como barrel-bridge
+// para não quebrar os 6+ arquivos que ainda importam de `./storeData`.
+export { formatPrice, pixPrice, discountPct } from "@/lib/format";
 export const fallbackImg = "https://placehold.co/400x500/f3f4f6/999?text=Produto";
 
 // ─── NAV LINKS ───────────────────────────────────────────────────────────────

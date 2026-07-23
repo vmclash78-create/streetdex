@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
-import { type CartItem, formatPrice, fallbackImg, WHATSAPP } from "./storeData";
+import { type CartItem, fallbackImg, WHATSAPP } from "./storeData";
+import { formatPrice } from "@/lib/format";
+import { CHECKOUT_PAYMENT_OPTIONS as PAYMENT_METHODS } from "@/constants/payments";
 import { useCreateOrder } from "@/hooks/useOrders";
 import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,13 +25,8 @@ interface CheckoutViewProps {
 
 type Step = 1 | 2 | 3 | 4;
 
-const PAYMENT_METHODS = [
-  { value: "pix", label: "PIX", description: "Pagamento instantâneo com desconto" },
-  { value: "dinheiro", label: "Dinheiro na entrega", description: "Pague ao receber o pedido" },
-  { value: "cartao", label: "Cartão na entrega", description: "Débito ou crédito na entrega" },
-];
-
-const PIX_KEY = "Sua Chave PIX"; // Default fallback
+/** Chave PIX de fallback quando a loja não configurou uma em settings. */
+const PIX_KEY = "Sua Chave PIX";
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { data: settings } = useStoreSettings();
