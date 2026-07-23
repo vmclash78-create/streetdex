@@ -421,6 +421,50 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                 <Input value={address.complement} onChange={(e) => setAddress({ ...address, complement: e.target.value })} placeholder="Apto 101" className="mt-1" />
               </div>
             </div>
+
+            {/* Cálculo automático de frete pelo CEP */}
+            <div className="rounded-xl border border-border/60 bg-card/60 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Truck size={16} className="text-primary" />
+                <p className="text-sm font-bold uppercase tracking-wider text-foreground">Frete</p>
+              </div>
+              {shippingOptions.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Informe o CEP acima para calcular o frete automaticamente.
+                </p>
+              ) : (
+                <>
+                  {shippingLoc && (
+                    <p className="text-xs text-muted-foreground">
+                      Entrega para <span className="text-foreground font-semibold">{shippingLoc.city} - {shippingLoc.uf}</span>
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    {shippingOptions.map((o) => {
+                      const active = selectedShipping?.name === o.name;
+                      return (
+                        <button
+                          key={o.name}
+                          type="button"
+                          onClick={() => setSelectedShipping(o)}
+                          className={`w-full text-left rounded-lg border px-3 py-2 flex items-center justify-between transition-colors ${
+                            active ? "border-primary bg-primary/10" : "border-border/50 bg-background/40 hover:bg-muted/40"
+                          }`}
+                        >
+                          <div>
+                            <p className="text-sm font-bold text-foreground">{o.name}</p>
+                            <p className="text-[11px] text-muted-foreground">{o.days}</p>
+                          </div>
+                          <p className={`text-sm font-bold ${o.free ? "text-green-500" : "text-foreground"}`}>
+                            {o.free ? "Grátis" : formatPrice(o.price)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
 
