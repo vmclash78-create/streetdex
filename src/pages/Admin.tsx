@@ -518,6 +518,7 @@ const ProductsView = () => {
       status: "active", 
       stock: 0, 
       free_shipping: true, 
+      shipping_cost: 0,
       category: "" 
     });
     setLocalMargin("");
