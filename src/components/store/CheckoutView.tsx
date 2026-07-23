@@ -260,12 +260,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
       // Update coupon usage if applicable
       if (appliedCoupon) {
-        await upsertCoupon.mutateAsync({
-          id: appliedCoupon.id,
-          used_count: appliedCoupon.used_count + 1,
-          status: appliedCoupon.max_uses !== null && appliedCoupon.used_count + 1 >= appliedCoupon.max_uses ? "inactive" : "active"
-        });
+        await supabase.rpc("redeem_coupon", { p_id: appliedCoupon.id });
       }
+
 
       onOrderComplete(order.id, order.order_number);
 
