@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X, Truck } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, fallbackImg, WHATSAPP } from "./storeData";
 import { formatPrice } from "@/lib/format";
@@ -7,6 +7,7 @@ import { CHECKOUT_PAYMENT_OPTIONS as PAYMENT_METHODS } from "@/constants/payment
 import { useCreateOrder } from "@/hooks/useOrders";
 import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
 import { supabase } from "@/integrations/supabase/client";
+import { parseShippingConfig, estimateShippingOptions, type ShippingOption } from "@/lib/shipping";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
