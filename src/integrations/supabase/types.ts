@@ -579,6 +579,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      redeem_coupon: { Args: { p_id: string }; Returns: undefined }
+      validate_coupon: {
+        Args: { p_code: string; p_total: number }
+        Returns: {
+          code: string
+          discount_type: string
+          discount_value: number
+          id: string
+          min_purchase_amount: number
+          reason: string
+          valid: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"
