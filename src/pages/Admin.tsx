@@ -910,6 +910,22 @@ const ProductsView = () => {
                   <Label htmlFor="free_shipping" className="text-sm cursor-pointer">Oferecer Frete Grátis</Label>
                 </div>
 
+                {!editingProduct.free_shipping && (
+                  <div>
+                    <Label className="text-sm font-medium">Valor do Frete (R$)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={(editingProduct as any).shipping_cost ?? 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, shipping_cost: parseFloat(e.target.value) || 0 } as any)}
+                      className="mt-1"
+                      placeholder="0,00"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">Custo de frete cobrado para este produto quando não houver frete grátis.</p>
+                  </div>
+                )}
+
                 {/* Descrição livre */}
                 <div className="pt-4 border-t border-border">
                   <Label className="text-sm font-medium">Descrição do Produto</Label>
