@@ -261,7 +261,12 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           address_neighborhood: address.neighborhood,
           address_city: address.city,
           address_complement: address.complement || undefined,
-          notes: notes || undefined,
+          notes: [
+            selectedShipping
+              ? `Frete: ${selectedShipping.name} - ${selectedShipping.free ? "Grátis" : formatPrice(selectedShipping.price)} (${selectedShipping.days})`
+              : null,
+            notes || null,
+          ].filter(Boolean).join(" | ") || undefined,
         },
         items: cartItems.map((i) => ({
           product_name: i.product.name,
