@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X, Truck } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, fallbackImg, WHATSAPP } from "./storeData";
 import { formatPrice } from "@/lib/format";
@@ -7,6 +7,7 @@ import { CHECKOUT_PAYMENT_OPTIONS as PAYMENT_METHODS } from "@/constants/payment
 import { useCreateOrder } from "@/hooks/useOrders";
 import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
 import { supabase } from "@/integrations/supabase/client";
+import { parseShippingConfig, estimateShippingOptions, type ShippingOption } from "@/lib/shipping";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -44,20 +45,26 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [notes, setNotes] = useState("");
   const [pixConfirmed, setPixConfirmed] = useState(false);
-  
+
+  // Shipping (auto by CEP → region)
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [shippingLoc, setShippingLoc] = useState<{ city: string; uf: string } | null>(null);
+
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<DBCoupon | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
-  
+
   const createOrder = useCreateOrder();
   const { toast } = useToast();
 
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
-  
+  const allItemsFreeShipping = cartItems.length > 0 && cartItems.every((i) => !!i.product.freeShipping);
+
   const couponDiscountAmount = useMemo(() => {
     if (!appliedCoupon) return 0;
-    
+
     if (appliedCoupon.discount_type === "percentage") {
       return total * (appliedCoupon.discount_value / 100);
     } else {
@@ -66,12 +73,14 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   }, [appliedCoupon, total]);
 
   const totalAfterCoupon = total - couponDiscountAmount;
+  const shippingCost = selectedShipping ? selectedShipping.price : 0;
 
   const finalTotal = useMemo(() => {
-    if (paymentMethod === "pix") return totalAfterCoupon * (1 - pixDiscount);
-    if (paymentMethod === "dinheiro") return totalAfterCoupon * (1 - cashDiscount);
-    return totalAfterCoupon;
-  }, [totalAfterCoupon, paymentMethod, pixDiscount, cashDiscount]);
+    let subtotal = totalAfterCoupon;
+    if (paymentMethod === "pix") subtotal = subtotal * (1 - pixDiscount);
+    else if (paymentMethod === "dinheiro") subtotal = subtotal * (1 - cashDiscount);
+    return subtotal + shippingCost;
+  }, [totalAfterCoupon, paymentMethod, pixDiscount, cashDiscount, shippingCost]);
 
 
 
@@ -129,6 +138,11 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       return false;
     }
 
+    if (!selectedShipping) {
+      toast({ title: "Selecione o frete", description: "Confirme o CEP para calcular o frete e escolha uma opção de entrega.", variant: "destructive" });
+      return false;
+    }
+
     return true;
   };
 
@@ -151,7 +165,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }
 
       const data = validation.data;
-      
+
       setAddress(prev => ({
         ...prev,
         street: data.logradouro || prev.street,
@@ -159,6 +173,13 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         city: data.localidade || prev.city
       }));
       setOfficialStreet(data.logradouro || null);
+
+      // Calcula opções de frete automaticamente pela região do CEP
+      const cfg = parseShippingConfig(settings?.shipping_config);
+      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
+      setShippingOptions(opts);
+      setSelectedShipping(opts[0] || null);
+      setShippingLoc({ city: data.localidade, uf: data.uf });
 
       toast({
         title: "CEP localizado",
@@ -240,7 +261,12 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           address_neighborhood: address.neighborhood,
           address_city: address.city,
           address_complement: address.complement || undefined,
-          notes: notes || undefined,
+          notes: [
+            selectedShipping
+              ? `Frete: ${selectedShipping.name} - ${selectedShipping.free ? "Grátis" : formatPrice(selectedShipping.price)} (${selectedShipping.days})`
+              : null,
+            notes || null,
+          ].filter(Boolean).join(" | ") || undefined,
         },
         items: cartItems.map((i) => ({
           product_name: i.product.name,
@@ -394,6 +420,50 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                 <Label>Complemento</Label>
                 <Input value={address.complement} onChange={(e) => setAddress({ ...address, complement: e.target.value })} placeholder="Apto 101" className="mt-1" />
               </div>
+            </div>
+
+            {/* Cálculo automático de frete pelo CEP */}
+            <div className="rounded-xl border border-border/60 bg-card/60 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Truck size={16} className="text-primary" />
+                <p className="text-sm font-bold uppercase tracking-wider text-foreground">Frete</p>
+              </div>
+              {shippingOptions.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Informe o CEP acima para calcular o frete automaticamente.
+                </p>
+              ) : (
+                <>
+                  {shippingLoc && (
+                    <p className="text-xs text-muted-foreground">
+                      Entrega para <span className="text-foreground font-semibold">{shippingLoc.city} - {shippingLoc.uf}</span>
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    {shippingOptions.map((o) => {
+                      const active = selectedShipping?.name === o.name;
+                      return (
+                        <button
+                          key={o.name}
+                          type="button"
+                          onClick={() => setSelectedShipping(o)}
+                          className={`w-full text-left rounded-lg border px-3 py-2 flex items-center justify-between transition-colors ${
+                            active ? "border-primary bg-primary/10" : "border-border/50 bg-background/40 hover:bg-muted/40"
+                          }`}
+                        >
+                          <div>
+                            <p className="text-sm font-bold text-foreground">{o.name}</p>
+                            <p className="text-[11px] text-muted-foreground">{o.days}</p>
+                          </div>
+                          <p className={`text-sm font-bold ${o.free ? "text-green-500" : "text-foreground"}`}>
+                            {o.free ? "Grátis" : formatPrice(o.price)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -553,6 +623,15 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                   </div>
 
                 )}
+                {selectedShipping && (
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-muted-foreground">Frete ({selectedShipping.name})</span>
+                    <span className={`text-sm ${selectedShipping.free ? "text-green-600" : "text-foreground"}`}>
+                      {selectedShipping.free ? "Grátis" : formatPrice(selectedShipping.price)}
+                    </span>
+                  </div>
+                )}
+
 
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
                   <span className="text-sm font-bold text-foreground">Total</span>
