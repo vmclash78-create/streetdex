@@ -20,6 +20,7 @@ export type DBProduct = {
   updated_at: string;
   description?: string | null;
   measurements?: { size: string; chest?: number; length?: number; sleeve?: number }[] | null;
+  shipping_cost?: number;
 };
 
 export const useProducts = () => {
@@ -31,7 +32,7 @@ export const useProducts = () => {
         .select("*")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data as DBProduct[];
+      return data as unknown as DBProduct[];
     },
   });
 };
@@ -45,7 +46,7 @@ export const useAdminProducts = () => {
         .select("*")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data as DBProduct[];
+      return data as unknown as DBProduct[];
     },
   });
 };
