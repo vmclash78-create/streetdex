@@ -137,6 +137,99 @@ export type Database = {
         }
         Relationships: []
       }
+      melhor_envio_auth: {
+        Row: {
+          access_token: string | null
+          client_id: string | null
+          client_secret: string | null
+          connected_email: string | null
+          created_at: string
+          default_height_cm: number | null
+          default_insurance: number | null
+          default_length_cm: number | null
+          default_weight_kg: number | null
+          default_width_cm: number | null
+          environment: string
+          expires_at: string | null
+          from_address: string | null
+          from_city: string | null
+          from_complement: string | null
+          from_district: string | null
+          from_document: string | null
+          from_email: string | null
+          from_name: string | null
+          from_number: string | null
+          from_phone: string | null
+          from_state: string | null
+          from_zip: string | null
+          id: number
+          redirect_uri: string | null
+          refresh_token: string | null
+          scopes: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          client_id?: string | null
+          client_secret?: string | null
+          connected_email?: string | null
+          created_at?: string
+          default_height_cm?: number | null
+          default_insurance?: number | null
+          default_length_cm?: number | null
+          default_weight_kg?: number | null
+          default_width_cm?: number | null
+          environment?: string
+          expires_at?: string | null
+          from_address?: string | null
+          from_city?: string | null
+          from_complement?: string | null
+          from_district?: string | null
+          from_document?: string | null
+          from_email?: string | null
+          from_name?: string | null
+          from_number?: string | null
+          from_phone?: string | null
+          from_state?: string | null
+          from_zip?: string | null
+          id?: number
+          redirect_uri?: string | null
+          refresh_token?: string | null
+          scopes?: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          client_id?: string | null
+          client_secret?: string | null
+          connected_email?: string | null
+          created_at?: string
+          default_height_cm?: number | null
+          default_insurance?: number | null
+          default_length_cm?: number | null
+          default_weight_kg?: number | null
+          default_width_cm?: number | null
+          environment?: string
+          expires_at?: string | null
+          from_address?: string | null
+          from_city?: string | null
+          from_complement?: string | null
+          from_district?: string | null
+          from_document?: string | null
+          from_email?: string | null
+          from_name?: string | null
+          from_number?: string | null
+          from_phone?: string | null
+          from_state?: string | null
+          from_zip?: string | null
+          id?: number
+          redirect_uri?: string | null
+          refresh_token?: string | null
+          scopes?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
