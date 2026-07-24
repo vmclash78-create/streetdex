@@ -459,6 +459,65 @@ export type Database = {
         }
         Relationships: []
       }
+      shipments: {
+        Row: {
+          carrier: string
+          carrier_order_id: string | null
+          carrier_service: string | null
+          created_at: string
+          delivered_at: string | null
+          id: string
+          label_url: string | null
+          order_id: string
+          posted_at: string | null
+          raw_response: Json
+          shipping_cost: number | null
+          status: string
+          tracking_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          carrier?: string
+          carrier_order_id?: string | null
+          carrier_service?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          label_url?: string | null
+          order_id: string
+          posted_at?: string | null
+          raw_response?: Json
+          shipping_cost?: number | null
+          status?: string
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          carrier?: string
+          carrier_order_id?: string | null
+          carrier_service?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          label_url?: string | null
+          order_id?: string
+          posted_at?: string | null
+          raw_response?: Json
+          shipping_cost?: number | null
+          status?: string
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_settings: {
         Row: {
           id: string
@@ -602,7 +661,10 @@ export type Database = {
         | "aguardando_pagamento"
         | "pago"
         | "preparando"
+        | "etiqueta_gerada"
         | "enviado"
+        | "postado"
+        | "em_transito"
         | "entregue"
     }
     CompositeTypes: {
@@ -736,7 +798,10 @@ export const Constants = {
         "aguardando_pagamento",
         "pago",
         "preparando",
+        "etiqueta_gerada",
         "enviado",
+        "postado",
+        "em_transito",
         "entregue",
       ],
     },

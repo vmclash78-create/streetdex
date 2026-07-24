@@ -1,141 +1,107 @@
 
-## Fase 1 — Auditoria Arquitetural
+# Integração Melhor Envio — Expedição de Pedidos
 
-Total analisado: **~7.975 linhas** em 40 arquivos (excluindo `components/ui/*`, `integrations/supabase/types.ts` e testes). Nada foi modificado ainda.
+## Pré-requisitos (você faz uma vez, antes de eu implementar)
 
----
+1. Criar conta grátis em https://melhorenvio.com.br
+2. Criar um **App** no painel Melhor Envio → Configurações → Tokens de Acesso
+3. Gerar um **Token de Produção** (ou Sandbox pra testar) com escopos:
+   `cart-read`, `cart-write`, `shipping-calculate`, `shipping-cancel`, `shipping-checkout`, `shipping-generate`, `shipping-preview`, `shipping-print`, `shipping-share`, `shipping-tracking`, `orders-read`
+4. Ter saldo na carteira do Melhor Envio (só pra emitir etiqueta real; sandbox é grátis)
 
-### 1. Ofensores por tamanho (violação clara de SRP)
-
-| Arquivo | Linhas | Problema principal |
-|---|---|---|
-| `src/pages/Admin.tsx` | **2.528** | 11 sub-views (`DashboardView`, `ProductsView`, `BannersView`, `SalesView`, `FinancesView`, `SettingsView`, `OrdersAdminView`, `CouponsView`, `MeasurementsEditor`, `ShippingConfigEditor`) declaradas dentro de um único arquivo. 58 hooks React distintos. Layout + roteamento + estado de UI + lógica de som + notificações + formulários. |
-| `src/integrations/supabase/types.ts` | 741 | Auto-gerado — não tocar. |
-| `src/components/store/CheckoutView.tsx` | **610** | Fluxo de 4 steps + validação + cupom + integração ViaCEP + integração Supabase + WhatsApp + estado do PIX, tudo no mesmo componente. |
-| `src/hooks/useStoreData.ts` | **423** | 7 domínios (produtos, banners, sales, expenses, coupons, settings, sale items) em 1 arquivo, com todos os tipos `DB*` co-localizados. |
-| `src/pages/Store.tsx` | 395 | Filtros + busca + categorias + listagem + navegação para checkout — precisa de sub-hook `useStoreCatalog`. |
-| `src/components/store/ProductDetail.tsx` | 387 | Modal + galeria + seletor de tamanho + medidas + CTAs — dividir. |
-| `src/components/store/StoreHeader.tsx` | 365 | Header desktop + menu mobile + busca + navegação de categorias. |
-
-**Meta pós-refactor:** nenhum arquivo de UI > 200 linhas; nenhum hook > 150 linhas.
+Quando terminar, me manda o token — abro um formulário seguro pra você colar.
 
 ---
 
-### 2. Lógica de negócio dentro de UI
+## Escopo
 
-- `CheckoutView.tsx` — cálculos de desconto (PIX, dinheiro, cupom), validação de cupom via RPC, chamada ViaCEP, montagem de payload do pedido, geração do link WhatsApp. Nada disso é apresentação.
-- `Admin.tsx` — cálculos financeiros (`FinancesView`), agregações de dashboard, desbloqueio de áudio, listeners de Realtime, dedup de pedidos, permissões — tudo misturado com JSX.
-- `Store.tsx` — filtros de preço/categoria/tamanho e ordenação implementados inline no componente da página.
-- `ProductDetail.tsx` — montagem da mensagem WhatsApp e cálculo de parcelamento.
+Feature isolada, sem tocar em nada existente. Adiciona:
+- Botões **Gerar Etiqueta**, **Imprimir Etiqueta**, **Rastrear** no card de cada pedido no Admin
+- Aba **Expedição** nas Configurações (token, ambiente, CEP de origem, peso/dimensões padrão)
+- Atualização automática de status conforme o Melhor Envio retorna
 
----
+## Banco de Dados
 
-### 3. Duplicação detectada
-
-| Padrão duplicado | Onde | Solução |
-|---|---|---|
-| `settings?.whatsapp_store \|\| settings?.whatsapp \|\| WHATSAPP` | CheckoutView, HeroCarousel, OrderSuccessView, StoreHeader (via prop) | Hook `useStoreWhatsapp()` |
-| `formatPrice` importado em 6 arquivos + reimplementado em Admin como local | Admin.tsx (linha 63) + storeData.ts | Mover para `src/lib/format.ts` e reusar |
-| `PAYMENT_METHODS` / `PAYMENT_LABELS` | CheckoutView (loja) e Admin (dashboard) — listas diferentes para o mesmo domínio | `src/constants/payments.ts` unificado |
-| Cálculo de desconto PIX/dinheiro | CheckoutView, CartView, ProductCard, ProductDetail | Utilitário `applyPaymentDiscount()` |
-| Padrão `useQuery`/`useMutation` + toast + invalidate | ~15 lugares em useStoreData/useOrders | Factory `createResource(table, keys)` |
-| Tipos `DB*` (Product, Sale, etc.) escritos à mão | useStoreData.ts | Derivar de `Database['public']['Tables']['x']['Row']` |
-| Fetch ViaCEP | Inline em CheckoutView | `src/services/viacep.ts` |
-| Montagem de link WhatsApp | 4 lugares — parcialmente centralizado em `utils/whatsapp.ts` | Consolidar 100% |
-
----
-
-### 4. Prop drilling / estado mal posicionado
-
-- `Admin.tsx` passa `somLiberado` + `testarNotificacao` para `OrdersAdminView` — som/notificação deveria ser um hook `useOrderNotifications()`.
-- `Store.tsx` faz drilling de `cart` + `setCart` + `searchQuery` + `selectedCategory` para 4+ componentes → candidato a `StoreContext` ou hook `useCart()` (server-side sync futuro).
-- `StoreHeader` recebe 8 props que são todas do mesmo domínio "estado da loja" → mesmo `StoreContext`.
-
----
-
-### 5. Naming / clareza
-
-| Atual | Sugerido | Motivo |
-|---|---|---|
-| `useStoreData.ts` (arquivo com 7 domínios) | quebrar em `hooks/products/`, `hooks/sales/`, etc. | Não é um "hook" — é um módulo |
-| `useOrders.ts` exportando `ORDER_STATUSES`, `getStatusInfo`, `DBOrder` | separar tipos e constants | Hook não deve exportar constantes de domínio |
-| `somLiberado` / `testarNotificacao` | `isAudioUnlocked` / `playTestNotification` | Consistência PT/EN + prefixo `is` |
-| `storeData.ts` (componente e dados juntos) | `constants/store.ts` + `types/store.ts` | Mistura tipos, constantes e helpers |
-| `Store.tsx` variável `data` genérica em vários hooks | nomes específicos (`products`, `banners`) | Legibilidade |
-| `MeasurementsEditor` dentro de Admin | próprio arquivo em `features/admin/products/` | Reuso e testes |
-
----
-
-### 6. Estrutura por feature (proposta — profundidade Completa)
+Nova tabela `shipments` (uma entrega por pedido, mas preparada pra múltiplas transportadoras no futuro):
 
 ```text
-src/
-├── app/                          # App.tsx, providers, router
-├── features/
-│   ├── admin/
-│   │   ├── dashboard/            # DashboardView + hooks
-│   │   ├── products/             # ProductsView, ProductForm, MeasurementsEditor
-│   │   ├── banners/
-│   │   ├── sales/
-│   │   ├── finances/
-│   │   ├── coupons/
-│   │   ├── orders/               # OrdersAdminView + useOrderNotifications
-│   │   ├── settings/             # SettingsView, ShippingConfigEditor
-│   │   └── index.ts              # barrel
-│   ├── auth/                     # useAuth, ProtectedRoute, AuthPage, ResetPassword
-│   ├── storefront/
-│   │   ├── catalog/              # Store.tsx (Page), useStoreCatalog, filters
-│   │   ├── product/              # ProductCard, ProductDetail, gallery
-│   │   ├── cart/                 # CartView, useCart
-│   │   ├── checkout/             # CheckoutView + subcomponentes por step
-│   │   ├── order-tracking/
-│   │   ├── layout/               # StoreHeader, StoreFooter, HeroCarousel, FAQ
-│   │   └── index.ts
-│   └── notifications/            # notification-sounds + useOrderNotifications
-├── shared/
-│   ├── components/               # ImageUploadField, ThemeToggle, Logos
-│   ├── ui/                       # shadcn (não tocar)
-│   ├── hooks/                    # use-mobile, use-toast
-│   └── constants/                # payments, sizes, statuses
-├── lib/                          # utils, format, cn
-├── services/                     # supabase client, viacep, whatsapp
-├── types/                        # DB* derivados
-└── pages/                        # apenas mount de features (thin)
+shipments
+├── id, order_id (FK), created_at, updated_at
+├── carrier                 (text — 'melhor_envio' por enquanto)
+├── carrier_service         (text — 'PAC', 'SEDEX', etc.)
+├── carrier_order_id        (text — id do pedido no Melhor Envio)
+├── tracking_code           (text — ex: 'AB123456789BR')
+├── label_url               (text — PDF da etiqueta)
+├── status                  (text — 'pending','purchased','generated','posted','in_transit','delivered','cancelled')
+├── shipping_cost           (numeric)
+├── raw_response            (jsonb — resposta completa da API pra debug)
+└── posted_at, delivered_at (timestamptz)
 ```
 
+Coluna nova em `store_settings` (JSON `shipping_config` já existe, só estender):
+- `melhor_envio_env`: 'sandbox' | 'production'
+- `origin_zip`, `origin_address`, `origin_number`, `origin_city`, `origin_state`
+- `default_weight_kg`, `default_length_cm`, `default_width_cm`, `default_height_cm`, `default_insurance`
+
+Coluna opcional em `products`: `weight_kg`, `length_cm`, `width_cm`, `height_cm` — sobrescreve o padrão.
+
+RLS: só admin lê/escreve `shipments`. Token do Melhor Envio salvo como **secret** (`MELHOR_ENVIO_TOKEN`), nunca no banco público.
+
+## Edge Functions
+
+Uma função só, com rotas internas — mais fácil manter:
+
+**`melhor-envio`** (verify_jwt = true, checa role admin em toda chamada):
+- `POST /calculate`   → cota preços/prazos por CEP (útil pro checkout também no futuro)
+- `POST /generate`    → cria carrinho, compra, gera etiqueta. Retorna `tracking_code`, `label_url`, salva em `shipments`
+- `POST /print`       → gera PDF 100x150mm da etiqueta (endpoint `/shipment/print` do ME)
+- `GET  /track/:code` → consulta rastreamento
+- `POST /webhook`     → recebe atualizações do ME e atualiza `shipments.status` + `orders.status`
+
+Todas usam `MELHOR_ENVIO_TOKEN` do Deno.env, base URL alterna sandbox/produção conforme `store_settings.melhor_envio_env`.
+
+## Frontend
+
+**`src/features/shipping/`** (novo módulo, isolado):
+- `useShipment(orderId)` — hook que lê/cria shipment
+- `ShipmentActions.tsx` — 3 botões (Gerar / Imprimir / Rastrear) + badge de status
+- `TrackingDialog.tsx` — timeline dos eventos do rastreio
+- `GenerateLabelDialog.tsx` — confirma serviço (PAC/SEDEX), peso, dimensões antes de gerar
+
+**No `Admin.tsx`** (mudança mínima):
+- Dentro do card de pedido existente, adicionar `<ShipmentActions orderId={order.id} />` no rodapé
+- Nova aba em Configurações: `ShippingSettingsTab.tsx` (token via botão "Configurar Token" → chama `add_secret`, resto dos campos vão em `store_settings.shipping_config`)
+
+## Fluxo de Status
+
+```text
+Cliente compra → order.status = 'preparando'
+Admin clica "Gerar Etiqueta" → shipments criado, status 'generated', order.status = 'etiqueta_gerada'
+ME confirma postagem (webhook) → status 'posted', order.status = 'postado'
+ME atualiza rastreio → status 'in_transit' → 'delivered' → order.status = 'entregue'
+```
+
+Novos valores no enum `order_status`: `etiqueta_gerada`, `postado`, `em_transito`, `entregue` (adiciono via migration se não existirem).
+
+## Preparado para Futuro
+
+- Coluna `carrier` na tabela `shipments` permite adicionar Frenet/Kangu depois só criando outra edge function
+- Hook `useShipment` abstrai a transportadora, componentes UI não precisam saber qual é
+
+## Segurança
+
+- Token do ME só existe como secret de edge function — nunca chega no browser
+- Toda edge function valida JWT + role admin antes de chamar API externa
+- Webhook do ME valida assinatura HMAC (secret separado, gero automaticamente)
+- Rate limit básico por IP no endpoint de webhook
+
+## Fora de Escopo (fica pra depois se você quiser)
+
+- Cálculo de frete no checkout via Melhor Envio (hoje usa sua tabela por região — funciona bem)
+- Múltiplos volumes/caixas por pedido
+- Declaração de conteúdo automática
+- Integração com outras transportadoras
+
 ---
 
-### 7. Plano de execução proposto (Fases 2–5, após sua aprovação)
-
-Ordem sugerida (menor risco → maior risco), cada bloco commitável isoladamente:
-
-1. **Constantes/tipos/serviços** — mover `formatPrice`, `PAYMENT_METHODS`, tipos `DB*`, `viacep.ts`, `whatsapp.ts`. Zero mudança de comportamento.
-2. **Quebrar `useStoreData.ts`** em `hooks/products.ts`, `hooks/sales.ts`, etc. + barrel para manter imports atuais funcionando durante transição.
-3. **Storefront**: extrair `useStoreCatalog`, `useCart`, `useStoreWhatsapp`. Dividir `Store.tsx`, `ProductDetail.tsx`, `StoreHeader.tsx`.
-4. **Checkout**: dividir `CheckoutView` em `Step1Customer`, `Step2Address`, `Step3Payment`, `Step4Confirm` + hook `useCheckoutForm` + `useCoupon`.
-5. **Admin**: extrair cada `*View` para `features/admin/<domain>/*View.tsx`, extrair `useOrderNotifications`, `useFinances`.
-6. **Reorganização por feature** + barrel exports + atualização de todos os imports (codemod com `sed` + verificação `tsgo`).
-7. **Naming pass** final + JSDoc nos hooks públicos.
-
----
-
-### 8. Riscos e sinalizações
-
-- **Checkout e RPC `create_storefront_order`** — não mudar assinaturas nem ordem de campos. Testar fluxo end-to-end via Playwright após cada mudança.
-- **Realtime de pedidos no Admin** — o canal `admin-order-notifications-v2` deve ser preservado exatamente (Supabase Realtime é sensível a nome/config).
-- **`ProtectedRoute` tem teste** (`ProtectedRoute.test.tsx`) — manter contrato.
-- **`storeData.ts`** exporta `WHATSAPP`, `fallbackImg`, `formatPrice`, `pixPrice`, `discountPct`, `heroBanners`, `type Product`, `type CartItem`, `type Measurement` — importados por 7 arquivos; a transição precisa de re-exports temporários.
-- **`Admin.tsx`** com 58 hooks é um alvo de alta chance de regressão em som/Realtime — separar em PR próprio.
-- **Nada de mudança visual, de rota (`/`, `/loja`, `/admin`, `/auth`, `/reset-password`, `/track-order`, `/order-tracking/:id`), ou de assinatura de RPC.**
-
----
-
-### O que preciso de você antes da Fase 2
-
-1. **Aprovação do mapa** acima (ou correções).
-2. **Confirmação de que posso mover arquivos** (a estrutura `features/*` implica renomear/mover ~30 arquivos; git mantém o histórico, mas quero seu OK explícito).
-3. **Escolha de estratégia de transição** para os re-exports:
-   - (a) *Big-bang*: mover tudo e atualizar todos os imports em cada PR — mais limpo, mais volumoso.
-   - (b) *Barrel-bridge*: manter re-exports em `storeData.ts`/`useStoreData.ts` apontando para os novos módulos por 1–2 iterações — mais seguro, deixa dívida temporária.
-
-Ao aprovar, começo pela Fase 2 na ordem descrita, um bloco por vez, com verificação de build a cada passo.
+**Aprova pra eu começar?** Confirma também: **sandbox primeiro** (recomendo, pra testar sem gastar) ou já vai direto pra produção?
