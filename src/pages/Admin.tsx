@@ -912,19 +912,9 @@ const ProductsView = () => {
                 </div>
 
                 {!editingProduct.free_shipping && (
-                  <div>
-                    <Label className="text-sm font-medium">Valor do Frete (R$)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={(editingProduct as any).shipping_cost ?? 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, shipping_cost: parseFloat(e.target.value) || 0 } as any)}
-                      className="mt-1"
-                      placeholder="0,00"
-                    />
-                    <p className="text-[11px] text-muted-foreground mt-1">Custo de frete cobrado para este produto quando não houver frete grátis.</p>
-                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    O frete será calculado automaticamente pelo CEP do cliente no checkout, usando a tabela de "Frete por Região".
+                  </p>
                 )}
 
                 {/* Descrição livre */}
