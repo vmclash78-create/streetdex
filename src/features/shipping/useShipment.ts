@@ -30,7 +30,7 @@ export function useShipmentByOrder(orderId?: string) {
         .limit(1)
         .maybeSingle();
       if (error) throw error;
-      return (data as Shipment) ?? null;
+      return (data as unknown as Shipment) ?? null;
     },
   });
 }
