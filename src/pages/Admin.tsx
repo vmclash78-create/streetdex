@@ -275,23 +275,30 @@ const Admin = () => {
       </aside>
 
       {/* Mobile nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex">
-        {navItems.map((item) => (
-          <button key={item.key} onClick={() => setView(item.key)}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[0.6rem] transition-colors ${view === item.key ? "text-primary" : "text-muted-foreground"}`}>
-            <item.icon size={18} />
-            {item.label}
-          </button>
-        ))}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+        <nav className="flex w-full gap-1 overflow-x-auto scrollbar-none px-2 py-2" aria-label="Navegação administrativa">
+          {navItems.map((item) => (
+            <Button
+              key={item.key}
+              type="button"
+              variant="ghost"
+              onClick={() => setView(item.key)}
+              className={`h-14 min-w-[4.75rem] shrink-0 flex-col gap-1 rounded-lg px-2 py-1 text-[0.68rem] font-medium leading-none transition-colors ${view === item.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <item.icon size={19} className="shrink-0" />
+              <span className="max-w-full truncate">{item.label}</span>
+            </Button>
+          ))}
+        </nav>
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-card">
-          <div className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 flex-1 max-w-xs">
+        <header className="flex items-center justify-between gap-3 px-3 py-3 md:px-6 border-b border-border bg-card">
+          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-lg bg-muted px-3 py-2 md:max-w-xs">
             <Search size={16} className="text-muted-foreground" />
-            <input type="text" placeholder="Buscar..." className="bg-transparent text-sm text-foreground outline-none flex-1 placeholder:text-muted-foreground" />
+            <input type="text" placeholder="Buscar..." className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 md:gap-3">
             {!somLiberado && (
               <Badge variant="outline" className="hidden sm:flex text-[10px] py-0 px-1.5 h-6 border-yellow-500/50 text-yellow-500/80 animate-pulse bg-yellow-500/5">
                 Áudio aguardando clique
@@ -302,7 +309,7 @@ const Admin = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 md:p-6 md:pb-6">
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
           {view === "banners" && <BannersView />}
@@ -1165,12 +1172,12 @@ const SalesView = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 md:mb-6">
         <h1 className="text-2xl font-bold text-foreground">Vendas</h1>
-        <Button onClick={() => setShowForm(true)} className="gap-2"><Plus size={16} /> Nova Venda</Button>
+        <Button onClick={() => setShowForm(true)} className="w-full gap-2 sm:w-auto"><Plus size={16} /> Nova Venda</Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-card p-4 rounded-lg border border-border">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4 mb-6 bg-card p-3 md:p-4 rounded-lg border border-border">
         <div className="space-y-1.5">
           <Label className="text-xs font-medium flex items-center gap-2">
             <Calendar size={12} className="text-primary" /> De
@@ -1179,7 +1186,7 @@ const SalesView = () => {
             type="date" 
             value={filterDateFrom} 
             onChange={(e) => setFilterDateFrom(e.target.value)} 
-            className="h-9 text-sm"
+            className="h-11 text-base md:h-9 md:text-sm"
           />
         </div>
         <div className="space-y-1.5">
@@ -1190,15 +1197,15 @@ const SalesView = () => {
             type="date" 
             value={filterDateTo} 
             onChange={(e) => setFilterDateTo(e.target.value)} 
-            className="h-9 text-sm"
+            className="h-11 text-base md:h-9 md:text-sm"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="col-span-2 space-y-1.5 md:col-span-1">
           <Label className="text-xs font-medium flex items-center gap-2">
             <CreditCard size={12} className="text-primary" /> Pagamento
           </Label>
           <Select value={filterPayment} onValueChange={setFilterPayment}>
-            <SelectTrigger className="h-9 text-sm">
+            <SelectTrigger className="h-11 text-base md:h-9 md:text-sm">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
@@ -1218,11 +1225,11 @@ const SalesView = () => {
             placeholder="0,00"
             value={filterMinAmount} 
             onChange={(e) => setFilterMinAmount(e.target.value)} 
-            className="h-9 text-sm"
+            className="h-11 text-base md:h-9 md:text-sm"
           />
         </div>
         <div className="space-y-1.5 flex flex-col justify-end">
-          <div className="flex gap-2">
+          <div className="flex min-w-0 gap-2">
             <div className="flex-1 space-y-1.5">
               <Label className="text-xs font-medium flex items-center gap-2 md:hidden">
                 <DollarSign size={12} className="text-primary" /> Valor Máx.
@@ -1232,7 +1239,7 @@ const SalesView = () => {
                 placeholder="Máx"
                 value={filterMaxAmount} 
                 onChange={(e) => setFilterMaxAmount(e.target.value)} 
-                className="h-9 text-sm"
+                className="h-11 text-base md:h-9 md:text-sm"
               />
             </div>
             <Button 
@@ -1245,7 +1252,7 @@ const SalesView = () => {
                 setFilterMinAmount("");
                 setFilterMaxAmount("");
               }}
-              className="h-9 text-xs"
+              className="h-11 shrink-0 text-xs md:h-9"
             >
               Limpar
             </Button>
@@ -1256,9 +1263,9 @@ const SalesView = () => {
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
       ) : filteredSales && filteredSales.length > 0 ? (
-        <Card>
-
-          <Table>
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+          <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Data</TableHead>
@@ -1287,6 +1294,7 @@ const SalesView = () => {
               ))}
             </TableBody>
           </Table>
+          </div>
         </Card>
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
@@ -2045,9 +2053,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 md:mb-6">
         <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {!somLiberado && (
             <Badge variant="outline" className="text-[10px] py-0 px-1 border-yellow-500/50 text-yellow-500/80 animate-pulse">
               Aguardando interação para ativar áudio
@@ -2060,19 +2068,19 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6 bg-card p-4 rounded-lg border border-border shadow-sm">
-        <div className="space-y-1.5 flex-1 min-w-[200px]">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(280px,1fr)_180px_minmax(260px,1fr)_auto] md:gap-4 mb-6 bg-card p-3 md:p-4 rounded-lg border border-border shadow-sm">
+        <div className="min-w-0 space-y-1.5">
           <Label className="text-xs uppercase text-muted-foreground font-bold">Data (De / Até)</Label>
-          <div className="flex gap-2">
-            <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-9" />
-            <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-9" />
+          <div className="grid grid-cols-2 gap-2">
+            <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-11 text-base md:h-9 md:text-sm" />
+            <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-11 text-base md:h-9 md:text-sm" />
           </div>
         </div>
 
-        <div className="space-y-1.5 w-full md:w-[180px]">
+        <div className="space-y-1.5">
           <Label className="text-xs uppercase text-muted-foreground font-bold">Pagamento</Label>
           <Select value={filterPayment || "all"} onValueChange={(v) => setFilterPayment(v === "all" ? "" : v)}>
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-11 text-base md:h-9 md:text-sm">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
@@ -2084,9 +2092,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
           </Select>
         </div>
 
-        <div className="space-y-1.5 flex-1 min-w-[200px]">
+        <div className="min-w-0 space-y-1.5">
           <Label className="text-xs uppercase text-muted-foreground font-bold">Valor (Min / Max)</Label>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <div className="relative flex-1">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">R$</span>
               <Input 
@@ -2094,7 +2102,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                 placeholder="0,00" 
                 value={filterMinAmount} 
                 onChange={(e) => setFilterMinAmount(e.target.value)} 
-                className="h-9 pl-7" 
+                className="h-11 pl-7 text-base md:h-9 md:text-sm" 
               />
             </div>
             <div className="relative flex-1">
@@ -2104,7 +2112,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                 placeholder="Max" 
                 value={filterMaxAmount} 
                 onChange={(e) => setFilterMaxAmount(e.target.value)} 
-                className="h-9 pl-7" 
+                className="h-11 pl-7 text-base md:h-9 md:text-sm" 
               />
             </div>
           </div>
@@ -2121,7 +2129,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
               setFilterMinAmount("");
               setFilterMaxAmount("");
             }}
-            className="h-9 text-xs text-muted-foreground hover:text-foreground"
+            className="h-11 w-full text-xs text-muted-foreground hover:text-foreground md:h-9 md:w-auto"
           >
             Limpar
           </Button>
@@ -2133,8 +2141,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
       ) : !filteredOrders || filteredOrders.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground text-sm">Nenhum pedido registrado</div>
       ) : (
-        <Card>
-          <Table>
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+          <Table className="min-w-[760px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Pedido</TableHead>
@@ -2191,6 +2200,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
               })}
             </TableBody>
           </Table>
+          </div>
         </Card>
       )}
 
