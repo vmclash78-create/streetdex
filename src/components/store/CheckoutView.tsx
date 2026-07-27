@@ -286,6 +286,14 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         await supabase.rpc("redeem_coupon", { p_id: appliedCoupon.id });
       }
 
+      // Fire-and-forget: envia e-mail com o cupom ativo, se cliente informou e-mail
+      if (customer.email.trim()) {
+        supabase.functions
+          .invoke("send-coupon-email", {
+            body: { email: customer.email.trim(), name: customer.name.trim() },
+          })
+          .catch((err) => console.warn("coupon email failed:", err));
+      }
 
       onOrderComplete(order.id, order.order_number);
 
