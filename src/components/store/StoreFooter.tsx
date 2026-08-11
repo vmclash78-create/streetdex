@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getWhatsAppLink } from "@/utils/whatsapp";
 import { WHATSAPP } from "./storeData";
+import { useStoreSettings } from "@/hooks/useStoreData";
 
 interface StoreFooterProps {
   onNavigateHome: () => void;
@@ -14,6 +15,7 @@ interface StoreFooterProps {
 const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) => {
   const whatsappNumber = whatsapp || WHATSAPP;
   const year = new Date().getFullYear();
+  const { data: settings } = useStoreSettings();
 
   return (
     <footer className="relative bg-card border-t border-primary/30 transition-colors duration-300 overflow-hidden">
@@ -24,31 +26,28 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
       <div className="relative border-b border-border/40 bg-gradient-to-r from-primary/10 via-card to-primary/10">
         <div className="max-w-[1200px] mx-auto px-5 py-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div>
-            <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase mb-1">Newsletter</p>
+            <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase mb-1">Comunidade</p>
             <h3 className="font-display text-2xl md:text-3xl font-bold uppercase tracking-wider text-foreground leading-tight">
-              Entre na lista. <span className="text-primary">Sai na frente.</span>
+              Entre no grupo. <span className="text-primary">Sai na frente.</span>
             </h3>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Drops, cupons e lançamentos antes de todo mundo.
+              Receba drops, cupons e lançamentos antes de todo mundo no nosso WhatsApp.
             </p>
           </div>
-          <form
-            onSubmit={(e) => e.preventDefault()}
-            className="flex gap-2 w-full"
-          >
-            <Input
-              type="email"
-              required
-              placeholder="seu@email.com"
-              className="bg-background/60 border-border/60 h-11 text-sm focus-visible:ring-primary"
-            />
+          <div className="flex w-full md:justify-end">
             <Button
-              type="submit"
-              className="h-11 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs neon-glow gap-1.5"
+              asChild
+              className="h-12 px-8 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-wider text-sm neon-glow gap-2 w-full md:w-auto"
             >
-              <Zap size={14} /> Assinar
+              <a 
+                href={settings?.whatsapp_group_url || "#"} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <MessageCircle size={18} /> Entrar no Grupo
+              </a>
             </Button>
-          </form>
+          </div>
         </div>
       </div>
 
