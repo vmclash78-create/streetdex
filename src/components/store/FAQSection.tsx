@@ -26,10 +26,6 @@ const FAQS = [
     q: "O produto está esgotado, e agora?",
     a: "Chame a gente no WhatsApp! Avisamos assim que repor o estoque ou produzimos sob encomenda dependendo da peça.",
   },
-  {
-    q: "Vocês fazem estampas personalizadas?",
-    a: "Fazemos sim! Mande sua ideia ou arte no WhatsApp e a gente orça pra você. Camisetas únicas com a sua identidade.",
-  },
 ];
 
 const FAQSection = () => {
