@@ -20,6 +20,37 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
       {/* Neon top accent */}
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary to-transparent neon-glow" />
 
+      {/* CTA Band */}
+      <div className="relative border-b border-border/40 bg-gradient-to-r from-primary/10 via-card to-primary/10">
+        <div className="max-w-[1200px] mx-auto px-5 py-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div>
+            <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase mb-1">Newsletter</p>
+            <h3 className="font-display text-2xl md:text-3xl font-bold uppercase tracking-wider text-foreground leading-tight">
+              Entre na lista. <span className="text-primary">Sai na frente.</span>
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Drops, cupons e lançamentos antes de todo mundo.
+            </p>
+          </div>
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="flex gap-2 w-full"
+          >
+            <Input
+              type="email"
+              required
+              placeholder="seu@email.com"
+              className="bg-background/60 border-border/60 h-11 text-sm focus-visible:ring-primary"
+            />
+            <Button
+              type="submit"
+              className="h-11 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs neon-glow gap-1.5"
+            >
+              <Zap size={14} /> Assinar
+            </Button>
+          </form>
+        </div>
+      </div>
 
       {/* Main grid */}
       <div className="max-w-[1200px] mx-auto px-5 pt-12 pb-8">
