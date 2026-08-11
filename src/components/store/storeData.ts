@@ -35,7 +35,6 @@ export const navLinks = [
     label: "Produtos",
     key: "Produtos",
     dropdown: [
-      "Camisas Personalizadas",
       "Camisas Casais",
       "Camisas Jogadores",
       "Camisas Olhar Apaixonado",
