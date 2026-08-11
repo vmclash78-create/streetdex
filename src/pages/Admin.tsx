@@ -1827,6 +1827,10 @@ const SettingsView = () => {
               <Label>WhatsApp Principal</Label>
               <Input value={getValue("whatsapp_store")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_store: e.target.value })} placeholder="Ex: 5585999999999" className="mt-1" />
             </div>
+            <div>
+              <Label>Link do Grupo WhatsApp (Comunidade)</Label>
+              <Input value={getValue("whatsapp_group_url")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_group_url: e.target.value })} placeholder="Ex: https://chat.whatsapp.com/..." className="mt-1" />
+            </div>
           </div>
 
           {/* Configurações de Desconto e Pagamento */}
