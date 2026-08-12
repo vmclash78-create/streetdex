@@ -1780,50 +1780,52 @@ const SettingsView = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Seção de Upload de Logo Simplificada */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2">Logo da Loja</Label>
-            <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preview Fundo Claro</p>
-                  <div className="aspect-video w-full rounded-lg border border-border bg-white flex items-center justify-center overflow-hidden group relative">
-                    {getValue("logo_url") ? (
-                      <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-[80%] object-contain p-4" />
-                    ) : (
-                      <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
-                        <Upload size={20} />
-                        Sem logo
-                      </div>
-                    )}
-                    {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
-                  </div>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">Logo do Tema Claro (Fundo Branco)</Label>
+              <div className="flex flex-col gap-3">
+                <div className="aspect-video w-full rounded-lg border border-border bg-white flex items-center justify-center overflow-hidden group relative">
+                  {getValue("logo_url") ? (
+                    <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-[80%] object-contain p-4" />
+                  ) : (
+                    <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
+                      <Upload size={20} />
+                      Sem logo
+                    </div>
+                  )}
+                  {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
                 </div>
-
-                <div className="space-y-2">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preview Fundo Escuro</p>
-                  <div className="aspect-video w-full rounded-lg border border-border bg-zinc-950 flex items-center justify-center overflow-hidden group relative">
-                    {getValue("logo_url") ? (
-                      <img src={getValue("logo_url")} alt="Preview Escuro" className="max-w-full max-h-[80%] object-contain p-4" />
-                    ) : (
-                      <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
-                        <Upload size={20} />
-                        Sem logo
-                      </div>
-                    )}
-                    {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="relative cursor-pointer flex-1" disabled={uploading === "logo_url"}>
+                <Button variant="outline" size="sm" className="relative cursor-pointer w-full" disabled={uploading === "logo_url"}>
                   <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url")} />
-                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo da Loja"}
+                  {uploading === "logo_url" ? "Enviando..." : "Subir Logo Tema Claro"}
                 </Button>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Dica: Use uma logo em formato PNG com fundo transparente para que ela se adapte perfeitamente aos modos claro e escuro.
-              </p>
             </div>
+
+            <div className="space-y-3 pt-4 border-t border-border">
+              <Label className="flex items-center gap-2">Logo do Tema Escuro (Fundo Preto)</Label>
+              <div className="flex flex-col gap-3">
+                <div className="aspect-video w-full rounded-lg border border-border bg-zinc-950 flex items-center justify-center overflow-hidden group relative">
+                  {getValue("logo_url_dark") ? (
+                    <img src={getValue("logo_url_dark")} alt="Preview Escuro" className="max-w-full max-h-[80%] object-contain p-4" />
+                  ) : (
+                    <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
+                      <Upload size={20} />
+                      Sem logo
+                    </div>
+                  )}
+                  {uploading === "logo_url_dark" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+                </div>
+                <Button variant="outline" size="sm" className="relative cursor-pointer w-full" disabled={uploading === "logo_url_dark"}>
+                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleUpload(e, "logo_url_dark")} />
+                  {uploading === "logo_url_dark" ? "Enviando..." : "Subir Logo Tema Escuro"}
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-muted-foreground">
+              Dica: Use logos em formato PNG com fundo transparente. O sistema alternará automaticamente entre elas dependendo do tema do usuário.
+            </p>
           </div>
 
           {/* Dados da Loja */}

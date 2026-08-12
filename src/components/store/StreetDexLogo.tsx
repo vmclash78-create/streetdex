@@ -6,13 +6,13 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const imgSize = size === "sm" ? "h-12" : size === "lg" ? "h-20" : "h-16";
   
   const logoUrl = settings?.logo_url;
+  const logoUrlDark = settings?.logo_url_dark;
   
-  // Se não houver logo personalizada, usamos a padrão
-  const logoSrc = logoUrl || streetdexLogo;
-  
-  // A logo é adaptada para o modo escuro usando filtros CSS
-  // No modo escuro, aplicamos inversão se for a logo padrão (preta)
-  // ou se for uma logo customizada que precise de contraste.
+  // No modo escuro, priorizamos a logo escura se ela existir.
+  // Caso contrário, usamos a logo padrão (logoUrl) ou a fallback.
+  const logoSrc = (document.documentElement.classList.contains('dark') && logoUrlDark) 
+    ? logoUrlDark 
+    : (logoUrl || streetdexLogo);
   return (
     <div className="flex items-center">
       <img
