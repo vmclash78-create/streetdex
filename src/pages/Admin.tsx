@@ -272,19 +272,18 @@ const Admin = () => {
       </aside>
 
       {/* Mobile nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <nav className="flex w-full gap-1 overflow-x-auto scrollbar-none px-2 py-2" aria-label="Navegação administrativa">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] border-t border-border bg-card/95 backdrop-blur-md shadow-lg">
+        <nav className="flex w-full justify-between items-center gap-1 overflow-x-auto scrollbar-none px-2 py-1" aria-label="Navegação administrativa">
           {navItems.map((item) => (
-            <Button
+            <button
               key={item.key}
               type="button"
-              variant="ghost"
               onClick={() => setView(item.key)}
-              className={`h-14 min-w-[4.75rem] shrink-0 flex-col gap-1 rounded-lg px-2 py-1 text-[0.68rem] font-medium leading-none transition-colors ${view === item.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              className={`min-h-[3.75rem] min-w-[4.2rem] flex-1 flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[0.62rem] font-medium leading-none transition-all cursor-pointer select-none active:bg-primary/20 ${view === item.key ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}
             >
-              <item.icon size={19} className="shrink-0" />
+              <item.icon size={18} className="shrink-0" />
               <span className="max-w-full truncate">{item.label}</span>
-            </Button>
+            </button>
           ))}
         </nav>
       </div>
