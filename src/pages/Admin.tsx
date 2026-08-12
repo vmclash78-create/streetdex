@@ -8,8 +8,6 @@ import {
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
   Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck,
 } from "lucide-react";
-import { ShippingSettingsView } from "@/features/shipping/ShippingSettingsView";
-import { ShipmentActions } from "@/features/shipping/ShipmentActions";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
@@ -64,7 +62,7 @@ import {
 } from "@/constants/payments";
 import { EXPENSE_CATEGORIES } from "@/constants/expenses";
 
-type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "coupons" | "finances" | "shipping" | "settings";
+type AdminView = "dashboard" | "products" | "banners" | "sales" | "orders" | "coupons" | "finances" | "settings";
 
 const statusColors: Record<string, string> = {
   active: "bg-green-500/20 text-green-600 dark:text-green-400",
@@ -239,7 +237,6 @@ const Admin = () => {
     { icon: ShoppingCart, label: "Vendas", key: "sales" },
     { icon: Tag, label: "Cupons", key: "coupons" },
     { icon: Wallet, label: "Finanças", key: "finances" },
-    { icon: Truck, label: "Expedição", key: "shipping" },
     { icon: Settings, label: "Configurações", key: "settings" },
   ];
 
@@ -317,7 +314,6 @@ const Admin = () => {
           {view === "sales" && <SalesView />}
           {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
-          {view === "shipping" && <ShippingSettingsView />}
           {view === "settings" && <SettingsView />}
         </main>
       </div>
@@ -2292,11 +2288,6 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                   </div>
                 </div>
 
-                <ShipmentActions
-                  orderId={selectedOrder.id}
-                  toZip={selectedOrder.address_cep}
-                  orderTotal={Number(selectedOrder.total)}
-                />
               </div>
             </>
           )}
