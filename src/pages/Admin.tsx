@@ -1821,7 +1821,7 @@ const SettingsView = () => {
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                A logo será adaptada automaticamente para os modos claro e escuro.
+                Dica: Use uma logo em formato PNG com fundo transparente para que ela se adapte perfeitamente aos modos claro e escuro.
               </p>
             </div>
           </div>
