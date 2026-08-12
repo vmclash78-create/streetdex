@@ -1783,7 +1783,7 @@ const SettingsView = () => {
           <div className="space-y-3">
             <Label className="flex items-center gap-2">Logo da Loja</Label>
             <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
                   <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-muted flex items-center justify-center overflow-hidden group relative">
                     {getValue("logo_url") && getValue("logo_url") !== '/streetdex-logo.png' ? (
