@@ -39,29 +39,17 @@ const HeroCarousel = () => {
         <div className="flex">
           {banners.map((banner, i) => (
             <div key={i} className="flex-[0_0_100%] min-w-0 relative overflow-hidden bg-background">
-              {/* Liquid-glass ambient backdrop: blurred, scaled image fills the frame so the sides are never plain black */}
-              <div className="absolute inset-0 hidden md:block">
-                <img
-                  src={banner.img}
-                  alt=""
-                  aria-hidden="true"
-                  className="h-full w-full object-cover object-center scale-110 blur-3xl opacity-60"
-                />
-                {/* Blue-purple glass tint to keep the streetwear neon identity */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#340b79]/40 via-transparent to-[#340b79]/40" />
-                <div className="absolute inset-0 bg-[#141414]/30 backdrop-saturate-150" />
-              </div>
-              {/* Foreground image: contained on desktop, cover on mobile */}
+              {/* Foreground image: full cover to avoid side bars */}
               <img
                 src={banner.img}
                 alt={`Carrossel ${i + 1}`}
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding={i === 0 ? "sync" : "async"}
-                className="relative h-[500px] w-full object-cover object-center md:h-auto md:max-h-[75vh] md:object-contain"
+                className="w-full h-[500px] md:h-[600px] lg:h-[700px] object-cover object-center"
               />
               {/* Dark gradient overlay for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
             </div>
           ))}
         </div>
