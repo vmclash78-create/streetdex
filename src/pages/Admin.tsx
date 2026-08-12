@@ -1784,17 +1784,26 @@ const SettingsView = () => {
             <Label className="flex items-center gap-2">Logo da Loja</Label>
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2">
-                  <div className="aspect-video w-full rounded-lg border border-dashed border-border bg-muted flex items-center justify-center overflow-hidden group relative">
-                    {getValue("logo_url") && getValue("logo_url") !== '/streetdex-logo.png' ? (
-                      <div className="flex w-full h-full">
-                        <div className="flex-1 bg-white flex items-center justify-center p-4 border-r border-border">
-                          <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-full object-contain" />
-                        </div>
-                        <div className="flex-1 bg-zinc-900 flex items-center justify-center p-4">
-                          <img src={getValue("logo_url")} alt="Preview Escuro" className="max-w-full max-h-full object-contain" />
-                        </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preview Fundo Claro</p>
+                  <div className="aspect-video w-full rounded-lg border border-border bg-white flex items-center justify-center overflow-hidden group relative">
+                    {getValue("logo_url") ? (
+                      <img src={getValue("logo_url")} alt="Preview Claro" className="max-w-full max-h-[80%] object-contain p-4" />
+                    ) : (
+                      <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
+                        <Upload size={20} />
+                        Sem logo
                       </div>
+                    )}
+                    {uploading === "logo_url" && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preview Fundo Escuro</p>
+                  <div className="aspect-video w-full rounded-lg border border-border bg-zinc-950 flex items-center justify-center overflow-hidden group relative">
+                    {getValue("logo_url") ? (
+                      <img src={getValue("logo_url")} alt="Preview Escuro" className="max-w-full max-h-[80%] object-contain p-4" />
                     ) : (
                       <div className="text-zinc-400 text-xs flex flex-col items-center gap-1">
                         <Upload size={20} />
