@@ -112,7 +112,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1100px] w-[96vw] bg-[#141414] border-zinc-800 p-0 overflow-y-auto max-h-[92vh]">
+      <DialogContent className="max-w-[1100px] w-[96vw] bg-[#141414] border-zinc-800 p-0 overflow-y-auto max-h-[92vh] focus-visible:outline-none">
         <DialogHeader className="print:hidden px-6 pt-5 pb-4 border-b border-zinc-800">
           <DialogTitle className="flex items-center gap-2 text-white font-bold">
             <Printer size={18} className="text-primary" /> Etiqueta de Envio — Correios
