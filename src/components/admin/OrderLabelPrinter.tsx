@@ -67,7 +67,8 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   storeName = "Street Dex",
 }) => {
   const { data: settings } = useStoreSettings();
-  const logoSrc = settings?.logo_url || streetdexLogo;
+  // Fundo dos boxes é preto: prioriza a logo do tema escuro (clara)
+  const logoSrc = settings?.logo_url_dark || settings?.logo_url || streetdexLogo;
 
   const handlePrint = () => window.print();
 
