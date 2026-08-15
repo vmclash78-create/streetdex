@@ -34,24 +34,23 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div id="label-content" className="m-6 p-8 bg-white text-black font-sans border-4 border-black relative print:m-0 print:border-0">
-          {/* Estética Streetwear: Bordas duplas e grids */}
-          <div className="absolute top-0 right-0 w-16 h-16 border-l-2 border-b-2 border-black print:hidden"></div>
+        <div id="label-content" className="m-6 p-8 bg-white text-black font-sans border-4 border-black relative print:m-0 print:border-4">
+          {/* Estética Streetwear: Minimalista e Profissional */}
           
           {/* Header */}
-          <div className="flex justify-between items-end border-b-4 border-black pb-6 mb-8">
+          <div className="flex justify-between items-start border-b-4 border-black pb-6 mb-8">
             <div className="flex items-center gap-4">
-              <div className="bg-black p-2 rounded-sm print:bg-transparent print:p-0">
-                <StreetDexLogo size="md" className="invert print:invert-0" />
+              <div className="bg-black p-2 rounded-sm">
+                <StreetDexLogo size="md" className="grayscale brightness-0 invert" />
               </div>
               <div>
                 <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">{storeName}</h1>
-                <p className="text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-black mt-1">Authentic Streetwear</p>
+                <p className="text-[10px] text-black uppercase tracking-[0.3em] font-black mt-1">LOGISTICS / AUTHENTIC SHIPPING</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="bg-black text-white px-3 py-1 mb-1 inline-block print:bg-transparent print:text-black print:border-2 print:border-black">
-                <p className="text-lg font-black uppercase tracking-tighter">ID #{order.order_number}</p>
+              <div className="bg-black text-white px-3 py-1 mb-1 inline-block">
+                <p className="text-lg font-black uppercase tracking-tighter">ORDEM #{order.order_number}</p>
               </div>
               <p className="text-[10px] font-bold uppercase">{new Date(order.created_at).toLocaleDateString("pt-BR")}</p>
             </div>
@@ -168,8 +167,17 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             .print\\:hidden {
               display: none !important;
             }
-            .print\\:invert-0 {
-              filter: invert(0) !important;
+            .grayscale.brightness-0.invert {
+              filter: grayscale(1) brightness(0) invert(1) !important;
+              -webkit-filter: grayscale(1) brightness(0) invert(1) !important;
+            }
+            .bg-black {
+              background-color: black !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .text-white {
+              color: white !important;
             }
           }
         `}} />
