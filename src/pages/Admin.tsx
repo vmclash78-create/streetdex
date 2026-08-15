@@ -6,11 +6,12 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck,
+  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck, Printer
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
+import OrderLabelPrinter from "@/components/admin/OrderLabelPrinter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -309,7 +310,7 @@ const Admin = () => {
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
           {view === "banners" && <BannersView />}
-          {view === "orders" && <OrdersAdminView somLiberado={somLiberado} testarNotificacao={testarNotificacao} />}
+          {view === "orders" && <OrdersAdminView somLiberado={somLiberado} testarNotificacao={testarNotificacao} storeName={settings?.store_name} />}
           {view === "sales" && <SalesView />}
           {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
@@ -1956,7 +1957,16 @@ const SettingsView = () => {
 };
 
 // ─── ORDERS ADMIN ───
-const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: boolean; testarNotificacao: () => void }) => {
+const OrdersAdminView = ({ 
+  somLiberado, 
+  testarNotificacao,
+  storeName 
+}: { 
+  somLiberado: boolean; 
+  testarNotificacao: () => void;
+  storeName?: string;
+}) => {
+
   const { data: orders, isLoading } = useOrders();
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
@@ -1967,6 +1977,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<DBOrder | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [isLabelPrinterOpen, setIsLabelPrinterOpen] = useState(false);
+  const [orderForLabel, setOrderForLabel] = useState<string | null>(null);
+
   
   // Filtros
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -2195,6 +2208,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder({ ...order })} title="Editar">
                           <Edit2 size={15} />
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" onClick={() => { setOrderForLabel(order.id); setIsLabelPrinterOpen(true); }} title="Imprimir etiqueta">
+                          <Printer size={15} />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setOrderToDelete(order.id)} title="Excluir">
                           <Trash2 size={15} />
                         </Button>
@@ -2203,6 +2219,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                             <ChevronRight size={15} />
                           </a>
                         </Button>
+
                       </div>
                     </TableCell>
                   </TableRow>
@@ -2287,7 +2304,20 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                   </div>
                 </div>
 
+                <div className="pt-2 border-t border-border">
+                  <Button 
+                    className="w-full gap-2" 
+                    onClick={() => {
+                      setOrderForLabel(selectedOrder.id);
+                      setIsLabelPrinterOpen(true);
+                    }}
+                  >
+                    <Printer size={16} /> Imprimir Etiqueta de Envio
+                  </Button>
+                </div>
+
               </div>
+
             </>
           )}
         </DialogContent>
@@ -2407,7 +2437,19 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Label Printer Component */}
+      {orderForLabel && (
+        <OrderLabelPrinter
+          isOpen={isLabelPrinterOpen}
+          onOpenChange={setIsLabelPrinterOpen}
+          order={orders?.find(o => o.id === orderForLabel)!}
+          items={orderItems || []}
+          storeName={storeName}
+        />
+      )}
     </div>
+
   );
 };
 
