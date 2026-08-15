@@ -10,7 +10,7 @@ const StreetDexLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "
     // Check initial state
     setIsDark(document.documentElement.classList.contains('dark'));
 
-    // Observe theme changes
+    // Observe theme changes on html element
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
@@ -20,6 +20,10 @@ const StreetDexLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "
     });
 
     observer.observe(document.documentElement, { attributes: true });
+    
+    // Also listen to system theme changes if needed, 
+    // but next-themes usually handles this via the class on <html>
+    
     return () => observer.disconnect();
   }, []);
 
@@ -37,6 +41,7 @@ const StreetDexLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "
   return (
     <div className={`flex items-center ${className}`}>
       <img
+        key={isDark ? 'dark' : 'light'}
         src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
         className={`${imgSize} w-auto object-contain transition-all duration-300`}
