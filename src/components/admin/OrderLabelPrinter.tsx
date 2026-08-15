@@ -88,6 +88,12 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             </div>
           </div>
 
+          {/* Correios Logo placeholder / Declaração de Conteúdo info */}
+          <div className="flex justify-between items-center py-2 px-3 border-2 border-zinc-200 rounded-md text-[10px] font-bold italic">
+            <span className="text-zinc-400 uppercase">Objeto para Postagem</span>
+            <span className="text-zinc-600">ETIQUETA MANUAL</span>
+          </div>
+
           {/* Footer / QR / Barcode placeholders */}
           <div className="flex justify-between items-end pt-4 border-t-2 border-black">
             <div className="text-[10px] uppercase font-bold space-y-1">
