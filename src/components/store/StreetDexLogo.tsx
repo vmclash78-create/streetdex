@@ -41,6 +41,7 @@ const StreetDexLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "
   return (
     <div className={`flex items-center ${className}`}>
       <img
+        key={isDark ? 'dark' : 'light'}
         src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
         className={`${imgSize} w-auto object-contain transition-all duration-300`}
