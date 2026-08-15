@@ -1,10 +1,11 @@
 import React from "react";
 import { DBOrder, DBOrderItem, DBCustomer } from "@/hooks/useOrders";
 import { formatPrice } from "@/lib/format";
-import { Printer, Instagram, Globe } from "lucide-react";
+import { Printer, Instagram, Globe, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import StreetDexLogo from "@/components/store/StreetDexLogo";
+import { useStoreSettings } from "@/hooks/useStoreData";
+import streetdexLogo from "@/assets/streetdex-logo.png";
 
 interface OrderLabelPrinterProps {
   order: DBOrder & { customers: DBCustomer };
@@ -14,6 +15,50 @@ interface OrderLabelPrinterProps {
   storeName?: string;
 }
 
+/** Barras pseudo-aleatórias determinísticas (mesma etiqueta = mesmo desenho) */
+const Barcode = ({ seed, height, count }: { seed: number; height: number; count: number }) => (
+  <div className="flex items-end justify-center gap-[2px]" style={{ height }}>
+    {Array.from({ length: count }).map((_, i) => {
+      const v = (Math.sin((i + 1) * (seed % 97) * 12.9898) * 43758.5453) % 1;
+      const w = Math.abs(v) > 0.62 ? 4 : Math.abs(v) > 0.32 ? 2 : 1;
+      return <div key={i} style={{ width: w, height: "100%", background: "#000" }} />;
+    })}
+  </div>
+);
+
+const QrCodeMock = ({ size = 78 }: { size?: number }) => {
+  const cells = 13;
+  const px = size / cells;
+  const isFinder = (r: number, c: number) =>
+    (r < 4 && c < 4) || (r < 4 && c >= cells - 4) || (r >= cells - 4 && c < 4);
+  return (
+    <div style={{ width: size, height: size, display: "grid", gridTemplateColumns: `repeat(${cells}, ${px}px)` }}>
+      {Array.from({ length: cells * cells }).map((_, i) => {
+        const r = Math.floor(i / cells);
+        const c = i % cells;
+        let on: boolean;
+        if (isFinder(r, c)) {
+          const rr = r < 4 ? r : cells - 1 - r;
+          const cc = c < 4 ? c : cells - 1 - c;
+          on = rr === 0 || cc === 0 || (rr === 2 && cc === 2);
+        } else {
+          on = Math.abs((Math.sin((r + 1) * 12.9 + (c + 1) * 78.2) * 43758.5453) % 1) > 0.5;
+        }
+        return <div key={i} style={{ width: px, height: px, background: on ? "#000" : "#fff" }} />;
+      })}
+    </div>
+  );
+};
+
+const Tag = ({ children }: { children: React.ReactNode }) => (
+  <span
+    className="inline-block bg-black text-white rounded-[4px] px-2 py-[2px] text-[11px] font-bold tracking-tight"
+    style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+  >
+    {children}
+  </span>
+);
+
 const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   order,
   items,
@@ -21,247 +66,244 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   onOpenChange,
   storeName = "Street Dex",
 }) => {
-  const handlePrint = () => {
-    window.print();
-  };
+  const { data: settings } = useStoreSettings();
+  // Fundo dos boxes é preto: prioriza a logo do tema escuro (clara)
+  const logoSrc = settings?.logo_url_dark || settings?.logo_url || streetdexLogo;
 
-  // Mock data for elements present in the reference image but not in our DB yet
+  const handlePrint = () => window.print();
+
+  const brand = `${(settings?.store_name || storeName).toUpperCase()} | STREETWEAR`;
+  const instagram = settings?.instagram_url?.replace(/^.*instagram\.com\//, "@").replace(/\/$/, "") || "@street.dex";
+  const site = "streetdex.com.br";
   const cnpj = "58.123.456/0001-90";
-  const instagram = "@street.dex";
-  const website = "streetdex.com.br";
-  const contract = "9912445588";
+  const senderAddr = ["Rua das Estrelas, 123 – Centro", "Fortaleza – CE – CEP: 60000-000"];
+  const uf = "CE";
+  const destCity = order.address_city || "FORTALEZA";
+  const weight = "0,250";
+  const nf = String(order.order_number).padStart(8, "0");
+  const tracking = `BR ${String(order.order_number).padStart(3, "0")} 456 789 00 1 BR`;
+  const plp = "0001234567890";
+
+  const contentSummary =
+    items.length > 0
+      ? items.map((i) => `${i.quantity} ${i.product_name.toLowerCase()}`).join(" / ")
+      : "1 camiseta / vestuário";
+
+  const LogoBox = ({ size, withHandle }: { size: number; withHandle?: boolean }) => (
+    <div
+      className="bg-black flex flex-col items-center justify-center shrink-0"
+      style={{ width: size, height: size, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+    >
+      <img
+        src={logoSrc}
+        alt={brand}
+        className="object-contain"
+        style={{ width: size - 12, height: withHandle ? size - 44 : size - 12 }}
+      />
+      {withHandle && (
+        <div className="flex items-center gap-1 text-white text-[12px] font-bold mt-1">
+          <Instagram size={13} strokeWidth={2.5} />
+          <Globe size={13} strokeWidth={2.5} />
+          <span>{instagram}</span>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl bg-[#141414] border-zinc-800 print:p-0 print:border-0 print:shadow-none print:bg-white print:text-black overflow-hidden p-0">
-        <DialogHeader className="print:hidden px-6 pt-6 bg-zinc-900 border-b border-zinc-800 pb-4">
-          <DialogTitle className="flex items-center gap-2 text-white font-black uppercase italic tracking-tighter">
-            <Printer size={18} className="text-primary" /> Imprimir Etiqueta Padrão Correios
+      <DialogContent className="max-w-[1100px] w-[96vw] bg-[#141414] border-zinc-800 p-0 overflow-y-auto max-h-[92vh]">
+        <DialogHeader className="print:hidden px-6 pt-5 pb-4 border-b border-zinc-800">
+          <DialogTitle className="flex items-center gap-2 text-white font-bold">
+            <Printer size={18} className="text-primary" /> Etiqueta de Envio — Correios
           </DialogTitle>
         </DialogHeader>
 
-        <div id="label-content" className="m-4 bg-white text-black font-sans border border-black relative print:m-0 print:border-0" style={{ width: '1000px', margin: '20px auto' }}>
-          
-          {/* TOP SECTION: LOGO CORREIOS | PAC | NF/DATE */}
-          <div className="flex border-b border-black h-20 items-stretch">
-            <div className="flex-1 flex items-center px-4 border-r border-black gap-2">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                 <div className="w-4 h-4 bg-white rotate-45"></div>
+        <div className="p-5 print:p-0">
+          <div
+            id="label-content"
+            className="bg-white text-black mx-auto rounded-[10px] border-2 border-black overflow-hidden"
+            style={{ width: 1000, fontFamily: "Arial, Helvetica, sans-serif" }}
+          >
+            {/* LINHA 1 — Correios / PAC / Peso */}
+            <div className="flex border-b-2 border-black">
+              <div className="flex items-center gap-3 px-5 py-3" style={{ width: "31%" }}>
+                <svg width="42" height="30" viewBox="0 0 42 30" fill="none">
+                  <path d="M2 15 L14 2 L26 2 L14 15 L26 28 L14 28 Z" fill="#000" />
+                  <path d="M18 15 L30 2 L40 2 L28 15 L40 28 L30 28 Z" fill="#000" />
+                </svg>
+                <span className="text-[30px] font-bold tracking-tight leading-none">Correios</span>
               </div>
-              <span className="text-2xl font-black italic tracking-tighter uppercase">Correios</span>
-            </div>
-            <div className="flex-[1.5] flex flex-col items-center justify-center border-r border-black">
-              <span className="text-3xl font-black uppercase tracking-tighter">PAC</span>
-              <span className="text-[10px] font-bold">Contrato: {contract}</span>
-            </div>
-            <div className="flex-1 flex flex-col justify-center items-end px-4 gap-1">
-              <div className="flex items-center gap-2">
-                 <div className="w-8 h-8 rounded-full border-4 border-black"></div>
-                 <span className="text-[10px] font-bold">NF: 00012345</span>
+              <div className="flex flex-col items-center justify-center py-2" style={{ width: "38%" }}>
+                <span className="text-[30px] font-bold leading-none">PAC</span>
+                <span className="text-[13px] mt-1">Contrato: 9912445588</span>
               </div>
-              <div className="text-right leading-none">
-                 <p className="text-[8px] font-bold uppercase text-zinc-500">Peso (kg)</p>
-                 <p className="text-xs font-black">0,250</p>
-                 <p className="text-[8px] font-bold uppercase text-zinc-500 mt-1">Data da Postagem</p>
-                 <p className="text-xs font-black">{new Date().toLocaleDateString("pt-BR")}</p>
+              <div className="flex items-center justify-end gap-4 px-5 py-2" style={{ width: "31%" }}>
+                <div className="flex flex-col items-center">
+                  <div
+                    className="rounded-full bg-black"
+                    style={{ width: 44, height: 44, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+                  />
+                  <span className="text-[12px] mt-1 whitespace-nowrap">NF: {nf}</span>
+                </div>
+                <div className="text-right leading-tight">
+                  <p className="text-[12px]">Peso (kg)</p>
+                  <p className="text-[19px] font-bold leading-none">{weight}</p>
+                  <p className="text-[11px] mt-1">Data da Postagem</p>
+                  <p className="text-[14px] font-bold leading-none">{new Date().toLocaleDateString("pt-BR")}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* SENDER AND SERVICE SECTION */}
-          <div className="flex border-b border-black min-h-[160px]">
-            {/* Sender */}
-            <div className="flex-[3.5] border-r border-black p-4">
-              <div className="bg-black text-white text-[10px] font-black uppercase px-2 py-0.5 inline-block mb-3">REMETENTE</div>
-              <div className="flex gap-4">
-                <div className="w-24 h-24 bg-black p-2 shrink-0">
-                  <StreetDexLogo size="md" className="brightness-0 invert h-full w-full object-contain" />
-                </div>
-                <div className="text-[11px] leading-tight font-bold">
-                  <p className="text-sm font-black uppercase tracking-tighter">{storeName} | STREETWEAR</p>
-                  <p className="text-zinc-500 mt-1">Moda para quem vive intensamente Unissex</p>
-                  <p className="mt-1">CNPJ: {cnpj}</p>
-                  <p className="mt-1 uppercase">Rua das Estrelas, 123 - Centro</p>
-                  <p className="uppercase">Fortaleza - CE - CEP: 60000-000</p>
-                  <p className="mt-1 lowercase flex items-center gap-1"><Instagram size={10}/> {instagram}</p>
-                </div>
-              </div>
-            </div>
-            {/* Service Status */}
-            <div className="flex-1 border-r border-black p-4 flex flex-col">
-              <div className="bg-black text-white text-[10px] font-black uppercase px-2 py-0.5 inline-block self-start mb-2">SERVIÇO</div>
-              <span className="text-3xl font-black uppercase italic tracking-tighter">PAC</span>
-              <div className="mt-auto space-y-1">
-                <div className="border-b border-black/20 pb-1">
-                  <p className="text-[8px] text-zinc-400 font-bold uppercase">Recebedor</p>
-                  <div className="h-4"></div>
-                </div>
-                <div className="border-b border-black/20 pb-1">
-                  <p className="text-[8px] text-zinc-400 font-bold uppercase">Assinatura</p>
-                  <div className="h-4"></div>
-                </div>
-                <div>
-                  <p className="text-[8px] text-zinc-400 font-bold uppercase">Documento</p>
-                  <div className="h-4"></div>
+            {/* LINHA 2 — Remetente / Serviço / Destino */}
+            <div className="flex border-b-2 border-black">
+              <div className="px-5 py-3 border-r-2 border-black" style={{ width: "55%" }}>
+                <Tag>REMETENTE</Tag>
+                <div className="flex gap-4 mt-3">
+                  <LogoBox size={150} />
+                  <div className="text-[15px] leading-[1.45]">
+                    <p className="text-[18px] font-bold">{brand}</p>
+                    <p>Moda para quem vive intensamente</p>
+                    <p>Unissex</p>
+                    <p>CNPJ: {cnpj}</p>
+                    {senderAddr.map((l) => (
+                      <p key={l}>{l}</p>
+                    ))}
+                    <p>Instagram: {instagram}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            {/* Destination Code */}
-            <div className="flex-1 p-4 flex flex-col items-center">
-              <div className="bg-black text-white text-[10px] font-black uppercase px-2 py-0.5 inline-block mb-2">DESTINO</div>
-              <span className="text-5xl font-black italic tracking-tighter">CE</span>
-              <p className="text-[10px] font-black uppercase mt-1">FORTALEZA</p>
-              <div className="mt-auto bg-white p-1 border border-black w-14 h-14">
-                {/* QR Code Placeholder */}
-                <div className="w-full h-full border-[3px] border-black flex flex-wrap p-0.5 gap-0.5">
-                   {[...Array(9)].map((_, i) => (
-                     <div key={i} className={`w-[14px] h-[14px] ${i%2===0 ? 'bg-black' : ''}`}></div>
-                   ))}
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* RECIPIENT AND CONTENT SECTION */}
-          <div className="flex border-b border-black min-h-[160px] items-stretch">
-            {/* Recipient info */}
-            <div className="flex-[3.5] border-r border-black p-4 flex flex-col">
-              <div className="bg-black text-white text-[10px] font-black uppercase px-2 py-0.5 inline-block mb-3 self-start">DESTINATÁRIO</div>
-              <h2 className="text-lg font-black uppercase tracking-tighter">{order.customers.name}</h2>
-              <div className="text-xs font-bold leading-relaxed mt-2 uppercase">
-                <p>{order.address_street}, {order.address_number} {order.address_complement && `- ${order.address_complement}`}</p>
-                <p>{order.address_neighborhood}</p>
-                <p className="text-sm font-black">{order.address_city}</p>
-                <p className="text-lg font-black tracking-widest mt-1">CEP: {order.address_cep}</p>
-                <p className="mt-2">Tel: {order.customers.phone}</p>
-              </div>
-            </div>
-            
-            {/* Logo Central & Content Details */}
-            <div className="flex-[3.5] flex border-r border-black">
-              <div className="flex-1 p-4 flex flex-col items-center justify-center border-r border-black gap-2">
-                 <div className="w-32 h-32 bg-black p-2">
-                    <StreetDexLogo size="md" className="brightness-0 invert h-full w-full object-contain" />
-                 </div>
-                 <div className="flex items-center gap-3 text-[9px] font-black italic uppercase">
-                    <span className="flex items-center gap-0.5"><Instagram size={8}/> {instagram}</span>
-                 </div>
-              </div>
-              <div className="flex-1 flex flex-col">
-                 <div className="p-3 flex-1 flex flex-col">
-                    <div className="text-[9px] font-black uppercase text-center mb-2">DECLARAÇÃO DE CONTEÚDO</div>
-                    <div className="flex-1 text-[10px] font-bold">
-                       {items.map((item, idx) => (
-                         <div key={idx} className="flex justify-between border-b border-black/10 py-1">
-                           <span className="uppercase truncate max-w-[80px]">{item.quantity}x {item.product_name}</span>
-                           <span className="uppercase">{item.size || "UN"}</span>
-                         </div>
-                       ))}
+              <div className="px-5 py-3 border-r-2 border-black flex flex-col" style={{ width: "28%" }}>
+                <Tag>SERVIÇO</Tag>
+                <p className="text-[36px] font-bold leading-none mt-2">PAC</p>
+                <div className="mt-4 space-y-[14px]">
+                  {["Recebedor", "Assinatura", "Documento"].map((l) => (
+                    <div key={l} className="flex items-end gap-2">
+                      <span className="text-[13px] whitespace-nowrap">{l}</span>
+                      <div className="flex-1 border-b border-black/70" />
                     </div>
-                 </div>
-                 <div className="bg-black text-white p-2">
-                    <p className="text-[8px] font-black uppercase text-center text-zinc-400">VALOR DECLARADO</p>
-                    <p className="text-lg font-black text-center italic leading-none">{formatPrice(order.total)}</p>
-                 </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="px-4 py-3 flex flex-col items-center" style={{ width: "17%" }}>
+                <Tag>DESTINO</Tag>
+                <p className="text-[46px] font-bold leading-none mt-1">{uf}</p>
+                <p className="text-[17px] font-bold uppercase leading-none mt-1 text-center">{destCity}</p>
+                <div className="mt-3">
+                  <QrCodeMock size={86} />
+                </div>
               </div>
             </div>
 
-            {/* PLP/FRETE Status */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 border-b border-black p-3 flex flex-col items-center justify-center">
-                 <div className="bg-black text-white text-[8px] font-black uppercase px-2 py-0.5 mb-1">FRETE</div>
-                 <span className="text-sm font-black italic tracking-tighter">PAGO</span>
+            {/* LINHA 3 — Destinatário / Logo / Declaração / Frete */}
+            <div className="flex border-b-2 border-black">
+              <div className="px-5 py-3" style={{ width: "33%" }}>
+                <Tag>DESTINATÁRIO</Tag>
+                <p className="text-[20px] font-bold uppercase mt-3">{order.customers.name}</p>
+                <div className="text-[16px] leading-[1.5] mt-1">
+                  <p>
+                    {order.address_street}, {order.address_number}
+                    {order.address_neighborhood ? ` – ${order.address_neighborhood}` : ""}
+                  </p>
+                  <p>
+                    {order.address_city} – {uf}
+                  </p>
+                  <p>CEP: {order.address_cep}</p>
+                  <p>Tel: {order.customers.phone}</p>
+                </div>
               </div>
-              <div className="flex-1 p-3 flex flex-col items-center justify-center text-center">
-                 <div className="bg-black text-white text-[8px] font-black uppercase px-2 py-0.5 mb-1">PLP</div>
-                 <span className="text-[10px] font-bold">0001234567890</span>
+
+              <div className="flex items-center justify-center py-4" style={{ width: "22%" }}>
+                <LogoBox size={170} withHandle />
+              </div>
+
+              <div className="px-4 py-3 border-l-2 border-black flex flex-col justify-center" style={{ width: "28%" }}>
+                <p className="text-[16px] font-bold text-center mb-2">DECLARAÇÃO DE CONTEÚDO</p>
+                <div className="border border-black">
+                  <p className="text-[15px] text-center py-2 px-2">{contentSummary}</p>
+                  <p
+                    className="bg-black text-white text-[14px] font-bold text-center py-1"
+                    style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+                  >
+                    VALOR DECLARADO
+                  </p>
+                  <p className="text-[16px] text-center py-2">{formatPrice(order.total)}</p>
+                </div>
+              </div>
+
+              <div className="border-l-2 border-black flex flex-col" style={{ width: "17%" }}>
+                <div className="px-4 py-3 border-b-2 border-black">
+                  <Tag>FRETE</Tag>
+                  <p className="text-[20px] font-bold mt-1">PAGO</p>
+                </div>
+                <div className="px-4 py-3">
+                  <Tag>PLP</Tag>
+                  <p className="text-[16px] font-bold mt-1">{plp}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* TRACKING CODES SECTION */}
-          <div className="flex h-32 items-stretch">
-             {/* Rastreamento */}
-             <div className="flex-[1.5] border-r border-black p-4 flex flex-col items-center justify-center">
-                <p className="text-[10px] font-black uppercase mb-1">CÓDIGO DE RASTREAMENTO</p>
-                <p className="text-2xl font-black italic tracking-widest mb-2">BR 123 456 789 00 1 BR</p>
-                {/* Barcode Simulator 1 */}
-                <div className="h-12 w-full flex items-center justify-center gap-[1px]">
-                   {[...Array(80)].map((_, i) => (
-                     <div key={i} className={`h-10 w-[1px] bg-black ${i%5===0 ? 'w-[3px]' : i%8===0 ? 'w-[2px]' : ''}`}></div>
-                   ))}
+            {/* LINHA 4 — Rastreamento / Código de barras */}
+            <div className="flex items-stretch">
+              <div className="px-6 py-4 flex flex-col items-center justify-center" style={{ width: "62%" }}>
+                <p className="text-[15px] font-bold">CÓDIGO DE RASTREAMENTO</p>
+                <p className="text-[34px] font-bold tracking-wide leading-none my-2">{tracking}</p>
+                <Barcode seed={order.order_number + 7} height={78} count={72} />
+              </div>
+              <div className="border-l-2 border-dashed border-black/60" />
+              <div className="px-6 py-4 flex flex-col items-center justify-center" style={{ width: "38%" }}>
+                <Tag>CÓDIGO DE BARRAS</Tag>
+                <div className="mt-3">
+                  <Barcode seed={order.order_number + 31} height={82} count={44} />
                 </div>
-             </div>
-             {/* Código de Barras Central */}
-             <div className="flex-1 p-4 flex flex-col items-center justify-center">
-                <div className="bg-black text-white text-[8px] font-black uppercase px-2 py-0.5 mb-2">CÓDIGO DE BARRAS</div>
-                {/* Barcode Simulator 2 */}
-                <div className="h-16 w-full flex items-center justify-center gap-[1.5px]">
-                   {[...Array(50)].map((_, i) => (
-                     <div key={i} className={`h-14 w-[1px] bg-black ${i%3===0 ? 'w-[4px]' : i%7===0 ? 'w-[3px]' : ''}`}></div>
-                   ))}
-                </div>
-                <p className="text-[10px] font-bold tracking-[0.3em] mt-1">12345678901234</p>
-             </div>
-          </div>
+                <p className="text-[17px] font-bold mt-2">12345678901234</p>
+              </div>
+            </div>
 
-          {/* FOOTER BLACK BAR */}
-          <div className="bg-black text-white px-6 py-2 flex justify-between items-center text-[10px] font-black italic uppercase">
-             <div className="flex items-center gap-1"><Globe size={12}/> {website}</div>
-             <div className="flex items-center gap-2">
-                <span>★</span>
-                <span>{storeName.toUpperCase()} | STREETWEAR</span>
-             </div>
-             <div>Obrigado pela preferência!</div>
+            {/* RODAPÉ PRETO */}
+            <div
+              className="bg-black text-white flex items-center justify-between px-6 py-3 text-[15px] font-bold"
+              style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+            >
+              <span className="flex items-center gap-2">
+                <Globe size={16} /> {site}
+              </span>
+              <span className="flex items-center gap-2">
+                <Star size={14} fill="currentColor" /> {brand}
+              </span>
+              <span>Obrigado pela preferência!</span>
+              <img src={logoSrc} alt="" className="h-8 w-auto object-contain" />
+            </div>
           </div>
         </div>
 
-        {/* Print Styles and Wrapper */}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           @media print {
-            @page {
-              margin: 0;
-              size: auto;
-            }
-            body * {
-              visibility: hidden;
-            }
-            #label-content, #label-content * {
-              visibility: visible;
-            }
+            @page { margin: 8mm; size: landscape; }
+            body * { visibility: hidden; }
+            #label-content, #label-content * { visibility: visible; }
             #label-content {
-              position: absolute;
-              left: 50%;
-              top: 50%;
-              transform: translate(-50%, -50%) scale(0.95);
+              position: absolute; left: 0; top: 0;
               width: 1000px !important;
-              margin: 0 !important;
-              border: 1px solid black !important;
+              transform: scale(1); transform-origin: top left;
             }
-            .print\\:hidden {
-              display: none !important;
-            }
-            /* Reset colors for print */
-            .bg-black {
-              background-color: black !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .text-white {
-              color: white !important;
-            }
-            .border-black {
-              border-color: black !important;
-            }
+            .print\\:hidden { display: none !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           }
-        `}} />
+        `,
+          }}
+        />
 
-        <div className="flex justify-end gap-3 p-6 bg-zinc-900 border-t border-zinc-800 print:hidden relative z-50">
+        <div className="flex justify-end gap-3 p-5 bg-zinc-900 border-t border-zinc-800 print:hidden">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white hover:bg-white/10">
             Cancelar
           </Button>
-          <Button onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase italic tracking-tighter gap-2 px-8">
-            <Printer size={18} /> Disparar Impressão
+          <Button onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-8 font-bold">
+            <Printer size={18} /> Imprimir Etiqueta
           </Button>
         </div>
       </DialogContent>
