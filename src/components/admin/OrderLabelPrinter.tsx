@@ -119,7 +119,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-5 print:p-0">
+        <div className="p-5 print:p-0 print-container">
           <div
             id="label-content"
             className="bg-white text-black mx-auto rounded-[10px] border-2 border-black overflow-hidden"
