@@ -167,8 +167,17 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             .print\\:hidden {
               display: none !important;
             }
-            .print\\:invert-0 {
-              filter: invert(0) !important;
+            .grayscale.brightness-0.invert {
+              filter: grayscale(1) brightness(0) invert(1) !important;
+              -webkit-filter: grayscale(1) brightness(0) invert(1) !important;
+            }
+            .bg-black {
+              background-color: black !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .text-white {
+              color: white !important;
             }
           }
         `}} />
