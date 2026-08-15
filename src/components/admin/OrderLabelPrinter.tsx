@@ -1,9 +1,10 @@
 import React from "react";
 import { DBOrder, DBOrderItem, DBCustomer } from "@/hooks/useOrders";
 import { formatPrice } from "@/lib/format";
-import { Printer, X } from "lucide-react";
+import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 
 interface OrderLabelPrinterProps {
   order: DBOrder & { customers: DBCustomer };
@@ -26,90 +27,126 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-card border-border print:p-0 print:border-0 print:shadow-none print:bg-white print:text-black">
-        <DialogHeader className="print:hidden">
-          <DialogTitle className="flex items-center gap-2">
-            <Printer size={18} /> Imprimir Etiqueta de Envio
+      <DialogContent className="max-w-2xl bg-[#141414] border-zinc-800 print:p-0 print:border-0 print:shadow-none print:bg-white print:text-black overflow-hidden">
+        <DialogHeader className="print:hidden px-6 pt-6">
+          <DialogTitle className="flex items-center gap-2 text-white font-black uppercase italic tracking-tighter">
+            <Printer size={18} className="text-primary" /> Imprimir Etiqueta de Envio
           </DialogTitle>
         </DialogHeader>
 
-        <div id="label-content" className="p-4 space-y-8 bg-white text-black font-sans border border-zinc-200 rounded-md print:border-0 print:rounded-none">
+        <div id="label-content" className="m-6 p-8 bg-white text-black font-sans border-4 border-black relative print:m-0 print:border-0">
+          {/* Estética Streetwear: Bordas duplas e grids */}
+          <div className="absolute top-0 right-0 w-16 h-16 border-l-2 border-b-2 border-black print:hidden"></div>
+          
           {/* Header */}
-          <div className="flex justify-between items-start border-b-2 border-black pb-4">
-            <div>
-              <h1 className="text-2xl font-black uppercase italic">{storeName}</h1>
-              <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-bold mt-1">Streetwear & Culture</p>
+          <div className="flex justify-between items-end border-b-4 border-black pb-6 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="bg-black p-2 rounded-sm print:bg-transparent print:p-0">
+                <StreetDexLogo size="md" className="invert print:invert-0" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">{storeName}</h1>
+                <p className="text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-black mt-1">Authentic Streetwear</p>
+              </div>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold uppercase tracking-tighter">Pedido #{order.order_number}</p>
-              <p className="text-[10px] text-zinc-500">{new Date(order.created_at).toLocaleDateString("pt-BR")}</p>
+              <div className="bg-black text-white px-3 py-1 mb-1 inline-block print:bg-transparent print:text-black print:border-2 print:border-black">
+                <p className="text-lg font-black uppercase tracking-tighter">ID #{order.order_number}</p>
+              </div>
+              <p className="text-[10px] font-bold uppercase">{new Date(order.created_at).toLocaleDateString("pt-BR")}</p>
             </div>
           </div>
 
-          {/* Recipient info */}
-          <div className="space-y-4">
-            <div className="bg-zinc-100 p-3 rounded print:bg-zinc-50">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-2">Destinatário</p>
-              <h2 className="text-lg font-bold uppercase">{order.customers.name}</h2>
-              <p className="text-sm font-medium mt-1">
-                {order.address_street}, {order.address_number}
-                {order.address_complement && ` - ${order.address_complement}`}
-              </p>
-              <p className="text-sm font-medium">
-                {order.address_neighborhood}
-              </p>
-              <p className="text-sm font-medium uppercase">
-                {order.address_city} - CEP: {order.address_cep}
-              </p>
-              <p className="text-xs font-bold mt-2">TEL: {order.customers.phone}</p>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Recipient info */}
+            <div className="space-y-4">
+              <div className="border-2 border-black p-4 relative">
+                <div className="absolute -top-3 left-3 bg-white px-2 text-[10px] font-black uppercase tracking-widest border-2 border-black">
+                  Destinatário
+                </div>
+                <h2 className="text-xl font-black uppercase italic mt-2">{order.customers.name}</h2>
+                <div className="space-y-1 mt-3 font-bold text-sm">
+                  <p className="uppercase leading-tight">
+                    {order.address_street}, {order.address_number}
+                    {order.address_complement && <span className="block text-zinc-500">{order.address_complement}</span>}
+                  </p>
+                  <p className="uppercase">{order.address_neighborhood}</p>
+                  <p className="uppercase text-lg">
+                    {order.address_city} - {order.address_cep}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-zinc-200">
+                  <p className="text-xs font-black">CONTATO: {order.customers.phone}</p>
+                </div>
+              </div>
+
+              {/* Barcode Simulator */}
+              <div className="pt-4">
+                <div className="h-16 w-full bg-black mb-2 flex items-center justify-center overflow-hidden">
+                   <div className="flex gap-[2px] h-full items-center px-4">
+                      {[...Array(60)].map((_, i) => (
+                        <div key={i} className={`h-12 w-[1px] bg-white ${i % 4 === 0 ? 'w-[3px]' : i % 7 === 0 ? 'w-[2px]' : ''}`} />
+                      ))}
+                   </div>
+                </div>
+                <p className="text-[9px] text-center tracking-[0.5em] font-mono font-bold uppercase">ORD-{order.id.substring(0, 12).toUpperCase()}</p>
+              </div>
             </div>
 
             {/* Content info */}
-            <div>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-2 border-b border-zinc-200 pb-1">Conteúdo do Pacote</p>
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-100 text-[10px] uppercase text-zinc-400">
-                    <th className="py-2">Item</th>
-                    <th className="py-2 text-center w-12">Qtd</th>
-                    <th className="py-2 text-right w-24">Tam</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-50">
-                  {items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="py-2 pr-4 font-medium">{item.product_name}</td>
-                      <td className="py-2 text-center">{item.quantity}</td>
-                      <td className="py-2 text-right font-bold">{item.size || "—"}</td>
+            <div className="border-2 border-black p-4 relative flex flex-col">
+              <div className="absolute -top-3 left-3 bg-white px-2 text-[10px] font-black uppercase tracking-widest border-2 border-black">
+                Manifesto de Conteúdo
+              </div>
+              <div className="flex-1 overflow-hidden mt-2">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b-2 border-black text-[10px] uppercase font-black">
+                      <th className="py-2">Item / Drop</th>
+                      <th className="py-2 text-center w-12">Qtd</th>
+                      <th className="py-2 text-right w-16">Tam</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="text-xs font-bold">
+                    {items.map((item) => (
+                      <tr key={item.id} className="border-b border-zinc-100 italic">
+                        <td className="py-3 pr-2 uppercase leading-tight truncate max-w-[120px]">{item.product_name}</td>
+                        <td className="py-3 text-center">{item.quantity}</td>
+                        <td className="py-3 text-right uppercase">{item.size || "OS"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-6 pt-4 border-t-4 border-black flex justify-between items-end">
+                <div className="text-[10px] uppercase font-black space-y-0.5">
+                  <p>Modalidade: Express Ground</p>
+                  <p>Peso Est: 0.850kg</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-black uppercase text-zinc-400">Total Declaro</p>
+                  <p className="text-xl font-black italic leading-none">{formatPrice(order.total)}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Footer / QR / Barcode placeholders */}
-          <div className="flex justify-between items-end pt-4 border-t-2 border-black">
-            <div className="text-[10px] uppercase font-bold space-y-1">
-              <p>Envio: Padrão Nacional</p>
-              <p>Valor Total: {formatPrice(order.total)}</p>
-            </div>
-            <div className="text-right">
-              <div className="h-10 w-48 bg-black mb-1 flex items-center justify-center">
-                 <div className="flex gap-[2px] h-full items-center px-2">
-                    {[...Array(40)].map((_, i) => (
-                      <div key={i} className={`h-8 w-[1px] bg-white ${i % 3 === 0 ? 'w-[2px]' : ''}`} />
-                    ))}
-                 </div>
-              </div>
-              <p className="text-[8px] tracking-[0.3em] font-mono">ORD-{order.id.substring(0, 8).toUpperCase()}</p>
-            </div>
+          {/* Decorative Elements */}
+          <div className="mt-8 flex justify-between items-center opacity-20 print:hidden">
+            <div className="h-px bg-black flex-1 mr-4"></div>
+            <p className="text-[8px] font-black uppercase tracking-[1em]">Street Dex Logistics System</p>
+            <div className="h-px bg-black flex-1 ml-4"></div>
           </div>
         </div>
 
         {/* Print Styles */}
         <style dangerouslySetInnerHTML={{ __html: `
           @media print {
+            @page {
+              margin: 0;
+              size: auto;
+            }
             body * {
               visibility: hidden;
             }
@@ -118,23 +155,31 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             }
             #label-content {
               position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              width: 90%;
+              max-width: 800px;
               margin: 0;
               padding: 40px;
-              border: 0;
+              border: 4px solid black !important;
+              box-shadow: none !important;
             }
             .print\\:hidden {
               display: none !important;
             }
+            .print\\:invert-0 {
+              filter: invert(0) !important;
+            }
           }
         `}} />
 
-        <div className="flex justify-end gap-2 mt-4 print:hidden">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
-          <Button onClick={handlePrint} className="gap-2">
-            <Printer size={16} /> Imprimir Agora
+        <div className="flex justify-end gap-3 p-6 bg-zinc-900 border-t border-zinc-800 print:hidden">
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white hover:bg-white/10">
+            Cancelar
+          </Button>
+          <Button onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase italic tracking-tighter gap-2 px-8">
+            <Printer size={18} /> Disparar Impressão
           </Button>
         </div>
       </DialogContent>
