@@ -2,7 +2,7 @@ import streetdexLogo from "@/assets/streetdex-logo.png";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { useEffect, useState } from "react";
 
-const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
+const StreetDexLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg", className?: string }) => {
   const { data: settings } = useStoreSettings();
   const [isDark, setIsDark] = useState(false);
   
@@ -35,7 +35,7 @@ const StreetDexLogo = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
     : (logoUrl || streetdexLogo);
     
   return (
-    <div className="flex items-center">
+    <div className={`flex items-center ${className}`}>
       <img
         src={logoSrc}
         alt={settings?.store_name || "Street Dex"}
