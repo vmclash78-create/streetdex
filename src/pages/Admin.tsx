@@ -6,11 +6,12 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck,
+  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck, Printer
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
+import OrderLabelPrinter from "@/components/admin/OrderLabelPrinter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
