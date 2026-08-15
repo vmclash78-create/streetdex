@@ -131,7 +131,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
               <div className="text-xs font-bold leading-relaxed mt-2 uppercase">
                 <p>{order.address_street}, {order.address_number} {order.address_complement && `- ${order.address_complement}`}</p>
                 <p>{order.address_neighborhood}</p>
-                <p className="text-sm font-black">{order.address_city} - {order.address_state || 'UF'}</p>
+                <p className="text-sm font-black">{order.address_city}</p>
                 <p className="text-lg font-black tracking-widest mt-1">CEP: {order.address_cep}</p>
                 <p className="mt-2">Tel: {order.customers.phone}</p>
               </div>
