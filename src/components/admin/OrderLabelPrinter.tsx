@@ -40,8 +40,8 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
           {/* Header */}
           <div className="flex justify-between items-start border-b-4 border-black pb-6 mb-8">
             <div className="flex items-center gap-4">
-              <div className="bg-black p-2 rounded-sm">
-                <StreetDexLogo size="md" className="grayscale brightness-0 invert" />
+              <div className="bg-black p-2 rounded-sm print:bg-black">
+                <StreetDexLogo size="md" className="brightness-0 invert print:brightness-0 print:invert" />
               </div>
               <div>
                 <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">{storeName}</h1>
@@ -167,9 +167,9 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             .print\\:hidden {
               display: none !important;
             }
-            .grayscale.brightness-0.invert {
-              filter: grayscale(1) brightness(0) invert(1) !important;
-              -webkit-filter: grayscale(1) brightness(0) invert(1) !important;
+            .brightness-0.invert {
+              filter: brightness(0) invert(1) !important;
+              -webkit-filter: brightness(0) invert(1) !important;
             }
             .bg-black {
               background-color: black !important;
