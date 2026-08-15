@@ -1968,6 +1968,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [editingOrder, setEditingOrder] = useState<DBOrder | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [isLabelPrinterOpen, setIsLabelPrinterOpen] = useState(false);
+  const [orderForLabel, setOrderForLabel] = useState<string | null>(null);
+
   
   // Filtros
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -2196,6 +2199,9 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder({ ...order })} title="Editar">
                           <Edit2 size={15} />
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" onClick={() => { setOrderForLabel(order.id); setIsLabelPrinterOpen(true); }} title="Imprimir etiqueta">
+                          <Printer size={15} />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setOrderToDelete(order.id)} title="Excluir">
                           <Trash2 size={15} />
                         </Button>
@@ -2204,6 +2210,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                             <ChevronRight size={15} />
                           </a>
                         </Button>
+
                       </div>
                     </TableCell>
                   </TableRow>
@@ -2288,7 +2295,20 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
                   </div>
                 </div>
 
+                <div className="pt-2 border-t border-border">
+                  <Button 
+                    className="w-full gap-2" 
+                    onClick={() => {
+                      setOrderForLabel(selectedOrder.id);
+                      setIsLabelPrinterOpen(true);
+                    }}
+                  >
+                    <Printer size={16} /> Imprimir Etiqueta de Envio
+                  </Button>
+                </div>
+
               </div>
+
             </>
           )}
         </DialogContent>
@@ -2408,7 +2428,19 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Label Printer Component */}
+      {orderForLabel && (
+        <OrderLabelPrinter
+          isOpen={isLabelPrinterOpen}
+          onOpenChange={setIsLabelPrinterOpen}
+          order={orders?.find(o => o.id === orderForLabel)!}
+          items={orderItems || []}
+          storeName={settings?.store_name}
+        />
+      )}
     </div>
+
   );
 };
 
