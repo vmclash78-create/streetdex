@@ -284,20 +284,24 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             __html: `
           @media print {
             @page { margin: 8mm; size: landscape; }
-            body > *:not(#radix-ui-portal) { visibility: hidden !important; pointer-events: none !important; }
-            #radix-ui-portal * { visibility: hidden; }
-            #label-content, #label-content * { visibility: visible !important; }
+            /* Esconde tudo no body */
+            body > * { display: none !important; }
+            /* Garante que o portal do Dialog (onde está a etiqueta) seja exibido */
+            body > div[id^="radix-"] { display: block !important; }
+            /* Esconde elementos internos do Dialog que não são a etiqueta */
+            div[role="dialog"] > *:not(.print-container) { display: none !important; }
+            /* Container da etiqueta */
+            .print-container { display: block !important; padding: 0 !important; margin: 0 !important; position: static !important; }
             #label-content {
-              position: fixed !important;
-              left: 0 !important;
-              top: 0 !important;
+              position: static !important;
+              display: block !important;
               width: 1000px !important;
-              margin: 0 !important;
+              margin: 0 auto !important;
               border: none !important;
               box-shadow: none !important;
-              transform: none !important;
-              z-index: 9999999 !important;
+              visibility: visible !important;
             }
+            #label-content * { visibility: visible !important; }
             .print\\:hidden { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           }
