@@ -284,12 +284,19 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             __html: `
           @media print {
             @page { margin: 8mm; size: landscape; }
-            body * { visibility: hidden; }
-            #label-content, #label-content * { visibility: visible; }
+            body > *:not(#radix-ui-portal) { visibility: hidden !important; pointer-events: none !important; }
+            #radix-ui-portal * { visibility: hidden; }
+            #label-content, #label-content * { visibility: visible !important; }
             #label-content {
-              position: absolute; left: 0; top: 0;
+              position: fixed !important;
+              left: 0 !important;
+              top: 0 !important;
               width: 1000px !important;
-              transform: scale(1); transform-origin: top left;
+              margin: 0 !important;
+              border: none !important;
+              box-shadow: none !important;
+              transform: none !important;
+              z-index: 9999999 !important;
             }
             .print\\:hidden { display: none !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
