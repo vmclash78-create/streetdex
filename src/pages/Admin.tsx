@@ -310,7 +310,7 @@ const Admin = () => {
           {view === "dashboard" && <DashboardView />}
           {view === "products" && <ProductsView />}
           {view === "banners" && <BannersView />}
-          {view === "orders" && <OrdersAdminView somLiberado={somLiberado} testarNotificacao={testarNotificacao} />}
+          {view === "orders" && <OrdersAdminView somLiberado={somLiberado} testarNotificacao={testarNotificacao} storeName={settings?.store_name} />}
           {view === "sales" && <SalesView />}
           {view === "coupons" && <CouponsView />}
           {view === "finances" && <FinancesView />}
@@ -1957,7 +1957,16 @@ const SettingsView = () => {
 };
 
 // ─── ORDERS ADMIN ───
-const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: boolean; testarNotificacao: () => void }) => {
+const OrdersAdminView = ({ 
+  somLiberado, 
+  testarNotificacao,
+  storeName 
+}: { 
+  somLiberado: boolean; 
+  testarNotificacao: () => void;
+  storeName?: string;
+}) => {
+
   const { data: orders, isLoading } = useOrders();
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
@@ -2436,7 +2445,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: { somLiberado: bool
           onOpenChange={setIsLabelPrinterOpen}
           order={orders?.find(o => o.id === orderForLabel)!}
           items={orderItems || []}
-          storeName={settings?.store_name}
+          storeName={storeName}
         />
       )}
     </div>
