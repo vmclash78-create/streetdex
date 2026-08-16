@@ -45,7 +45,7 @@ const HeroCarousel = () => {
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding={i === 0 ? "sync" : "async"}
-                className="h-[500px] md:h-[560px] lg:h-[620px] w-full max-w-full object-contain md:object-cover"
+                className="h-[500px] md:h-[600px] lg:h-[700px] w-full max-w-full object-cover md:object-center"
               />
               {/* Dark gradient overlay for text legibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />

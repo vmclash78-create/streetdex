@@ -15,7 +15,7 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
   const { data: settings } = useStoreSettings();
   const discount = Number(settings?.pix_discount || "0");
   const soldOut = typeof product.stock === "number" && product.stock <= 0;
-  const installments = product.price >= 60 ? 2 : 0;
+  const installments = product.price >= 30 ? 12 : 0;
 
   return (
     <div
