@@ -114,7 +114,7 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
               </li>
               <li>
                 <a href={getWhatsAppLink(whatsappNumber)} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
-                  Estampa personalizada
+                  Fale Conosco
                 </a>
               </li>
             </ul>
