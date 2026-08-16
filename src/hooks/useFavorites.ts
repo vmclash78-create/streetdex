@@ -23,7 +23,13 @@ export const useFavorites = () => {
         ? prev.filter((id) => id !== productId) 
         : [...prev, productId];
       
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      // Use window.setTimeout to ensure state is updated if needed or just call it directly
+      // Actually, updating localStorage here is fine, but let's make it robust
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch (e) {
+        console.error('Failed to save favorites', e);
+      }
       return next;
     });
   };
