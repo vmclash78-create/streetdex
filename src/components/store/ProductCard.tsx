@@ -1,21 +1,27 @@
 import { useState, memo } from "react";
 import { type Product, formatPrice, pixPrice, discountPct, fallbackImg } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
+import { useFavorites } from "@/hooks/useFavorites";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Eye } from "lucide-react";
+import { ShoppingCart, Eye, Heart } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
   onClick: () => void;
+  productId?: string;
 }
 
-const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
+const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => {
   const [hovered, setHovered] = useState(false);
   const { data: settings } = useStoreSettings();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const discount = Number(settings?.pix_discount || "0");
   const soldOut = typeof product.stock === "number" && product.stock <= 0;
   const installments = product.price >= 30 ? 12 : 0;
+  
+  const id = productId || product.id.toString();
+  const favored = isFavorite(id);
 
   return (
     <div
@@ -38,6 +44,21 @@ const ProductCard = memo(({ product, onClick }: ProductCardProps) => {
             </Badge>
           )}
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(id);
+          }}
+          className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-background/40 backdrop-blur-md border border-white/10 hover:bg-background/60 transition-colors group/heart"
+        >
+          <Heart
+            size={16}
+            className={`transition-all duration-300 ${
+              favored ? "fill-primary text-primary scale-110" : "text-white group-hover/heart:scale-110"
+            }`}
+          />
+        </button>
 
         <img
           src={hovered && product.img2 ? product.img2 : product.img}
