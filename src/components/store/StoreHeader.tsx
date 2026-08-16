@@ -275,9 +275,9 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
 
       {/* Fixed header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-[1200px] mx-auto flex items-center gap-3 px-4 h-16">
-          {/* Left: hamburger - absolute on mobile to not push center logo */}
-          <div className="flex-shrink-0 sm:relative">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-3 items-center px-4 h-16 relative">
+          {/* Left: hamburger + logo */}
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
@@ -289,29 +289,33 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
               <Menu size={20} strokeWidth={2} />
               <span className="absolute inset-0 rounded-full ring-1 ring-primary/0 group-hover:ring-primary/40 transition-all" />
             </Button>
-          </div>
-
-          {/* Center: Logo (Mobile: Absolute Center | PC: Left) */}
-          <div className="flex-1 flex justify-center sm:justify-start items-center">
-            <div className="sm:static absolute left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0">
+            
+            <div className="sm:block hidden">
               <StreetDexLogo size="sm" />
             </div>
           </div>
 
-          {/* Center-Right: search (Desktop only) */}
-          <div className="flex-1 max-w-md mx-auto relative hidden sm:block">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar produtos..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="h-9 pl-9 pr-3 rounded-full bg-muted/50 border-border/50 focus:border-primary/50"
-            />
+          {/* Center: search (PC) or Logo (Mobile) */}
+          <div className="flex justify-center">
+            {/* Desktop Search */}
+            <div className="hidden sm:block w-full max-w-md relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Buscar produtos..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="h-9 pl-9 pr-3 rounded-full bg-muted/50 border-border/50 focus:border-primary/50 w-full"
+              />
+            </div>
+            {/* Mobile Center Logo */}
+            <div className="sm:hidden">
+              <StreetDexLogo size="sm" />
+            </div>
           </div>
 
           {/* Right: theme + cart */}
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center justify-end gap-1">
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={onCartClick} className="relative">
               <ShoppingCart size={20} strokeWidth={1.5} />
