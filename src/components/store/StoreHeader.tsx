@@ -276,8 +276,8 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
       {/* Fixed header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-[1200px] mx-auto flex items-center gap-3 px-4 h-16">
-          {/* Left: hamburger + logo */}
-          <div className="flex-shrink-0 flex items-center gap-3">
+          {/* Left: hamburger - absolute on mobile to not push center logo */}
+          <div className="flex-shrink-0 sm:relative">
             <Button
               variant="ghost"
               size="icon"
@@ -289,11 +289,16 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
               <Menu size={20} strokeWidth={2} />
               <span className="absolute inset-0 rounded-full ring-1 ring-primary/0 group-hover:ring-primary/40 transition-all" />
             </Button>
-
-            <StreetDexLogo size="sm" />
           </div>
 
-          {/* Center: search */}
+          {/* Center: Logo (Mobile: Absolute Center | PC: Left) */}
+          <div className="flex-1 flex justify-center sm:justify-start items-center">
+            <div className="sm:static absolute left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0">
+              <StreetDexLogo size="sm" />
+            </div>
+          </div>
+
+          {/* Center-Right: search (Desktop only) */}
           <div className="flex-1 max-w-md mx-auto relative hidden sm:block">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -306,7 +311,7 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
           </div>
 
           {/* Right: theme + cart */}
-          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={onCartClick} className="relative">
               <ShoppingCart size={20} strokeWidth={1.5} />
