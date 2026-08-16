@@ -32,12 +32,10 @@ const StreetDexLogo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "
   const logoUrl = settings?.logo_url;
   const logoUrlDark = settings?.logo_url_dark;
   
-  // No modo escuro, priorizamos a logo escura se ela existir.
-  // Caso contrário, usamos a logo padrão (logoUrl) ou a fallback.
-  // Invertemos a lógica para corrigir a troca de logos
-  const logoSrc = (isDark && logoUrl) 
-    ? logoUrl 
-    : (logoUrlDark || streetdexLogo);
+  // Lógica de seleção do logo baseada no tema
+  const logoSrc = isDark 
+    ? (logoUrlDark || streetdexLogo) // Se escuro, usa dark logo, se não existir usa fallback
+    : (logoUrl || streetdexLogo);     // Se claro, usa logo padrão, se não existir usa fallback
     
   return (
     <div className={`flex items-center ${className}`}>
