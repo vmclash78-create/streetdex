@@ -1705,7 +1705,7 @@ const SuperFreteConfigEditor = () => {
           <Label>Ambiente</Label>
           <Select 
             value={localSF?.environment || "sandbox"} 
-            onValueChange={(v: any) => setLocalSF({ ...localSF!, environment: v })}
+            onValueChange={(v: "sandbox" | "production") => setLocalSF({ ...localSF!, environment: v })}
           >
             <SelectTrigger className="mt-1">
               <SelectValue />
