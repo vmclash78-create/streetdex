@@ -60,6 +60,36 @@ export const useUpdateSuperFreteSettings = () => {
   });
 };
 
+const callProxy = async (payload: any) => {
+  if (!payload.token || !String(payload.token).trim()) {
+    throw new Error("Token da SuperFrete não configurado. Preencha em Configurações > SuperFrete.");
+  }
+
+  const { data, error } = await supabase.functions.invoke('superfrete-proxy', { body: payload });
+
+  if (error) {
+    let detail = error.message;
+    try {
+      const res = (error as any).context;
+      if (res && typeof res.json === "function") {
+        const body = await res.json();
+        detail = body?.message || body?.error || detail;
+      }
+    } catch (_) { /* ignore */ }
+
+    if (/token/i.test(String(detail))) {
+      detail = `Token da SuperFrete inválido para o ambiente "${payload.environment === 'production' ? 'Produção' : 'Sandbox'}". Gere um token nesse mesmo ambiente e salve nas Configurações.`;
+    }
+    throw new Error(detail);
+  }
+
+  if (data && (data.error || data.message) && !data.id && !Array.isArray(data)) {
+    throw new Error(data.message || data.error);
+  }
+
+  return data;
+};
+
 export const calculateShipping = async (params: {
   from_zip: string;
   to_zip: string;
@@ -70,8 +100,7 @@ export const calculateShipping = async (params: {
   token: string;
   environment: 'sandbox' | 'production';
 }) => {
-  const { data, error } = await supabase.functions.invoke('superfrete-proxy', {
-    body: {
+  return await callProxy({
       token: params.token,
       environment: params.environment,
       endpoint: "/api/v0/calculator",
@@ -92,14 +121,7 @@ export const calculateShipping = async (params: {
           use_origin_package: true
         }
       }
-    }
   });
-
-  if (error) {
-    throw new Error(error.message || "Erro ao calcular frete via proxy");
-  }
-
-  return data;
 };
 
 export const generateOrderTag = async (params: {
@@ -109,8 +131,7 @@ export const generateOrderTag = async (params: {
   items: any[];
   settings: SuperFreteSettings;
 }) => {
-  const { data, error } = await supabase.functions.invoke('superfrete-proxy', {
-    body: {
+  return await callProxy({
       token: params.token,
       environment: params.environment,
       endpoint: "/api/v0/cart",
@@ -151,12 +172,5 @@ export const generateOrderTag = async (params: {
           use_origin_package: true
         }
       }
-    }
   });
-
-  if (error) {
-    throw new Error(error.message || "Erro ao gerar etiqueta via proxy");
-  }
-
-  return data;
 };
