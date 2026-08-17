@@ -1,10 +1,11 @@
 import React from "react";
 import { DBOrder, DBOrderItem, DBCustomer } from "@/hooks/useOrders";
 import { formatPrice } from "@/lib/format";
-import { Printer, Instagram, Globe, Star } from "lucide-react";
+import { Printer, Instagram, Globe, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStoreSettings } from "@/hooks/useStoreData";
+import { useSuperFreteSettings } from "@/lib/superfrete";
 import streetdexLogo from "@/assets/streetdex-logo.png";
 
 interface OrderLabelPrinterProps {
@@ -67,6 +68,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   storeName = "Street Dex",
 }) => {
   const { data: settings } = useStoreSettings();
+  const { data: sfSettings } = useSuperFreteSettings();
   // Fundo dos boxes é preto: prioriza a logo do tema escuro (clara)
   const logoSrc = settings?.logo_url_dark || settings?.logo_url || streetdexLogo;
 
@@ -75,9 +77,11 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   const brand = `${(settings?.store_name || storeName).toUpperCase()} | STREETWEAR`;
   const instagram = settings?.instagram_url?.replace(/^.*instagram\.com\//, "@").replace(/\/$/, "") || "@street.dex";
   const site = "streetdex.com.br";
-  const cnpj = "58.123.456/0001-90";
-  const senderAddr = ["Rua das Estrelas, 123 – Centro", "Fortaleza – CE – CEP: 60000-000"];
-  const uf = "CE";
+  const cnpj = settings?.store_cnpj || "58.123.456/0001-90";
+  const senderAddr = sfSettings?.from_street 
+    ? [`${sfSettings.from_street}, ${sfSettings.from_number} – ${sfSettings.from_neighborhood}`, `${sfSettings.from_city} – ${sfSettings.from_state} – CEP: ${sfSettings.from_zip}`]
+    : ["Rua das Estrelas, 123 – Centro", "Fortaleza – CE – CEP: 60000-000"];
+  const uf = sfSettings?.from_state || "CE";
   const destCity = order.address_city || "FORTALEZA";
   const weight = "0,250";
   const nf = String(order.order_number).padStart(8, "0");
@@ -115,7 +119,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
       <DialogContent className="max-w-[1100px] w-[96vw] bg-[#141414] border-zinc-800 p-0 overflow-y-auto max-h-[92vh] focus-visible:outline-none">
         <DialogHeader className="print:hidden px-6 pt-5 pb-4 border-b border-zinc-800">
           <DialogTitle className="flex items-center gap-2 text-white font-bold">
-            <Printer size={18} className="text-primary" /> Etiqueta de Envio — Correios
+            <Truck size={18} className="text-primary" /> Etiqueta de Envio — SuperFrete
           </DialogTitle>
         </DialogHeader>
 
@@ -128,11 +132,10 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
             {/* LINHA 1 — Correios / PAC / Peso */}
             <div className="flex border-b-2 border-black">
               <div className="flex items-center gap-3 px-5 py-3" style={{ width: "31%" }}>
-                <svg width="42" height="30" viewBox="0 0 42 30" fill="none">
-                  <path d="M2 15 L14 2 L26 2 L14 15 L26 28 L14 28 Z" fill="#000" />
-                  <path d="M18 15 L30 2 L40 2 L28 15 L40 28 L30 28 Z" fill="#000" />
-                </svg>
-                <span className="text-[30px] font-bold tracking-tight leading-none">Correios</span>
+                <div className="bg-[#003399] p-1.5 rounded">
+                  <Truck size={24} className="text-white" />
+                </div>
+                <span className="text-[26px] font-extrabold tracking-tighter leading-none text-[#003399]">SuperFrete</span>
               </div>
               <div className="flex flex-col items-center justify-center py-2" style={{ width: "38%" }}>
                 <span className="text-[30px] font-bold leading-none">PAC</span>

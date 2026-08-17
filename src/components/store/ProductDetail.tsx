@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { calculateShipping, useSuperFreteSettings } from "@/lib/superfrete";
 
 interface ProductDetailProps {
   product: Product;
@@ -223,6 +224,8 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<null | { city: string; state: string; options: { name: string; days: string; price: string }[] }>(null);
   const [error, setError] = useState("");
+  
+  const { data: sfSettings } = useSuperFreteSettings();
 
   let cfg: Record<string, RegionCfg> = DEFAULT_SHIPPING;
   if (shippingConfigRaw) {
@@ -234,25 +237,59 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
     return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
   };
 
-  const estimate = (uf: string) => {
-    const r = cfg[ufToRegion(uf)] || DEFAULT_SHIPPING.SE;
-    return [
-      { name: "PAC", days: `${r.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(r.pac_price) },
-      { name: "SEDEX", days: `${r.sedex_days} dias úteis`, price: formatPrice(r.sedex_price) },
-    ];
-  };
-
-
   const handleCalc = async () => {
     const digits = cep.replace(/\D/g, "");
-    setError(""); setResult(null);
+    setError(""); 
+    setResult(null);
     if (digits.length !== 8) { setError("Digite um CEP válido (8 dígitos)."); return; }
     setLoading(true);
+
     try {
+      // Tentar calcular via SuperFrete se configurado
+      if (sfSettings?.token && sfSettings?.from_zip) {
+        try {
+          const sfResult = await calculateShipping({
+            from_zip: sfSettings.from_zip,
+            to_zip: digits,
+            weight: 0.5, // Padrão
+            length: 20,
+            height: 10,
+            width: 15,
+            token: sfSettings.token,
+            environment: sfSettings.environment as "sandbox" | "production"
+          });
+
+          if (sfResult && Array.isArray(sfResult)) {
+            setResult({
+              city: "Sua Região", // API às vezes não retorna cidade no calc simples
+              state: "",
+              options: sfResult.map((s: any) => ({
+                name: s.name,
+                days: `${s.delivery_range.min}-${s.delivery_range.max} dias`,
+                price: freeShipping ? "Grátis" : formatPrice(Number(s.price))
+              }))
+            });
+            setLoading(false);
+            return;
+          }
+        } catch (sfErr) {
+          console.error("SuperFrete fallback to manual:", sfErr);
+        }
+      }
+
+      // Fallback manual via ViaCEP + Config da loja
       const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
       const data = await r.json();
       if (data.erro) { setError("CEP não encontrado."); return; }
-      setResult({ city: data.localidade, state: data.uf, options: estimate(data.uf) });
+      
+      const uf = data.uf;
+      const region = cfg[ufToRegion(uf)] || DEFAULT_SHIPPING.SE;
+      const options = [
+        { name: "PAC", days: `${region.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(region.pac_price) },
+        { name: "SEDEX", days: `${region.sedex_days} dias úteis`, price: formatPrice(region.sedex_price) },
+      ];
+
+      setResult({ city: data.localidade, state: data.uf, options });
     } catch {
       setError("Erro ao consultar o CEP. Tente novamente.");
     } finally {
