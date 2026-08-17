@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     if (!token || !endpoint) {
       return new Response(
         JSON.stringify({ error: 'Missing required parameters: token and endpoint' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -36,18 +36,24 @@ Deno.serve(async (req) => {
       body: JSON.stringify(body)
     });
 
-    const data = await response.json();
+    const raw = await response.text();
+    let data: any;
+    try { data = JSON.parse(raw); } catch { data = { message: raw }; }
 
-    return new Response(JSON.stringify(data), {
-      status: response.status,
+    // Always return 200 so the client can read the payload without the
+    // SDK throwing a non-2xx FunctionsHttpError (which blanks the screen).
+    return new Response(JSON.stringify(
+      response.ok ? data : { error: data?.message || data?.error || 'Erro na SuperFrete', superfrete_status: response.status }
+    ), {
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
     console.error('SuperFrete Proxy Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: (error as Error).message }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
