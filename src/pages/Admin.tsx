@@ -6,12 +6,14 @@ import {
   Crown, Search, Bell, BarChart3, Save, X, Loader2,
   Receipt, Wallet, Calendar, Download, ArrowUpRight, ArrowDownRight,
   ShoppingCart, CreditCard, Users, Tag, FileText, AlertTriangle,
-  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck, Printer
+  Image, ClipboardList, Eye, ChevronRight, Upload, Volume2, Truck, Printer,
+  ShieldCheck, ExternalLink
 } from "lucide-react";
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import OrderLabelPrinter from "@/components/admin/OrderLabelPrinter";
+import { useSuperFreteSettings, useUpdateSuperFreteSettings } from "@/lib/superfrete";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -1645,6 +1647,103 @@ const FinancesView = () => {
   );
 };
 
+// ─── SUPERFRETE CONFIG (in Settings) ───
+const SuperFreteConfigEditor = () => {
+  const { data: sfSettings, isLoading } = useSuperFreteSettings();
+  const updateSF = useUpdateSuperFreteSettings();
+  const [localSF, setLocalSF] = useState(sfSettings);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (sfSettings) setLocalSF(sfSettings);
+  }, [sfSettings]);
+
+  const handleSaveSF = async () => {
+    if (!localSF) return;
+    try {
+      await updateSF.mutateAsync(localSF);
+      toast({ title: "Sucesso", description: "Configurações SuperFrete salvas!" });
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+    }
+  };
+
+  if (isLoading) return <Loader2 className="animate-spin" />;
+
+  return (
+    <div className="space-y-4 pt-4 border-t border-border">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+          <Truck size={16} /> Integração SuperFrete
+        </h3>
+        <a 
+          href="https://web.superfrete.com/#/integrations" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-[10px] text-primary flex items-center gap-1 hover:underline"
+        >
+          Pegar Token <ExternalLink size={10} />
+        </a>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-4 rounded-lg border border-border p-4">
+        <div>
+          <Label>Token de Autenticação</Label>
+          <div className="relative mt-1">
+            <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <Input 
+              type="password"
+              placeholder="Bearer {token}"
+              className="pl-10"
+              value={localSF?.token || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, token: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label>Ambiente</Label>
+          <Select 
+            value={localSF?.environment || "sandbox"} 
+            onValueChange={(v: any) => setLocalSF({ ...localSF!, environment: v })}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sandbox">Sandbox (Testes)</SelectItem>
+              <SelectItem value="production">Produção (Real)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>CEP de Origem</Label>
+            <Input 
+              placeholder="00000-000"
+              value={localSF?.from_zip || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, from_zip: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Número</Label>
+            <Input 
+              placeholder="123"
+              value={localSF?.from_number || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, from_number: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <Button onClick={handleSaveSF} disabled={updateSF.isPending} size="sm" className="w-full">
+          {updateSF.isPending ? "Salvando..." : "Salvar Configuração SuperFrete"}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 // ─── SHIPPING CONFIG (in Settings) ───
 type ShippingRegionCfg = { pac_price: number; pac_days: string; sedex_price: number; sedex_days: string };
 type ShippingConfig = Record<string, ShippingRegionCfg>;
@@ -1681,9 +1780,9 @@ const ShippingConfigEditor = ({
   };
   return (
     <div className="space-y-4 pt-4 border-t border-border">
-      <h3 className="text-sm font-bold uppercase tracking-wider">Frete por Região</h3>
+      <h3 className="text-sm font-bold uppercase tracking-wider">Frete Fixo por Região</h3>
       <p className="text-xs text-muted-foreground">
-        Preços e prazos estimados mostrados ao cliente quando ele digita o CEP no produto.
+        Preços manuais usados se o SuperFrete não for configurado ou falhar.
       </p>
       {SHIPPING_REGIONS.map((r) => {
         const c = cfg[r.key] || DEFAULT_SHIPPING[r.key];
@@ -1862,6 +1961,7 @@ const SettingsView = () => {
           </div>
 
           {/* Configuração de Frete por Região */}
+          <SuperFreteConfigEditor />
           <ShippingConfigEditor
             getValue={getValue}
             setLocal={(patch) => setLocalSettings({ ...localSettings, ...patch })}
