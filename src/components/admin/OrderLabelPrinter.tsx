@@ -94,10 +94,10 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
     try {
       const data = await generateOrderTag({
         token: sfSettings.token,
-        environment: sfSettings.environment,
+        environment: sfSettings.environment as 'sandbox' | 'production',
         order,
         items,
-        settings: sfSettings
+        settings: sfSettings as any
       });
       
       setTagData(data);
