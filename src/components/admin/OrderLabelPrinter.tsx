@@ -128,7 +128,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   const weight = tagData?.package?.weight || "0,250";
   const nf = tagData?.invoice?.number || String(order.order_number).padStart(8, "0");
   const tracking = tagData?.tracking || `BR ${String(order.order_number).padStart(3, "0")} 456 789 00 1 BR`;
-  const plp = tagData?.protocol || "0001234567890";
+  const plp = tagData?.protocol || tagData?.id || "0001234567890";
 
   const contentSummary =
     items.length > 0
@@ -181,7 +181,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
               </div>
               <div className="flex flex-col items-center justify-center py-2" style={{ width: "38%" }}>
                 <span className="text-[30px] font-bold leading-none">PAC</span>
-                <span className="text-[13px] mt-1">Contrato: 9912445588</span>
+                <span className="text-[13px] mt-1">Contrato: {tagData?.contract || "9912445588"}</span>
               </div>
               <div className="flex items-center justify-end gap-4 px-5 py-2" style={{ width: "31%" }}>
                 <div className="flex flex-col items-center">
@@ -285,7 +285,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
                 </div>
                 <div className="px-4 py-3">
                   <Tag>PLP</Tag>
-                  <p className="text-[16px] font-bold mt-1">{plp}</p>
+                  <p className="text-[16px] font-bold mt-1 text-primary">{tagData ? "GERADA" : "PENDENTE"}</p>
                 </div>
               </div>
             </div>
@@ -303,7 +303,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
                 <div className="mt-3">
                   <Barcode seed={order.order_number + 31} height={82} count={44} />
                 </div>
-                <p className="text-[17px] font-bold mt-2">12345678901234</p>
+                <p className="text-[17px] font-bold mt-2">{plp}</p>
               </div>
             </div>
 
