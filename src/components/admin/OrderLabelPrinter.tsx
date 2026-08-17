@@ -5,7 +5,9 @@ import { Printer, Instagram, Globe, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStoreSettings } from "@/hooks/useStoreData";
-import { useSuperFreteSettings } from "@/lib/superfrete";
+import { useSuperFreteSettings, generateOrderTag } from "@/lib/superfrete";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import streetdexLogo from "@/assets/streetdex-logo.png";
 
 interface OrderLabelPrinterProps {
