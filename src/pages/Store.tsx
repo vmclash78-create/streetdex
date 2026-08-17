@@ -223,8 +223,8 @@ const Store = () => {
               <p className="text-[0.65rem] text-muted-foreground">Whatsapp e Instagram</p>
             </div>
           </a>
-          <div className="flex items-center gap-3 group/info">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/info:bg-primary/20 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Percent size={18} className="text-primary" />
             </div>
             <div>
@@ -241,8 +241,8 @@ const Store = () => {
               <p className="text-[0.65rem] text-muted-foreground">Nos chame que fazemos!</p>
             </div>
           </a>
-          <div className="flex items-center gap-3 group/info">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/info:bg-primary/20 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Truck size={18} className="text-primary" />
             </div>
             <div>
