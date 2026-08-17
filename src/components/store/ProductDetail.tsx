@@ -256,7 +256,7 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
             height: 10,
             width: 15,
             token: sfSettings.token,
-            environment: sfSettings.environment
+            environment: sfSettings.environment as "sandbox" | "production"
           });
 
           if (sfResult && Array.isArray(sfResult)) {
