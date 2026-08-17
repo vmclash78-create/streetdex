@@ -5,7 +5,9 @@ import { Printer, Instagram, Globe, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStoreSettings } from "@/hooks/useStoreData";
-import { useSuperFreteSettings } from "@/lib/superfrete";
+import { useSuperFreteSettings, generateOrderTag } from "@/lib/superfrete";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import streetdexLogo from "@/assets/streetdex-logo.png";
 
 interface OrderLabelPrinterProps {
@@ -69,10 +71,50 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
 }) => {
   const { data: settings } = useStoreSettings();
   const { data: sfSettings } = useSuperFreteSettings();
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [tagData, setTagData] = React.useState<any>(null);
+
   // Fundo dos boxes é preto: prioriza a logo do tema escuro (clara)
   const logoSrc = settings?.logo_url_dark || settings?.logo_url || streetdexLogo;
 
   const handlePrint = () => window.print();
+
+  const handleGenerateRealTag = async () => {
+    if (!sfSettings?.token) {
+      toast({
+        title: "Configuração incompleta",
+        description: "Configure o Token da SuperFrete nas configurações primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const data = await generateOrderTag({
+        token: sfSettings.token,
+        environment: sfSettings.environment as 'sandbox' | 'production',
+        order,
+        items,
+        settings: sfSettings as any
+      });
+      
+      setTagData(data);
+      toast({
+        title: "Etiqueta Gerada",
+        description: "A etiqueta real foi gerada com sucesso via SuperFrete.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Erro ao gerar etiqueta",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const brand = `${(settings?.store_name || storeName).toUpperCase()} | STREETWEAR`;
   const instagram = settings?.instagram_url?.replace(/^.*instagram\.com\//, "@").replace(/\/$/, "") || "@street.dex";
@@ -83,10 +125,10 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
     : ["Rua das Estrelas, 123 – Centro", "Fortaleza – CE – CEP: 60000-000"];
   const uf = sfSettings?.from_state || "CE";
   const destCity = order.address_city || "FORTALEZA";
-  const weight = "0,250";
-  const nf = String(order.order_number).padStart(8, "0");
-  const tracking = `BR ${String(order.order_number).padStart(3, "0")} 456 789 00 1 BR`;
-  const plp = "0001234567890";
+  const weight = tagData?.package?.weight || "0,250";
+  const nf = tagData?.invoice?.number || String(order.order_number).padStart(8, "0");
+  const tracking = tagData?.tracking || `BR ${String(order.order_number).padStart(3, "0")} 456 789 00 1 BR`;
+  const plp = tagData?.protocol || "0001234567890";
 
   const contentSummary =
     items.length > 0
@@ -316,8 +358,17 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white hover:bg-white/10">
             Cancelar
           </Button>
+          <Button 
+            onClick={handleGenerateRealTag} 
+            disabled={isGenerating || !!tagData}
+            variant="outline"
+            className="border-primary text-primary hover:bg-primary/10 gap-2 font-bold"
+          >
+            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Truck size={18} />}
+            {tagData ? "Etiqueta Gerada" : "Gerar Etiqueta Real"}
+          </Button>
           <Button onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-8 font-bold">
-            <Printer size={18} /> Imprimir Etiqueta
+            <Printer size={18} /> Imprimir
           </Button>
         </div>
       </DialogContent>
