@@ -74,10 +74,12 @@ export const calculateShipping = async (params: {
     ? "https://sandbox.superfrete.com/api/v0/calculator"
     : "https://api.superfrete.com/api/v0/calculator";
 
+  const authHeader = params.token.startsWith('Bearer ') ? params.token : `Bearer ${params.token}`;
+
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${params.token}`,
+      "Authorization": authHeader,
       "Content-Type": "application/json",
       "User-Agent": "StreetDex (integracao@superfrete.com)"
     },
@@ -119,8 +121,6 @@ export const generateOrderTag = async (params: {
     ? "https://sandbox.superfrete.com/api/v0/cart"
     : "https://api.superfrete.com/api/v0/cart";
 
-  // SuperFrete tokens are expected as "Bearer {token}" but the API might expect just the token or the full string.
-  // Standard practice for their API is to send the token in Authorization header.
   const authHeader = params.token.startsWith('Bearer ') ? params.token : `Bearer ${params.token}`;
 
   const response = await fetch(url, {
@@ -173,9 +173,6 @@ export const generateOrderTag = async (params: {
     const errorData = await response.json();
     throw new Error(errorData.message || `Erro ${response.status}: Falha ao gerar etiqueta na SuperFrete`);
   }
-
-  return response.json();
-};
 
   return response.json();
 };
