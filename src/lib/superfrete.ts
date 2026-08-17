@@ -48,9 +48,9 @@ export const useUpdateSuperFreteSettings = () => {
         .from("store_settings")
         .upsert({ 
           key: "superfrete_config", 
-          value: JSON.stringify(settings), // value is required by schema
-          superfrete_settings: settings 
-        }, { onConflict: 'key' });
+          value: JSON.stringify(settings),
+          superfrete_settings: settings as any
+        } as any, { onConflict: 'key' });
       
       if (error) throw error;
     },
