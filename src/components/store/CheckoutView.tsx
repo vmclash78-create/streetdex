@@ -8,6 +8,7 @@ import { useCreateOrder } from "@/hooks/useOrders";
 import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
 import { supabase } from "@/integrations/supabase/client";
 import { parseShippingConfig, estimateShippingOptions, type ShippingOption } from "@/lib/shipping";
+import { calculateShipping, useSuperFreteSettings } from "@/lib/superfrete";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
   const createOrder = useCreateOrder();
   const { toast } = useToast();
+  const { data: sfSettings } = useSuperFreteSettings();
 
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
   const allItemsFreeShipping = cartItems.length > 0 && cartItems.every((i) => !!i.product.freeShipping);
@@ -174,7 +176,40 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }));
       setOfficialStreet(data.logradouro || null);
 
-      // Calcula opções de frete automaticamente pela região do CEP
+      // Tentar calcular frete real via SuperFrete se configurado
+      if (sfSettings?.token && sfSettings?.from_zip) {
+        try {
+          const sfResult = await calculateShipping({
+            from_zip: sfSettings.from_zip,
+            to_zip: data.cep,
+            weight: 0.5,
+            length: 20,
+            height: 10,
+            width: 15,
+            token: sfSettings.token,
+            environment: sfSettings.environment as "sandbox" | "production"
+          });
+
+          if (sfResult && Array.isArray(sfResult)) {
+            const opts: ShippingOption[] = sfResult.map((s: any) => ({
+              name: s.name,
+              days: `${s.delivery_range.min}-${s.delivery_range.max} dias úteis`,
+              price: allItemsFreeShipping ? 0 : Number(s.price),
+              free: allItemsFreeShipping
+            }));
+            setShippingOptions(opts);
+            setSelectedShipping(opts[0] || null);
+            setShippingLoc({ city: data.localidade, uf: data.uf });
+            setIsValidatingCep(false);
+            toast({ title: "CEP localizado", description: `${data.localidade} - ${data.uf}` });
+            return;
+          }
+        } catch (sfErr) {
+          console.error("SuperFrete fallback:", sfErr);
+        }
+      }
+
+      // Calcula opções de frete automaticamente pela região do CEP (Fallback manual)
       const cfg = parseShippingConfig(settings?.shipping_config);
       const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
       setShippingOptions(opts);
