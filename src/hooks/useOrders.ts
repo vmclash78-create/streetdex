@@ -143,7 +143,10 @@ export const useCreateOrder = () => {
         p_address_city: payload.order.address_city || "",
         p_address_complement: payload.order.address_complement || "",
         p_notes: payload.order.notes || "",
-        p_items: payload.items,
+        p_items: payload.items.map(item => ({
+          ...item,
+          product_id: typeof item.product_id === 'string' && item.product_id.length > 20 ? item.product_id : null
+        })),
       });
 
       if (error) throw error;

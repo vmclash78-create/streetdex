@@ -44,7 +44,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
       const { error } = await supabase.from("wishlist").insert({
         customer_name: wishlistName,
         customer_phone: wishlistPhone,
-        product_id: product.id as any
+        product_id: typeof (product.id as any) === 'string' && (product.id as any).length > 20 ? (product.id as any) : null
       });
       if (error) throw error;
       toast({ title: "Adicionado!", description: "Você será notificado sobre promoções deste produto." });
