@@ -1651,7 +1651,7 @@ const FinancesView = () => {
 const SuperFreteConfigEditor = () => {
   const { data: sfSettings, isLoading } = useSuperFreteSettings();
   const updateSF = useUpdateSuperFreteSettings();
-  const [localSF, setLocalSF] = useState(sfSettings);
+  const [localSF, setLocalSF] = useState<any>(sfSettings);
   const { toast } = useToast();
 
   useEffect(() => {
