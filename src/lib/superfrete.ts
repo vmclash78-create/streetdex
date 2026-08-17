@@ -125,9 +125,11 @@ export const generateOrderTag = async (params: {
 
   const response = await fetch(url, {
     method: "POST",
+    mode: "cors",
     headers: {
       "Authorization": authHeader,
       "Content-Type": "application/json",
+      "Accept": "application/json",
       "User-Agent": "StreetDex (integracao@superfrete.com)"
     },
     body: JSON.stringify({
