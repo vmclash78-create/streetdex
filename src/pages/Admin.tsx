@@ -1736,6 +1736,33 @@ const SuperFreteConfigEditor = () => {
           </div>
         </div>
 
+        <div>
+          <Label>Logradouro / Bairro / Cidade / UF (para Etiquetas)</Label>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            <Input 
+              placeholder="Rua..."
+              value={localSF?.from_street || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, from_street: e.target.value })}
+            />
+            <Input 
+              placeholder="Bairro"
+              value={localSF?.from_neighborhood || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, from_neighborhood: e.target.value })}
+            />
+            <Input 
+              placeholder="Cidade"
+              value={localSF?.from_city || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, from_city: e.target.value })}
+            />
+            <Input 
+              placeholder="UF"
+              maxLength={2}
+              value={localSF?.from_state || ""}
+              onChange={(e) => setLocalSF({ ...localSF!, from_state: e.target.value.toUpperCase() })}
+            />
+          </div>
+        </div>
+
         <Button onClick={handleSaveSF} disabled={updateSF.isPending} size="sm" className="w-full">
           {updateSF.isPending ? "Salvando..." : "Salvar Configuração SuperFrete"}
         </Button>
