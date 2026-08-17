@@ -187,7 +187,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             height: 10,
             width: 15,
             token: sfSettings.token,
-            environment: sfSettings.environment as "sandbox" | "production"
+            environment: (sfSettings.environment || (sfSettings as any).mode || "sandbox") as "sandbox" | "production"
           });
 
           if (sfResult && Array.isArray(sfResult)) {
