@@ -1937,6 +1937,10 @@ const SettingsView = () => {
               <Label>Link do Grupo WhatsApp (Comunidade)</Label>
               <Input value={getValue("whatsapp_group_url")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_group_url: e.target.value })} placeholder="Ex: https://chat.whatsapp.com/..." className="mt-1" />
             </div>
+            <div>
+              <Label>CNPJ da Loja (para Etiquetas)</Label>
+              <Input value={getValue("store_cnpj")} onChange={(e) => setLocalSettings({ ...localSettings, store_cnpj: e.target.value })} placeholder="00.000.000/0000-00" className="mt-1" />
+            </div>
           </div>
 
           {/* Configurações de Desconto e Pagamento */}
