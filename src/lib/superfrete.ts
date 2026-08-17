@@ -107,3 +107,68 @@ export const calculateShipping = async (params: {
 
   return response.json();
 };
+
+export const generateOrderTag = async (params: {
+  token: string;
+  environment: 'sandbox' | 'production';
+  order: any;
+  items: any[];
+  settings: SuperFreteSettings;
+}) => {
+  const url = params.environment === 'sandbox'
+    ? "https://sandbox.superfrete.com/api/v0/cart"
+    : "https://api.superfrete.com/api/v0/cart";
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${params.token}`,
+      "Content-Type": "application/json",
+      "User-Agent": "StreetDex (integracao@superfrete.com)"
+    },
+    body: JSON.stringify({
+      from: {
+        postal_code: params.settings.from_zip.replace(/\D/g, ""),
+        address: params.settings.from_street,
+        number: params.settings.from_number,
+        district: params.settings.from_neighborhood,
+        city: params.settings.from_city,
+        state: params.settings.from_state,
+        country: "BR"
+      },
+      to: {
+        name: params.order.customers.name,
+        phone: params.order.customers.phone.replace(/\D/g, ""),
+        email: params.order.customers.email,
+        postal_code: params.order.address_cep.replace(/\D/g, ""),
+        address: params.order.address_street,
+        number: params.order.address_number,
+        district: params.order.address_neighborhood,
+        city: params.order.address_city,
+        state: params.order.address_state || "CE",
+        country: "BR"
+      },
+      package: {
+        weight: 0.3,
+        width: 20,
+        height: 10,
+        length: 20
+      },
+      service: 1, // PAC default
+      agency: 1, // Any agency
+      options: {
+        own_hand: false,
+        receipt: false,
+        insurance_value: params.order.total,
+        use_origin_package: true
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao gerar etiqueta");
+  }
+
+  return response.json();
+};
