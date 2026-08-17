@@ -234,7 +234,7 @@ const Store = () => {
           </div>
           <a href={getWhatsAppLink(whatsappSupport)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group/info">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/info:bg-primary/20 transition-colors">
-              <img src={infoStripImg} alt="Estampa diferente" className="w-6 h-6 object-contain opacity-80 group-hover/info:opacity-100 transition-opacity invert brightness-0 [filter:sepia(1)_saturate(5)_hue-rotate(240deg)]" />
+              <img src={infoStripImg} alt="Estampa diferente" className="w-6 h-6 object-contain opacity-80 group-hover/info:opacity-100 transition-opacity brightness-0 invert-[.3] sepia(1) saturate(5) hue-rotate(240deg)" style={{ filter: 'invert(22%) sepia(87%) saturate(5458%) hue-rotate(264deg) brightness(91%) contrast(106%)' }} />
             </div>
             <div>
               <p className="text-xs font-bold text-foreground">Estampa diferente?</p>
