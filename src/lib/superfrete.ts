@@ -86,7 +86,13 @@ export const calculateShipping = async (params: {
         height: params.height,
         length: params.length
       },
-      services: "1,2,17" // PAC, SEDEX, Mini Envios
+      services: "1,2,17", // PAC, SEDEX, Mini Envios
+      options: {
+        own_hand: false,
+        receipt: false,
+        insurance_value: 0,
+        use_origin_package: true
+      }
     })
   });
 
