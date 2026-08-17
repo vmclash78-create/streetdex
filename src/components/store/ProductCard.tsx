@@ -92,7 +92,7 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
               <ShoppingCart size={13} /> Comprar
             </Button>
             <Button variant="ghost" size="sm" className="text-xs font-medium px-5 text-foreground/80 hover:text-foreground gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
-              <Eye size={13} /> Espiar
+              <Eye size={13} /> Visualizar
             </Button>
           </div>
         )}
