@@ -20,11 +20,11 @@ export const useSuperFreteSettings = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("store_settings")
-        .select("superfrete_settings")
+        .select("*")
         .single();
       
       if (error) throw error;
-      return (data.superfrete_settings as unknown as SuperFreteSettings) || {
+      return (data as any).superfrete_settings as SuperFreteSettings || {
         token: "",
         environment: "sandbox",
         from_zip: "",
@@ -42,10 +42,11 @@ export const useUpdateSuperFreteSettings = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (settings: SuperFreteSettings) => {
+      const { data: storeData } = await supabase.from("store_settings").select("id").single();
       const { error } = await supabase
         .from("store_settings")
-        .update({ superfrete_settings: settings as any })
-        .eq("id", (await supabase.from("store_settings").select("id").single()).data?.id);
+        .update({ ["superfrete_settings" as any]: settings })
+        .eq("id", storeData?.id);
       
       if (error) throw error;
     },
