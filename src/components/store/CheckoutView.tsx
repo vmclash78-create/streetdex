@@ -514,18 +514,19 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                 <div className="space-y-2">
                   {shippingOptions.map((opt) => (
                     <div 
-                      key={opt.id}
+                      key={opt.name}
                       onClick={() => setSelectedShipping(opt)}
                       className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedShipping?.id === opt.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                        selectedShipping?.name === opt.name ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          selectedShipping?.id === opt.id ? "border-primary" : "border-muted-foreground"
+                          selectedShipping?.name === opt.name ? "border-primary" : "border-muted-foreground"
                         }`}>
-                          {selectedShipping?.id === opt.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                          {selectedShipping?.name === opt.name && <div className="w-2 h-2 rounded-full bg-primary" />}
                         </div>
+
                         <div>
                           <p className="text-sm font-semibold">{opt.name}</p>
                           <p className="text-[10px] text-muted-foreground">{opt.days}</p>
