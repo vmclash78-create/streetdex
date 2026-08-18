@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Crown, Mail, Lock, Loader2 } from "lucide-react";
+import { useStoreSettings } from "@/hooks/useStoreData";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ const AuthPage = () => {
   const [authLoading, setAuthLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const { user, isAdmin, loading, signIn } = useAuth();
+  const { data: settings } = useStoreSettings();
   const navigate = useNavigate();
 
   const handleForgotPassword = async () => {
@@ -26,6 +28,7 @@ const AuthPage = () => {
     }
     setError("");
     setResetLoading(true);
+    const { supabase } = await import("@/integrations/supabase/client");
     const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
@@ -66,11 +69,13 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm shadow-2xl">
+      <Card className="w-full max-w-sm shadow-2xl bg-card/95 backdrop-blur-sm border-primary/20">
         <CardHeader className="flex flex-col items-center pb-2">
-          <Crown size={28} className="text-primary mb-2" strokeWidth={1.5} />
-          <span className="text-2xl font-light tracking-tight text-foreground font-serif">duartt</span>
-          <p className="text-xs text-muted-foreground mt-1">Painel Administrativo</p>
+          <StreetDexLogo size="md" className="mb-2" />
+          <span className="text-2xl font-bold tracking-tighter text-foreground uppercase">
+            {settings?.store_name || "Street Dex"}
+          </span>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mt-1">Painel Administrativo</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
