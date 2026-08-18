@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, environment, endpoint, body } = await req.json();
+    const { token, environment, endpoint, body, userAgent } = await req.json();
 
     if (!token || !endpoint) {
       return new Response(
@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'User-Agent': 'StreetDex Proxy'
+        'User-Agent': userAgent || 'StreetDex Proxy (integracao@superfrete.com)'
       },
       body: JSON.stringify(body)
     });
