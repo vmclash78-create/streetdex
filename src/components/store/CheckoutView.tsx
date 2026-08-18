@@ -691,7 +691,11 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                     <span className="text-sm text-green-600">Desconto Dinheiro ({cashDiscount * 100}%)</span>
                     <span className="text-sm text-green-600">-{formatPrice(totalAfterCoupon * cashDiscount)}</span>
                   </div>
-
+                {selectedShipping && (
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-muted-foreground">Frete ({selectedShipping.name})</span>
+                    <span className="text-sm text-foreground">{selectedShipping.free ? "Grátis" : formatPrice(selectedShipping.price)}</span>
+                  </div>
                 )}
 
 
