@@ -607,14 +607,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                   </div>
 
                 )}
-                {selectedShipping && (
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-muted-foreground">Frete ({selectedShipping.name})</span>
-                    <span className={`text-sm ${selectedShipping.free ? "text-green-600" : "text-foreground"}`}>
-                      {selectedShipping.free ? "Grátis" : formatPrice(selectedShipping.price)}
-                    </span>
-                  </div>
-                )}
 
 
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
