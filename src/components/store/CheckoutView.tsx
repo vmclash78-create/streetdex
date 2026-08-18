@@ -8,7 +8,6 @@ import { useCreateOrder } from "@/hooks/useOrders";
 import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
 import { supabase } from "@/integrations/supabase/client";
 import { parseShippingConfig, estimateShippingOptions, type ShippingOption } from "@/lib/shipping";
-import { calculateShipping, useSuperFreteSettings } from "@/lib/superfrete";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
   const createOrder = useCreateOrder();
   const { toast } = useToast();
-  const { data: sfSettings } = useSuperFreteSettings();
+  
 
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
   const allItemsFreeShipping = cartItems.length > 0 && cartItems.every((i) => !!i.product.freeShipping);
@@ -176,38 +175,19 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }));
       setOfficialStreet(data.logradouro || null);
 
-      // Tentar calcular frete real via SuperFrete se configurado
-      if (sfSettings?.token && sfSettings?.from_zip) {
-        try {
-          const sfResult = await calculateShipping({
-            from_zip: sfSettings.from_zip,
-            to_zip: data.cep,
-            weight: 0.5,
-            length: 20,
-            height: 10,
-            width: 15,
-            token: sfSettings.token,
-            environment: (sfSettings.environment || (sfSettings as any).mode || "sandbox") as "sandbox" | "production"
-          });
+      // Calcula opções de frete automaticamente pela região do CEP (Manual)
+      const cfg = parseShippingConfig(settings?.shipping_config);
+      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
+      setShippingOptions(opts);
+      setSelectedShipping(opts[0] || null);
+      setShippingLoc({ city: data.localidade, uf: data.uf });
 
-          if (sfResult && Array.isArray(sfResult)) {
-            const opts: ShippingOption[] = sfResult.map((s: any) => ({
-              name: s.name,
-              days: `${s.delivery_range.min}-${s.delivery_range.max} dias úteis`,
-              price: allItemsFreeShipping ? 0 : Number(s.price),
-              free: allItemsFreeShipping
-            }));
-            setShippingOptions(opts);
-            setSelectedShipping(opts[0] || null);
-            setShippingLoc({ city: data.localidade, uf: data.uf });
-            setIsValidatingCep(false);
-            toast({ title: "CEP localizado", description: `${data.localidade} - ${data.uf}` });
-            return;
-          }
-        } catch (sfErr) {
-          console.error("SuperFrete fallback:", sfErr);
-        }
-      }
+      toast({
+        title: "CEP localizado",
+        description: `${data.localidade} - ${data.uf}`,
+      });
+    }
+  };
 
       // Calcula opções de frete automaticamente pela região do CEP (Fallback manual)
       const cfg = parseShippingConfig(settings?.shipping_config);
@@ -331,6 +311,24 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }
 
       onOrderComplete(order.id, order.order_number);
+
+      // Abrir WhatsApp com resumo do pedido
+      const itemsList = cartItems.map(i => `- ${i.qty}x ${i.product.name} (${i.size}): ${formatPrice(i.product.price)}`).join('\n');
+      const addressInfo = `${address.street}, ${address.number}${address.complement ? ` - ${address.complement}` : ''}\n${address.neighborhood}, ${address.city}/${shippingLoc?.uf || ''}\nCEP: ${address.cep}`;
+      const shippingInfo = selectedShipping ? `${selectedShipping.name} (${selectedShipping.days}): ${selectedShipping.free ? 'Grátis' : formatPrice(selectedShipping.price)}` : 'A combinar';
+      
+      const message = `*NOVO PEDIDO #${order.order_number}*\n\n` +
+        `*Cliente:* ${customer.name}\n` +
+        `*WhatsApp:* ${customer.phone}\n\n` +
+        `*Produtos:*\n${itemsList}\n\n` +
+        `*Endereço de Entrega:*\n${addressInfo}\n\n` +
+        `*Frete:* ${shippingInfo}\n` +
+        `*Pagamento:* ${paymentMethod.toUpperCase()}\n\n` +
+        `*TOTAL:* ${formatPrice(finalTotal)}\n\n` +
+        `--- \nGerado via Street Dex`;
+
+      const waLink = getWhatsAppLink(whatsapp, message);
+      window.open(waLink, '_blank');
 
 
 
