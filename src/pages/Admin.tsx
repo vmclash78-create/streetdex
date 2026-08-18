@@ -12,7 +12,7 @@ import {
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
-import OrderLabelPrinter from "@/components/admin/OrderLabelPrinter";
+
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
