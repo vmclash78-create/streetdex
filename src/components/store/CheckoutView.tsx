@@ -361,8 +361,17 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         `*Observação:* ${notes || 'Nenhuma'}\n\n` +
         `--- \nGerado via Street Dex`;
 
+      // Limpar persistência após sucesso
+      const keysToRemove = [
+        "checkout_step", "checkout_customer", "checkout_address", 
+        "checkout_payment_method", "checkout_notes", "store_view",
+        "store_selected_product_id"
+      ];
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      
       const waLink = getWhatsAppLink(whatsapp, message);
       window.open(waLink, '_blank');
+
 
 
 
