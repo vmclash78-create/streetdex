@@ -13,7 +13,7 @@ import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import OrderLabelPrinter from "@/components/admin/OrderLabelPrinter";
-import { useSuperFreteSettings, useUpdateSuperFreteSettings } from "@/lib/superfrete";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -1824,7 +1824,7 @@ const ShippingConfigEditor = ({
     <div className="space-y-4 pt-4 border-t border-border">
       <h3 className="text-sm font-bold uppercase tracking-wider">Frete Fixo por Região</h3>
       <p className="text-xs text-muted-foreground">
-        Preços manuais usados se o SuperFrete não for configurado ou falhar.
+        Preços manuais usados para cálculo de frete por região.
       </p>
       {SHIPPING_REGIONS.map((r) => {
         const c = cfg[r.key] || DEFAULT_SHIPPING[r.key];
@@ -2007,7 +2007,7 @@ const SettingsView = () => {
           </div>
 
           {/* Configuração de Frete por Região */}
-          <SuperFreteConfigEditor />
+          
           <ShippingConfigEditor
             getValue={getValue}
             setLocal={(patch) => setLocalSettings({ ...localSettings, ...patch })}
