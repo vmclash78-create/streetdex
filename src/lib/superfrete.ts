@@ -77,14 +77,18 @@ const callProxy = async (payload: any) => {
       }
     } catch (_) { /* ignore */ }
 
-    if (/token/i.test(String(detail))) {
-      detail = `Token da SuperFrete inválido para o ambiente "${payload.environment === 'production' ? 'Produção' : 'Sandbox'}". Gere um token nesse mesmo ambiente e salve nas Configurações.`;
+    if (/token/i.test(String(detail)) || /não autorizado/i.test(String(detail)) || (data as any)?.superfrete_status === 401) {
+      detail = `Token da SuperFrete inválido para o ambiente "${payload.environment === 'production' ? 'Produção' : 'Sandbox'}". Certifique-se que o token salvo em Configurações > SuperFrete corresponde ao ambiente selecionado.`;
     }
     throw new Error(detail);
   }
 
   if (data && (data.error || data.message) && !data.id && !Array.isArray(data)) {
-    throw new Error(data.message || data.error);
+    const detail = data.message || data.error;
+    if ((/token/i.test(String(detail)) || /não autorizado/i.test(String(detail)) || data.superfrete_status === 401)) {
+      throw new Error(`Token da SuperFrete inválido para o ambiente "${payload.environment === 'production' ? 'Produção' : 'Sandbox'}". Verifique o token em Configurações.`);
+    }
+    throw new Error(detail);
   }
 
   return data;
@@ -146,14 +150,14 @@ export const generateOrderTag = async (params: {
           country: "BR"
         },
         to: {
-          name: params.order.customers.name,
-          phone: params.order.customers.phone.replace(/\D/g, ""),
-          email: params.order.customers.email,
-          postal_code: params.order.address_cep.replace(/\D/g, ""),
-          address: params.order.address_street,
-          number: params.order.address_number,
-          district: params.order.address_neighborhood,
-          city: params.order.address_city,
+          name: params.order.customers?.name || "Cliente",
+          phone: (params.order.customers?.phone || "").replace(/\D/g, ""),
+          email: params.order.customers?.email || "",
+          postal_code: (params.order.address_cep || "").replace(/\D/g, ""),
+          address: params.order.address_street || "",
+          number: params.order.address_number || "S/N",
+          district: params.order.address_neighborhood || "",
+          city: params.order.address_city || "",
           state: params.order.address_state || "CE",
           country: "BR"
         },
