@@ -252,10 +252,23 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
       
       const uf = data.uf;
       const region = cfg[ufToRegion(uf)] || DEFAULT_SHIPPING.SE;
-      const options = [
-        { name: "PAC", days: `${region.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(region.pac_price) },
-        { name: "SEDEX", days: `${region.sedex_days} dias úteis`, price: formatPrice(region.sedex_price) },
-      ];
+      
+      const options = [];
+      
+      // If product has a specific fixed shipping cost, use it as the only option
+      if (!freeShipping && (product as any).shipping_cost > 0) {
+        options.push({ 
+          name: "Frete Fixo", 
+          days: "Entrega padrão", 
+          price: formatPrice((product as any).shipping_cost) 
+        });
+      } else {
+        options.push(
+          { name: "PAC", days: `${region.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(region.pac_price) },
+          { name: "SEDEX", days: `${region.sedex_days} dias úteis`, price: formatPrice(region.sedex_price) },
+        );
+      }
+
 
       setResult({ city: data.localidade, state: data.uf, options });
     } catch {

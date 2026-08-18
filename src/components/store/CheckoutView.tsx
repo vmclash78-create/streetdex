@@ -212,12 +212,29 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }));
       setOfficialStreet(data.logradouro || null);
 
-      // Calcula opções de frete automaticamente pela região do CEP (Manual)
+      // Calcula opções de frete automaticamente
       const cfg = parseShippingConfig(settings?.shipping_config);
-      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
+      
+      let opts: ShippingOption[] = [];
+      
+      // Check if any product in cart has a fixed shipping cost (priority)
+      const fixedShippingCost = cartItems.reduce((acc, item) => acc + (Number((item.product as any).shipping_cost) || 0), 0);
+      
+      if (!allItemsFreeShipping && fixedShippingCost > 0) {
+        opts = [{ 
+          name: "Frete Fixo", 
+          days: "Entrega padrão", 
+          price: fixedShippingCost, 
+          free: false 
+        }];
+      } else {
+        opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
+      }
+      
       setShippingOptions(opts);
       setSelectedShipping(opts[0] || null);
       setShippingLoc({ city: data.localidade, uf: data.uf });
+
 
       toast({
         title: "CEP localizado",
