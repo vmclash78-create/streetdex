@@ -165,7 +165,9 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             <ShippingCalculator
               freeShipping={!!product.freeShipping}
               shippingConfigRaw={settings?.shipping_config}
+              fixedShippingCost={Number((product as any).shipping_cost) || 0}
             />
+
 
             {/* Description / measurements */}
             <ProductDescription
@@ -219,7 +221,16 @@ const ufToRegion = (uf: string): keyof typeof DEFAULT_SHIPPING => {
   return "N";
 };
 
-const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping: boolean; shippingConfigRaw?: string }) => {
+const ShippingCalculator = ({ 
+  freeShipping, 
+  shippingConfigRaw,
+  fixedShippingCost
+}: { 
+  freeShipping: boolean; 
+  shippingConfigRaw?: string;
+  fixedShippingCost: number;
+}) => {
+
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<null | { city: string; state: string; options: { name: string; days: string; price: string }[] }>(null);
@@ -256,13 +267,14 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
       const options = [];
       
       // If product has a specific fixed shipping cost, use it as the only option
-      if (!freeShipping && (product as any).shipping_cost > 0) {
+      if (!freeShipping && fixedShippingCost > 0) {
         options.push({ 
           name: "Frete Fixo", 
           days: "Entrega padrão", 
-          price: formatPrice((product as any).shipping_cost) 
+          price: formatPrice(fixedShippingCost) 
         });
       } else {
+
         options.push(
           { name: "PAC", days: `${region.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(region.pac_price) },
           { name: "SEDEX", days: `${region.sedex_days} dias úteis`, price: formatPrice(region.sedex_price) },
