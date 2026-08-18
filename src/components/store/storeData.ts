@@ -48,12 +48,6 @@ export const navLinks = [
   { label: "Perguntas Frequentes", key: "FAQ" },
 ];
 
-export const heroBanners = [
-  { img: `${CDN}/themes/amazonas/2-slide-1770404284561-4963972633-0713ee8b7b0d3c27726d17f0755a3bd11770404287-480-0.webp?7172772863971010629`, cta: "Ver mais" },
-  { img: `${CDN}/themes/amazonas/2-slide-1770404890729-4911396590-e0930bc3b860a8ee8b43cd3e3c0a25b11770404891-1024-1024.webp?7172772863971010629`, cta: "Conferir" },
-  { img: `${CDN}/themes/amazonas/2-slide-1760882611297-7444640501-6d800da970b95bfeaf33b04532b9cecf1760882614-1024-1024.webp?7172772863971010629`, cta: "compre aqui" },
-  { img: `${CDN}/themes/amazonas/2-slide-1730488980929-3985781362-1630789a06e837949f7cc6d51ba368dd1730488981-1024-1024.webp?7172772863971010629`, cta: "conferir tudo" },
-  { img: `${CDN}/themes/amazonas/2-slide-1755815378030-4062347978-24c327312210fb86f51a9cd92b4f85681755815378-1024-1024.webp?7172772863971010629`, cta: "Ver mais" },
-];
+export const heroBanners: { img: string; cta: string }[] = [];
 
 export const infoStripImg = `${CDN}/themes/amazonas/2-img-833320502-1767889965-ce359877708e7ce7a3e777240d8b566e1767889965-240-0.webp?7172772863971010629`;
