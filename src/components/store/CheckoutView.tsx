@@ -212,29 +212,12 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }));
       setOfficialStreet(data.logradouro || null);
 
-      // Calcula opções de frete automaticamente
+      // Calcula opções de frete automaticamente pela região do CEP (Manual)
       const cfg = parseShippingConfig(settings?.shipping_config);
-      
-      let opts: ShippingOption[] = [];
-      
-      // Check if any product in cart has a fixed shipping cost (priority)
-      const fixedShippingCost = cartItems.reduce((acc, item) => acc + (Number((item.product as any).shipping_cost) || 0), 0);
-      
-      if (!allItemsFreeShipping && fixedShippingCost > 0) {
-        opts = [{ 
-          name: "Frete Fixo", 
-          days: "Entrega padrão", 
-          price: fixedShippingCost, 
-          free: false 
-        }];
-      } else {
-        opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
-      }
-      
+      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
       setShippingOptions(opts);
       setSelectedShipping(opts[0] || null);
       setShippingLoc({ city: data.localidade, uf: data.uf });
-
 
       toast({
         title: "CEP localizado",
@@ -520,49 +503,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
               <div>
                 <Label>Complemento</Label>
                 <Input value={address.complement} onChange={(e) => setAddress({ ...address, complement: e.target.value })} placeholder="Apto 101" className="mt-1" />
+              </div>
             </div>
-            
-            {/* Shipping selection restored */}
-            <div className="space-y-3 pt-2">
-              <Label className="text-sm font-semibold flex items-center gap-2">
-                <Truck size={16} className="text-primary" /> Opções de entrega
-              </Label>
-              {shippingOptions.length > 0 ? (
-                <div className="space-y-2">
-                  {shippingOptions.map((opt) => (
-                    <div 
-                      key={opt.name}
-                      onClick={() => setSelectedShipping(opt)}
-                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedShipping?.name === opt.name ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          selectedShipping?.name === opt.name ? "border-primary" : "border-muted-foreground"
-                        }`}>
-                          {selectedShipping?.name === opt.name && <div className="w-2 h-2 rounded-full bg-primary" />}
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-semibold">{opt.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{opt.days}</p>
-                        </div>
-                      </div>
-                      <span className="text-sm font-bold text-foreground">
-                        {opt.free ? "Grátis" : formatPrice(opt.price)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground bg-muted p-4 rounded-lg text-center">
-                  Informe o CEP para ver as opções de entrega.
-                </div>
-              )}
-            </div>
-          </div>
-
 
           </div>
         )}
@@ -723,15 +665,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
                 )}
 
-                {selectedShipping && (
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-muted-foreground">Frete ({selectedShipping.name})</span>
-                    <span className="text-sm text-foreground">{selectedShipping.free ? "Grátis" : formatPrice(selectedShipping.price)}</span>
-                  </div>
-                )}
 
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
-
                   <span className="text-sm font-bold text-foreground">Total</span>
                   <span className="text-lg font-bold text-foreground">{formatPrice(finalTotal)}</span>
                 </div>

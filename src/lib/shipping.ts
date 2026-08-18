@@ -38,12 +38,11 @@ export const parseShippingConfig = (raw?: string | null): Record<string, RegionC
 };
 
 export type ShippingOption = {
-  name: string;
+  name: "PAC" | "SEDEX";
   days: string;
   price: number;
   free: boolean;
 };
-
 
 export const estimateShippingOptions = (
   uf: string,

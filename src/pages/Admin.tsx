@@ -920,36 +920,11 @@ const ProductsView = () => {
                   <Label htmlFor="free_shipping" className="text-sm cursor-pointer">Oferecer Frete Grátis</Label>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 pt-2">
-                    <Checkbox 
-                      id="free_shipping"
-                      checked={editingProduct.free_shipping || false} 
-                      onCheckedChange={(c) => setEditingProduct({ ...editingProduct, free_shipping: !!c })} 
-                    />
-                    <Label htmlFor="free_shipping" className="text-sm cursor-pointer font-medium">Oferecer Frete Grátis</Label>
-                  </div>
-
-                  {!editingProduct.free_shipping && (
-                    <div className="space-y-3 pl-6 border-l-2 border-primary/20">
-                      <div>
-                        <Label className="text-[11px] font-medium">Valor do Frete (R$)</Label>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          value={editingProduct.shipping_cost || 0} 
-                          onChange={(e) => setEditingProduct({ ...editingProduct, shipping_cost: parseFloat(e.target.value) || 0 })} 
-                          className="h-9 mt-1" 
-                          placeholder="0.00"
-                        />
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          Deixe 0 para usar o cálculo automático por região (CEP).
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
+                {!editingProduct.free_shipping && (
+                  <p className="text-[11px] text-muted-foreground">
+                    O frete será calculado automaticamente pelo CEP do cliente no checkout, usando a tabela de "Frete por Região".
+                  </p>
+                )}
 
                 {/* Descrição livre */}
                 <div className="pt-4 border-t border-border">
