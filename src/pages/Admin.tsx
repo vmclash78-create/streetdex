@@ -12,8 +12,8 @@ import {
 import ThemeToggle from "@/components/store/ThemeToggle";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import ImageUploadField from "@/components/admin/ImageUploadField";
-import OrderLabelPrinter from "@/components/admin/OrderLabelPrinter";
-import { useSuperFreteSettings, useUpdateSuperFreteSettings } from "@/lib/superfrete";
+
+
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -1648,143 +1648,6 @@ const FinancesView = () => {
 };
 
 // ─── SUPERFRETE CONFIG (in Settings) ───
-const SuperFreteConfigEditor = () => {
-  const { data: sfSettings, isLoading } = useSuperFreteSettings();
-  const updateSF = useUpdateSuperFreteSettings();
-  const [localSF, setLocalSF] = useState<any>(sfSettings);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (sfSettings) setLocalSF(sfSettings);
-  }, [sfSettings]);
-
-  const handleSaveSF = async () => {
-    if (!localSF) return;
-    try {
-      await updateSF.mutateAsync(localSF);
-      toast({ title: "Sucesso", description: "Configurações SuperFrete salvas!" });
-    } catch (e: any) {
-      toast({ title: "Erro", description: e.message, variant: "destructive" });
-    }
-  };
-
-  if (isLoading) return <Loader2 className="animate-spin" />;
-
-  return (
-    <div className="space-y-4 pt-4 border-t border-border">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-          <Truck size={16} /> Integração SuperFrete
-        </h3>
-        <div className="flex gap-3">
-          <a 
-            href={localSF?.environment === "production" ? "https://web.superfrete.com/#/integrations" : "https://sandbox.superfrete.com/#/integrations"} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-[10px] text-primary flex items-center gap-1 hover:underline"
-          >
-            Pegar Token {localSF?.environment === "production" ? "(Produção)" : "(Sandbox)"} <ExternalLink size={10} />
-          </a>
-          {localSF?.environment !== "production" && (
-            <a 
-              href="https://sandbox.superfrete.com/#/account/credits" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[10px] text-yellow-500 flex items-center gap-1 hover:underline font-bold"
-            >
-              Recarregar Saldo Sandbox <ExternalLink size={10} />
-            </a>
-          )}
-        </div>
-      </div>
-      <p className="text-[11px] text-muted-foreground -mt-2">
-        Certifique-se de que o Token corresponde ao ambiente selecionado. Etiquetas em Sandbox não são válidas para postagem.
-      </p>
-      
-      <div className="grid grid-cols-1 gap-4 rounded-lg border border-border p-4">
-        <div>
-          <Label>Token de Autenticação</Label>
-          <div className="relative mt-1">
-            <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <Input 
-              type="password"
-              placeholder="Bearer {token}"
-              className="pl-10"
-              value={localSF?.token || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, token: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>Ambiente</Label>
-          <Select 
-            value={localSF?.environment || "sandbox"} 
-            onValueChange={(v: "sandbox" | "production") => setLocalSF({ ...localSF!, environment: v })}
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sandbox">Sandbox (Testes)</SelectItem>
-              <SelectItem value="production">Produção (Real)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>CEP de Origem</Label>
-            <Input 
-              placeholder="00000-000"
-              value={localSF?.from_zip || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, from_zip: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label>Número</Label>
-            <Input 
-              placeholder="123"
-              value={localSF?.from_number || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, from_number: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>Logradouro / Bairro / Cidade / UF (para Etiquetas)</Label>
-          <div className="grid grid-cols-2 gap-2 mt-1">
-            <Input 
-              placeholder="Rua..."
-              value={localSF?.from_street || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, from_street: e.target.value })}
-            />
-            <Input 
-              placeholder="Bairro"
-              value={localSF?.from_neighborhood || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, from_neighborhood: e.target.value })}
-            />
-            <Input 
-              placeholder="Cidade"
-              value={localSF?.from_city || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, from_city: e.target.value })}
-            />
-            <Input 
-              placeholder="UF"
-              maxLength={2}
-              value={localSF?.from_state || ""}
-              onChange={(e) => setLocalSF({ ...localSF!, from_state: e.target.value.toUpperCase() })}
-            />
-          </div>
-        </div>
-
-        <Button onClick={handleSaveSF} disabled={updateSF.isPending} size="sm" className="w-full">
-          {updateSF.isPending ? "Salvando..." : "Salvar Configuração SuperFrete"}
-        </Button>
-      </div>
-    </div>
-  );
-};
 
 // ─── SHIPPING CONFIG (in Settings) ───
 type ShippingRegionCfg = { pac_price: number; pac_days: string; sedex_price: number; sedex_days: string };
@@ -1824,7 +1687,7 @@ const ShippingConfigEditor = ({
     <div className="space-y-4 pt-4 border-t border-border">
       <h3 className="text-sm font-bold uppercase tracking-wider">Frete Fixo por Região</h3>
       <p className="text-xs text-muted-foreground">
-        Preços manuais usados se o SuperFrete não for configurado ou falhar.
+        Preços manuais usados para cálculo de frete por região.
       </p>
       {SHIPPING_REGIONS.map((r) => {
         const c = cfg[r.key] || DEFAULT_SHIPPING[r.key];
@@ -2007,7 +1870,7 @@ const SettingsView = () => {
           </div>
 
           {/* Configuração de Frete por Região */}
-          <SuperFreteConfigEditor />
+          
           <ShippingConfigEditor
             getValue={getValue}
             setLocal={(patch) => setLocalSettings({ ...localSettings, ...patch })}
@@ -2354,9 +2217,6 @@ const OrdersAdminView = ({
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder({ ...order })} title="Editar">
                           <Edit2 size={15} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" onClick={() => { setOrderForLabel(order.id); setIsLabelPrinterOpen(true); }} title="Imprimir etiqueta">
-                          <Printer size={15} />
-                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setOrderToDelete(order.id)} title="Excluir">
                           <Trash2 size={15} />
                         </Button>
@@ -2450,17 +2310,6 @@ const OrdersAdminView = ({
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-border">
-                  <Button 
-                    className="w-full gap-2" 
-                    onClick={() => {
-                      setOrderForLabel(selectedOrder.id);
-                      setIsLabelPrinterOpen(true);
-                    }}
-                  >
-                    <Printer size={16} /> Imprimir Etiqueta de Envio
-                  </Button>
-                </div>
 
               </div>
 
@@ -2584,16 +2433,6 @@ const OrdersAdminView = ({
         </DialogContent>
       </Dialog>
 
-      {/* Label Printer Component */}
-      {orderForLabel && (
-        <OrderLabelPrinter
-          isOpen={isLabelPrinterOpen}
-          onOpenChange={setIsLabelPrinterOpen}
-          order={orders?.find(o => o.id === orderForLabel)!}
-          items={orderItems || []}
-          storeName={storeName}
-        />
-      )}
     </div>
 
   );

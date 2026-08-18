@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { calculateShipping, useSuperFreteSettings } from "@/lib/superfrete";
+
 
 interface ProductDetailProps {
   product: Product;
@@ -225,7 +225,7 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
   const [result, setResult] = useState<null | { city: string; state: string; options: { name: string; days: string; price: string }[] }>(null);
   const [error, setError] = useState("");
   
-  const { data: sfSettings } = useSuperFreteSettings();
+  
 
   let cfg: Record<string, RegionCfg> = DEFAULT_SHIPPING;
   if (shippingConfigRaw) {
@@ -245,38 +245,6 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
     setLoading(true);
 
     try {
-      // Tentar calcular via SuperFrete se configurado
-      if (sfSettings?.token && sfSettings?.from_zip) {
-        try {
-          const sfResult = await calculateShipping({
-            from_zip: sfSettings.from_zip,
-            to_zip: digits,
-            weight: 0.5, // Padrão
-            length: 20,
-            height: 10,
-            width: 15,
-            token: sfSettings.token,
-            environment: (sfSettings.environment || (sfSettings as any).mode || "sandbox") as "sandbox" | "production"
-          });
-
-          if (sfResult && Array.isArray(sfResult)) {
-            setResult({
-              city: "Sua Região", // API às vezes não retorna cidade no calc simples
-              state: "",
-              options: sfResult.map((s: any) => ({
-                name: s.name,
-                days: `${s.delivery_range.min}-${s.delivery_range.max} dias`,
-                price: freeShipping ? "Grátis" : formatPrice(Number(s.price))
-              }))
-            });
-            setLoading(false);
-            return;
-          }
-        } catch (sfErr) {
-          console.error("SuperFrete fallback to manual:", sfErr);
-        }
-      }
-
       // Fallback manual via ViaCEP + Config da loja
       const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
       const data = await r.json();
