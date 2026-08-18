@@ -2217,9 +2217,6 @@ const OrdersAdminView = ({
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingOrder({ ...order })} title="Editar">
                           <Edit2 size={15} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" onClick={() => { setOrderForLabel(order.id); setIsLabelPrinterOpen(true); }} title="Imprimir etiqueta">
-                          <Printer size={15} />
-                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setOrderToDelete(order.id)} title="Excluir">
                           <Trash2 size={15} />
                         </Button>
@@ -2313,17 +2310,6 @@ const OrdersAdminView = ({
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-border">
-                  <Button 
-                    className="w-full gap-2" 
-                    onClick={() => {
-                      setOrderForLabel(selectedOrder.id);
-                      setIsLabelPrinterOpen(true);
-                    }}
-                  >
-                    <Printer size={16} /> Imprimir Etiqueta de Envio
-                  </Button>
-                </div>
 
               </div>
 
@@ -2447,16 +2433,6 @@ const OrdersAdminView = ({
         </DialogContent>
       </Dialog>
 
-      {/* Label Printer Component */}
-      {orderForLabel && (
-        <OrderLabelPrinter
-          isOpen={isLabelPrinterOpen}
-          onOpenChange={setIsLabelPrinterOpen}
-          order={orders?.find(o => o.id === orderForLabel)!}
-          items={orderItems || []}
-          storeName={storeName}
-        />
-      )}
     </div>
 
   );
