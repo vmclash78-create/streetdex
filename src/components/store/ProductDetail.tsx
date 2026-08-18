@@ -308,7 +308,7 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
               <p className={`text-sm font-bold ${o.price === "Grátis" ? "text-green-500" : "text-foreground"}`}>{o.price}</p>
             </div>
           ))}
-          <p className="text-[10px] text-muted-foreground">* Valores estimados. O frete final é confirmado no checkout.</p>
+          <p className="text-[10px] text-muted-foreground">* Valores reais configurados para sua região. O frete final é selecionado no checkout.</p>
         </div>
       )}
     </div>
