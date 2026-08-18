@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
-
+import HeroCarousel from "@/components/store/HeroCarousel";
 import ProductCard from "@/components/store/ProductCard";
 import ProductDetail from "@/components/store/ProductDetail";
 import CartView from "@/components/store/CartView";
@@ -200,7 +200,7 @@ const Store = () => {
         </div>
       )}
 
-      
+      <HeroCarousel />
 
       {/* Ticker */}
       <div className="py-2.5 overflow-hidden whitespace-nowrap bg-primary relative">
