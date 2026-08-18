@@ -523,7 +523,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             </div>
             
             {/* Shipping selection restored */}
-            <div className="rounded-xl border border-border/60 bg-card/60 p-4 space-y-3">
+            <div className="space-y-3 pt-2">
               <Label className="text-sm font-semibold flex items-center gap-2">
                 <Truck size={16} className="text-primary" /> Opções de entrega
               </Label>
