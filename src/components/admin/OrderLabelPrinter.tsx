@@ -5,7 +5,7 @@ import { Printer, Instagram, Globe, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStoreSettings } from "@/hooks/useStoreData";
-import { useSuperFreteSettings, generateOrderTag } from "@/lib/superfrete";
+
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import streetdexLogo from "@/assets/streetdex-logo.png";
@@ -70,7 +70,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   storeName = "Street Dex",
 }) => {
   const { data: settings } = useStoreSettings();
-  const { data: sfSettings } = useSuperFreteSettings();
+  const sfSettings = null;
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [tagData, setTagData] = React.useState<any>(null);
@@ -81,39 +81,11 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
   const handlePrint = () => window.print();
 
   const handleGenerateRealTag = async () => {
-    if (!sfSettings?.token) {
-      toast({
-        title: "Configuração incompleta",
-        description: "Configure o Token da SuperFrete nas configurações primeiro.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const data = await generateOrderTag({
-        token: sfSettings.token,
-        environment: sfSettings.environment || (sfSettings as any).mode || 'sandbox' as 'sandbox' | 'production',
-        order,
-        items,
-        settings: sfSettings as any
-      });
-      
-      setTagData(data);
-      toast({
-        title: "Etiqueta Gerada",
-        description: "A etiqueta real foi gerada com sucesso via SuperFrete.",
-      });
-    } catch (err: any) {
-      toast({
-        title: "Erro ao gerar etiqueta",
-        description: err.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+    toast({
+      title: "Recurso desativado",
+      description: "A integração com SuperFrete foi removida.",
+      variant: "default",
+    });
   };
 
   const brand = `${(settings?.store_name || storeName).toUpperCase()} | STREETWEAR`;
@@ -161,7 +133,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
       <DialogContent className="max-w-[1100px] w-[96vw] bg-[#141414] border-zinc-800 p-0 overflow-y-auto max-h-[92vh] focus-visible:outline-none">
         <DialogHeader className="print:hidden px-6 pt-5 pb-4 border-b border-zinc-800">
           <DialogTitle className="flex items-center gap-2 text-white font-bold">
-            <Truck size={18} className="text-primary" /> Etiqueta de Envio — SuperFrete
+            <Truck size={18} className="text-primary" /> Etiqueta de Envio
           </DialogTitle>
         </DialogHeader>
 
@@ -177,7 +149,7 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
                 <div className="bg-[#003399] p-1.5 rounded">
                   <Truck size={24} className="text-white" />
                 </div>
-                <span className="text-[26px] font-extrabold tracking-tighter leading-none text-[#003399]">SuperFrete</span>
+                <span className="text-[26px] font-extrabold tracking-tighter leading-none text-[#003399]">ENVIO</span>
               </div>
               <div className="flex flex-col items-center justify-center py-2" style={{ width: "38%" }}>
                 <span className="text-[30px] font-bold leading-none">PAC</span>
@@ -357,15 +329,6 @@ const OrderLabelPrinter: React.FC<OrderLabelPrinterProps> = ({
         <div className="flex justify-end gap-3 p-5 bg-zinc-900 border-t border-zinc-800 print:hidden">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white hover:bg-white/10">
             Cancelar
-          </Button>
-          <Button 
-            onClick={handleGenerateRealTag} 
-            disabled={isGenerating || !!tagData}
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary/10 gap-2 font-bold"
-          >
-            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Truck size={18} />}
-            {tagData ? "Etiqueta Gerada" : "Gerar Etiqueta Real"}
           </Button>
           <Button onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-8 font-bold">
             <Printer size={18} /> Imprimir
