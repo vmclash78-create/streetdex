@@ -1676,15 +1676,30 @@ const SuperFreteConfigEditor = () => {
         <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
           <Truck size={16} /> Integração SuperFrete
         </h3>
-        <a 
-          href="https://web.superfrete.com/#/integrations" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-[10px] text-primary flex items-center gap-1 hover:underline"
-        >
-          Pegar Token <ExternalLink size={10} />
-        </a>
+        <div className="flex gap-3">
+          <a 
+            href={localSF?.environment === "production" ? "https://web.superfrete.com/#/integrations" : "https://sandbox.superfrete.com/#/integrations"} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[10px] text-primary flex items-center gap-1 hover:underline"
+          >
+            Pegar Token {localSF?.environment === "production" ? "(Produção)" : "(Sandbox)"} <ExternalLink size={10} />
+          </a>
+          {localSF?.environment !== "production" && (
+            <a 
+              href="https://sandbox.superfrete.com/#/account/credits" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[10px] text-yellow-500 flex items-center gap-1 hover:underline font-bold"
+            >
+              Recarregar Saldo Sandbox <ExternalLink size={10} />
+            </a>
+          )}
+        </div>
       </div>
+      <p className="text-[11px] text-muted-foreground -mt-2">
+        Certifique-se de que o Token corresponde ao ambiente selecionado. Etiquetas em Sandbox não são válidas para postagem.
+      </p>
       
       <div className="grid grid-cols-1 gap-4 rounded-lg border border-border p-4">
         <div>
