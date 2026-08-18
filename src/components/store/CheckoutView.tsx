@@ -189,20 +189,6 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     }
   };
 
-      // Calcula opções de frete automaticamente pela região do CEP (Fallback manual)
-      const cfg = parseShippingConfig(settings?.shipping_config);
-      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
-      setShippingOptions(opts);
-      setSelectedShipping(opts[0] || null);
-      setShippingLoc({ city: data.localidade, uf: data.uf });
-
-      toast({
-        title: "CEP localizado",
-        description: `${data.localidade} - ${data.uf}`,
-      });
-    }
-  };
-
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
     setIsApplyingCoupon(true);
