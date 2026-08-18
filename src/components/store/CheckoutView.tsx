@@ -303,14 +303,25 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       const addressInfo = `${address.street}, ${address.number}${address.complement ? ` - ${address.complement}` : ''}\n${address.neighborhood}, ${address.city}/${shippingLoc?.uf || ''}\nCEP: ${address.cep}`;
       const shippingInfo = selectedShipping ? `${selectedShipping.name} (${selectedShipping.days}): ${selectedShipping.free ? 'Grátis' : formatPrice(selectedShipping.price)}` : 'A combinar';
       
+      let discountDetails = "";
+      if (appliedCoupon) {
+        discountDetails += `\n*Cupom (${appliedCoupon.code}):* -${formatPrice(couponDiscountAmount)}`;
+      }
+      if (paymentMethod === "pix" && pixDiscount > 0) {
+        discountDetails += `\n*Desconto PIX (${pixDiscount * 100}%):* -${formatPrice(totalAfterCoupon * pixDiscount)}`;
+      } else if (paymentMethod === "dinheiro" && cashDiscount > 0) {
+        discountDetails += `\n*Desconto Dinheiro (${cashDiscount * 100}%):* -${formatPrice(totalAfterCoupon * cashDiscount)}`;
+      }
+
       const message = `*NOVO PEDIDO #${order.order_number}*\n\n` +
         `*Cliente:* ${customer.name}\n` +
         `*WhatsApp:* ${customer.phone}\n\n` +
         `*Produtos:*\n${itemsList}\n\n` +
         `*Endereço de Entrega:*\n${addressInfo}\n\n` +
         `*Frete:* ${shippingInfo}\n` +
-        `*Pagamento:* ${paymentMethod.toUpperCase()}\n\n` +
-        `*TOTAL:* ${formatPrice(finalTotal)}\n\n` +
+        `*Pagamento:* ${paymentMethod.toUpperCase()}${discountDetails}\n\n` +
+        `*TOTAL FINAL:* ${formatPrice(finalTotal)}\n\n` +
+        `*Observação:* ${notes || 'Nenhuma'}\n\n` +
         `--- \nGerado via Street Dex`;
 
       const waLink = getWhatsAppLink(whatsapp, message);
