@@ -84,7 +84,11 @@ const callProxy = async (payload: any) => {
   }
 
   if (data && (data.error || data.message) && !data.id && !Array.isArray(data)) {
-    throw new Error(data.message || data.error);
+    const detail = data.message || data.error;
+    if ((/token/i.test(String(detail)) || /não autorizado/i.test(String(detail)) || data.superfrete_status === 401)) {
+      throw new Error(`Token da SuperFrete inválido para o ambiente "${payload.environment === 'production' ? 'Produção' : 'Sandbox'}". Verifique o token em Configurações.`);
+    }
+    throw new Error(detail);
   }
 
   return data;
