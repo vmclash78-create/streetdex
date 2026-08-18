@@ -1685,9 +1685,9 @@ const ShippingConfigEditor = ({
   };
   return (
     <div className="space-y-4 pt-4 border-t border-border">
-      <h3 className="text-sm font-bold uppercase tracking-wider">Frete Fixo por Região</h3>
+      <h3 className="text-sm font-bold uppercase tracking-wider">Tabela de Frete (Preço Real)</h3>
       <p className="text-xs text-muted-foreground">
-        Preços manuais usados para cálculo de frete por região.
+        Configure os valores reais cobrados por região. Estes valores são exibidos no produto e usados no checkout.
       </p>
       {SHIPPING_REGIONS.map((r) => {
         const c = cfg[r.key] || DEFAULT_SHIPPING[r.key];
