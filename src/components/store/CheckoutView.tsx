@@ -38,12 +38,27 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const pixDiscount = Number(settings?.pix_discount || "0") / 100;
   const cashDiscount = Number(settings?.cash_discount || "0") / 100;
 
-  const [step, setStep] = useState<Step>(1);
-  const [customer, setCustomer] = useState({ name: "", phone: "", email: "" });
-  const [address, setAddress] = useState({ cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" });
+  const [step, setStep] = useState<Step>(() => {
+    const saved = localStorage.getItem("checkout_step");
+    return saved ? (Number(saved) as Step) : 1;
+  });
+  const [customer, setCustomer] = useState(() => {
+    const saved = localStorage.getItem("checkout_customer");
+    return saved ? JSON.parse(saved) : { name: "", phone: "", email: "" };
+  });
+  const [address, setAddress] = useState(() => {
+    const saved = localStorage.getItem("checkout_address");
+    return saved ? JSON.parse(saved) : { cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" };
+  });
   const [officialStreet, setOfficialStreet] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState("pix");
-  const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(() => {
+    const saved = localStorage.getItem("checkout_payment_method");
+    return saved || "pix";
+  });
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem("checkout_notes");
+    return saved || "";
+  });
   const [pixConfirmed, setPixConfirmed] = useState(false);
 
   // Shipping (auto by CEP → region)
@@ -55,6 +70,28 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<DBCoupon | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  // Persistence effects
+  useEffect(() => {
+    localStorage.setItem("checkout_step", step.toString());
+  }, [step]);
+
+  useEffect(() => {
+    localStorage.setItem("checkout_customer", JSON.stringify(customer));
+  }, [customer]);
+
+  useEffect(() => {
+    localStorage.setItem("checkout_address", JSON.stringify(address));
+  }, [address]);
+
+  useEffect(() => {
+    localStorage.setItem("checkout_payment_method", paymentMethod);
+  }, [paymentMethod]);
+
+  useEffect(() => {
+    localStorage.setItem("checkout_notes", notes);
+  }, [notes]);
+
 
   const createOrder = useCreateOrder();
   const { toast } = useToast();
@@ -324,8 +361,17 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
         `*Observação:* ${notes || 'Nenhuma'}\n\n` +
         `--- \nGerado via Street Dex`;
 
+      // Limpar persistência após sucesso
+      const keysToRemove = [
+        "checkout_step", "checkout_customer", "checkout_address", 
+        "checkout_payment_method", "checkout_notes", "store_view",
+        "store_selected_product_id"
+      ];
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      
       const waLink = getWhatsAppLink(whatsapp, message);
       window.open(waLink, '_blank');
+
 
 
 

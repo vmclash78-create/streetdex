@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
@@ -28,9 +28,15 @@ const PRICE_RANGES = [
 ];
 
 const Store = () => {
-  const [view, setView] = useState<AppView>("store");
+  const [view, setView] = useState<AppView>(() => {
+    const saved = localStorage.getItem("store_view");
+    return (saved as AppView) || "store";
+  });
   const [searchQuery, setSearchQuery] = useState("");
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem("store_cart");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [selectedProduct, setSelectedProduct] = useState<DBProduct | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
@@ -41,6 +47,37 @@ const Store = () => {
   const { data: dbProducts, isLoading } = useProducts();
   const { data: settings } = useStoreSettings();
   const isMobile = useIsMobile();
+
+  // Persist view and cart
+  useEffect(() => {
+    localStorage.setItem("store_cart", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    if (view !== "order-success") {
+      localStorage.setItem("store_view", view);
+    } else {
+      localStorage.removeItem("store_view");
+    }
+  }, [view]);
+
+  // Handle product persistence if in product view
+  useEffect(() => {
+    if (view === "product" && selectedProduct) {
+      localStorage.setItem("store_selected_product_id", selectedProduct.id);
+    } else if (view !== "product") {
+      localStorage.removeItem("store_selected_product_id");
+    }
+  }, [view, selectedProduct]);
+
+  useEffect(() => {
+    const savedProductId = localStorage.getItem("store_selected_product_id");
+    if (view === "product" && !selectedProduct && savedProductId && dbProducts) {
+      const found = dbProducts.find(p => p.id === savedProductId);
+      if (found) setSelectedProduct(found);
+    }
+  }, [view, selectedProduct, dbProducts]);
+
 
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const whatsappSupport = whatsapp;
