@@ -506,8 +506,35 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
               </div>
             </div>
 
-          </div>
-        )}
+            {shippingOptions.length > 0 && (
+              <div className="rounded-xl border border-border/60 bg-card/60 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <Truck size={18} />
+                  <span className="text-sm font-bold uppercase tracking-wider">Opções de Entrega</span>
+                </div>
+                <div className="space-y-2">
+                  {shippingOptions.map((opt) => (
+                    <div
+                      key={opt.name}
+                      onClick={() => setSelectedShipping(opt)}
+                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                        selectedShipping?.name === opt.name
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                          : "border-border/40 hover:border-border bg-background/40"
+                      }`}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-foreground">{opt.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{opt.days}</span>
+                      </div>
+                      <span className="text-sm font-bold text-primary">
+                        {opt.free ? "Grátis" : formatPrice(opt.price)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
         {step === 3 && (
           <div className="space-y-4">
