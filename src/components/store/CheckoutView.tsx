@@ -535,6 +535,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                 </div>
               </div>
             )}
+          </div>
+        )}
 
         {step === 3 && (
           <div className="space-y-4">
