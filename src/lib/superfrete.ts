@@ -108,6 +108,7 @@ export const calculateShipping = async (params: {
       token: params.token,
       environment: params.environment,
       endpoint: "/api/v0/calculator",
+      userAgent: "Superfrete (integracao@superfrete.com)",
       body: {
         from: { postal_code: params.from_zip.replace(/\D/g, "") },
         to: { postal_code: params.to_zip.replace(/\D/g, "") },
@@ -139,6 +140,7 @@ export const generateOrderTag = async (params: {
       token: params.token,
       environment: params.environment,
       endpoint: "/api/v0/cart",
+      userAgent: "Superfrete (integracao@superfrete.com)",
       body: {
         from: {
           postal_code: params.settings.from_zip.replace(/\D/g, ""),
