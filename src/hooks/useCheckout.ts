@@ -7,7 +7,7 @@ import { useStoreSettings, type DBCoupon } from "@/hooks/useStoreData";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { useCreateOrder } from "@/hooks/useOrders";
-import { getWhatsAppLink } from "@/utils/whatsapp";
+import { getWhatsAppLink, formatWhatsAppOrderMessage } from "@/utils/whatsapp";
 
 export type Step = 1 | 2 | 3 | 4;
 
@@ -165,7 +165,43 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
       onOrderComplete(order.id, order.order_number);
       
       const whatsapp = settings?.whatsapp_store || settings?.whatsapp;
-      const waMessage = `Novo Pedido #${order.order_number}\nTotal: ${formatPrice(finalTotal)}`;
+      
+      const waMessage = formatWhatsAppOrderMessage({
+        orderNumber: order.order_number,
+        customer: { name: customer.name.trim(), phone: customer.phone.trim() },
+        items: cartItems.map((i) => ({ 
+          quantity: i.qty, 
+          product_name: i.product.name, 
+          size: i.size, 
+          price: i.product.price 
+        })),
+        address: { 
+          street: address.street, 
+          number: address.number, 
+          neighborhood: address.neighborhood, 
+          city: address.city, 
+          uf: shippingLoc?.uf || "", 
+          cep: address.cep 
+        },
+        shipping: { 
+          name: selectedShipping?.name || "Padrão", 
+          price: shippingCost,
+          days: selectedShipping?.days
+        },
+        payment: { 
+          method: paymentMethod,
+          discount: couponDiscountAmount > 0 
+            ? { label: "Cupom", value: couponDiscountAmount }
+            : (paymentMethod === "pix" && pixDiscount > 0)
+              ? { label: `PIX ${pixDiscount * 100}%`, value: totalAfterCoupon * pixDiscount }
+              : (paymentMethod === "dinheiro" && cashDiscount > 0)
+                ? { label: `Dinheiro ${cashDiscount * 100}%`, value: totalAfterCoupon * cashDiscount }
+                : undefined
+        },
+        total: finalTotal,
+        notes: notes.trim() || undefined
+      });
+
       window.open(getWhatsAppLink(whatsapp || "", waMessage), '_blank');
 
       ["checkout_step", "checkout_customer", "checkout_address", "checkout_payment_method", "checkout_notes"].forEach(k => localStorage.removeItem(k));
