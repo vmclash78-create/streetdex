@@ -369,6 +369,6 @@ const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick,
       </header>
     </>
   );
-};
+});
 
 export default memo(StoreHeader);
