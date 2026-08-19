@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Crown, Lock, Loader2 } from "lucide-react";
+import { useStoreSettings } from "@/hooks/useStoreData";
+import { Lock, Loader2 } from "lucide-react";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,7 @@ const ResetPasswordPage = () => {
     if (password !== confirm) return setError("As senhas não coincidem.");
 
     setLoading(true);
+    const { supabase } = await import("@/integrations/supabase/client");
     const { error: updErr } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (updErr) {
