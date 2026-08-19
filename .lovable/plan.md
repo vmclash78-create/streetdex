@@ -1,42 +1,35 @@
-# Plano: Remover Integração SuperFrete e Restaurar Fluxo WhatsApp
+# Project Performance Optimization Plan
 
-O usuário deseja remover completamente a integração com SuperFrete (e Melhor Envio, se houver) e retornar ao fluxo de pedidos via WhatsApp, onde os dados do pedido são formatados em uma mensagem e o usuário é redirecionado ao WhatsApp após finalizar.
+## PHASE 1 — PERFORMANCE PROFILING MAP
+Identify all potential bottlenecks:
+- **Supabase Queries**: Many queries use `.select("*")`. Needs explicit column selection.
+- **Component Re-renders**: Components like `ProductCard`, `CartView`, and `StoreHeader` are central and should be memoized.
+- **Data Fetching**: Independent queries in `Store.tsx` and `Admin.tsx` can be run in parallel (already mostly handled by React Query, but `Promise.all` can be used for custom logic).
+- **Bundle Optimization**: Ensure tree-shaking for `lucide-react` and other libraries.
+- **Images**: Use `loading="lazy"` and proper sizes for product images.
 
-## Alterações Técnicas
+## PHASE 2 — REACT RENDERING OPTIMIZATION
+- [ HIGH IMPACT ] `src/components/store/ProductCard.tsx` — Re-render without cause — Already memoized, but ensure props are stable.
+- [ MEDIUM IMPACT ] `src/pages/Store.tsx` — Derived state recalculation — Wrap filters and categories in `useMemo`.
+- [ MEDIUM IMPACT ] `src/components/store/StoreHeader.tsx` — Heavy re-renders — Memoize and split context usage.
+- [ LOW IMPACT ] `src/App.tsx` — Route lazy loading — Ensure all route-level components are lazy-loaded.
 
-### Frontend
-- **src/components/store/CheckoutView.tsx**: 
-    - Remover lógica de cálculo de frete via `calculateShipping` do SuperFrete.
-    - Manter apenas o cálculo manual por região (CEP) como fallback.
-    - No final do processo (`handleFinalize`), construir a mensagem do WhatsApp com todos os detalhes do pedido (produtos, tamanhos, endereço, frete, total, método de pagamento).
-    - Abrir o link do WhatsApp após a criação bem-sucedida do pedido no banco de dados.
-- **src/components/store/ProductDetail.tsx**:
-    - Remover `ShippingCalculator` ou simplificá-lo para não usar SuperFrete.
-- **src/pages/Admin.tsx**:
-    - Remover a aba ou seção de configurações do SuperFrete.
-    - Remover botões de geração de etiqueta real no gerenciamento de pedidos.
-- **src/lib/superfrete.ts**: Opcionalmente remover o arquivo, mas é melhor apenas parar de usá-lo para evitar erros de importação em outros locais ainda não mapeados.
+## PHASE 3 — DATA FETCHING & CACHING
+- [ HIGH IMPACT ] `src/hooks/*.ts` — Over-fetching — Replace `.select("*")` with explicit column lists.
+- [ MEDIUM IMPACT ] `src/hooks/useOrders.ts` — Unbounded list fetching — Apply `.limit()` or pagination.
+- [ MEDIUM IMPACT ] `src/hooks/products.ts` — Duplicate queries — Consolidate `useProducts` and `useAdminProducts`.
+- [ HIGH IMPACT ] `src/components/store/CheckoutView.tsx` — Perceived latency — Implement optimistic updates or better loading states.
 
-### Infraestrutura
-- **supabase/functions/superfrete-proxy**: A função pode ser mantida no backend, mas não será mais chamada pelo frontend.
+## PHASE 4 — BUNDLE & ASSET OPTIMIZATION
+- [ HIGH IMPACT ] `src/components/store/ProductCard.tsx` — Image layout shift — Add explicit width/height or aspect-ratio wrapper.
+- [ MEDIUM IMPACT ] `src/components/store/HeroCarousel.tsx` — Large images blocking load — Use `fetchPriority="high"` for first image and `loading="lazy"` for others.
 
-## Passos de Implementação
+## PHASE 5 — ALGORITHMIC COMPLEXITY
+- [ LOW IMPACT ] `src/pages/Store.tsx` — O(n) lookups in large lists — Use `Map` for cart items or favorites if list grows large.
 
-1. **Modificar `CheckoutView.tsx`**:
-    - Remover imports e chamadas ao `calculateShipping`.
-    - Atualizar `handleFinalize` para gerar a mensagem e redirecionar para o WhatsApp.
-2. **Modificar `ProductDetail.tsx`**:
-    - Remover lógica de SuperFrete do componente de cálculo de frete.
-3. **Limpar `Admin.tsx`**:
-    - Remover a interface de configuração do SuperFrete.
-4. **Verificar `OrderLabelPrinter.tsx`**:
-    - Desativar ou remover opções relacionadas à SuperFrete.
+## PHASE 6 — NETWORK & REQUEST EFFICIENCY
+- [ MEDIUM IMPACT ] `src/hooks/common/useOrderRealtimeNotifications.ts` — Redundant fetches — Ensure subscriptions don't trigger unnecessary re-renders.
 
-A mensagem de WhatsApp incluirá:
-- Número do Pedido
-- Lista de Itens (Nome, Tamanho, Qtd, Preço)
-- Dados do Cliente
-- Endereço de Entrega
-- Método de Frete e Valor
-- Método de Pagamento
-- Valor Total
+## PHASE 7 — PERCEIVED PERFORMANCE
+- [ HIGH IMPACT ] `src/pages/Store.tsx` — Loading states — Improve skeleton screens to match final layout exactly.
+- [ MEDIUM IMPACT ] `src/components/store/ProductDetail.tsx` — Pre-fetching — Prefetch product details on hover.
