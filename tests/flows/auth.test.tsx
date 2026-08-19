@@ -78,8 +78,8 @@ describe("AuthPage Integration", () => {
     render(<AuthPage />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.queryByTestId("auth-loading")).not.toBeInTheDocument(), { timeout: 2000 });
 
-    const emailInput = screen.getByPlaceholderText(/email/i);
-    const passwordInput = screen.getByPlaceholderText(/senha/i);
+    const emailInput = screen.getByPlaceholderText(/admin@email\.com/i);
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
     const submitButton = screen.getByRole("button", { name: /entrar/i });
 
     fireEvent.change(emailInput, { target: { value: "admin@streetdex.com" } });
