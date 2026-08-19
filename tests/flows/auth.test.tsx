@@ -50,6 +50,7 @@ describe("AuthPage Integration", () => {
     });
 
     render(<AuthPage />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.queryByTestId("auth-loading")).not.toBeInTheDocument(), { timeout: 2000 });
 
     const emailInput = screen.getByPlaceholderText(/email/i);
     const passwordInput = screen.getByPlaceholderText(/senha/i);
