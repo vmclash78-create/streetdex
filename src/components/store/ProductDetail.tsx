@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react"; from "react";
 import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X, Truck, Ruler, Info, ChevronDown } from "lucide-react";
 import { type Product, type CartItem, type Measurement, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
@@ -20,7 +20,7 @@ interface ProductDetailProps {
   cartCount: number;
 }
 
-const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: ProductDetailProps) => {
+const ProductDetail = memo(({ product, onBack, onAddToCart, onGoToCart, cartCount }: ProductDetailProps) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [imgIndex, setImgIndex] = useState(0);
   const [showWishlist, setShowWishlist] = useState(false);
@@ -390,4 +390,6 @@ const ProductDescription = ({ description, measurements }: { description?: strin
   );
 };
 
-export default ProductDetail;
+});
+
+export default memo(ProductDetail);
