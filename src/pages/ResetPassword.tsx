@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Crown, Lock, Loader2 } from "lucide-react";
+import { useStoreSettings } from "@/hooks/useStoreData";
+import { Lock, Loader2 } from "lucide-react";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,17 +17,21 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
+  const { data: settings } = useStoreSettings();
 
   useEffect(() => {
     // Supabase auto-consumes the recovery token from the URL hash and fires
     // PASSWORD_RECOVERY; we just need to make sure a session exists before submit.
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY" || session) setReady(true);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const setup = async () => {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" || session) setReady(true);
+      });
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) setReady(true);
-    });
-    return () => data.subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    };
+    setup();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +41,7 @@ const ResetPasswordPage = () => {
     if (password !== confirm) return setError("As senhas não coincidem.");
 
     setLoading(true);
+    const { supabase } = await import("@/integrations/supabase/client");
     const { error: updErr } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (updErr) {
@@ -50,9 +56,9 @@ const ResetPasswordPage = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader className="flex flex-col items-center pb-2">
-          <Crown size={28} className="text-primary mb-2" strokeWidth={1.5} />
-          <span className="text-2xl font-light tracking-tight text-foreground font-serif">
-            duartt
+          <StreetDexLogo size="md" className="mb-2" />
+          <span className="text-2xl font-bold tracking-tighter text-foreground uppercase">
+            {settings?.store_name || "Street Dex"}
           </span>
           <p className="text-xs text-muted-foreground mt-1">Redefinir senha</p>
         </CardHeader>
