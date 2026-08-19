@@ -14,7 +14,7 @@ import {
   ADMIN_PAYMENT_METHODS as PAYMENT_METHODS, 
   PAYMENT_METHOD_LABELS as PAYMENT_LABELS 
 } from "@/constants/payments";
-import { type DBOrder } from "@/types/db";
+import { type DBOrder } from "@/hooks/useOrders";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
