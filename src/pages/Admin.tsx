@@ -51,13 +51,34 @@ const Admin = () => {
   const { data: settings } = useStoreSettings();
   
   const {
-    somLiberado,
-    presetSelecionado,
-    volumeNotificacao,
-    desbloquearAudioComGesto,
-    tocarSomPedido,
-    testarNotificacao
-  } = useAdminNotifications(settings);
+    isAudioUnlocked: somLiberado,
+    handleUnlockAudio: desbloquearAudioComGesto,
+    playNotification: tocarSomPedido
+  } = useAdminNotifications();
+
+  const testarNotificacao = async () => {
+    await desbloquearAudioComGesto();
+    
+    if ("Notification" in window && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+
+    const ok = await tocarSomPedido();
+    toast({
+      title: ok ? "Teste de Som" : "Som bloqueado",
+      description: ok
+        ? "Sinal sonoro enviado. Você ouviu o alerta?"
+        : "Interaja com a página (clique em qualquer lugar) e tente novamente.",
+      variant: ok ? "default" : "destructive",
+    });
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Teste de Notificação Street Dex", {
+        body: "As notificações estão funcionando corretamente!",
+        icon: "/favicon.ico",
+      });
+    }
+  };
 
   useEffect(() => {
     console.log("Configurando canal de notificações de pedidos...");
