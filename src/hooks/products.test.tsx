@@ -44,15 +44,14 @@ describe("useProducts", () => {
       { id: "2", name: "Product 2", price: 200, sort_order: 2 },
     ];
 
-    const mockSelect = vi.fn().mockReturnThis();
     const mockOrder = vi.fn().mockResolvedValue({
       data: mockProducts,
       error: null,
     });
+    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder });
 
     (supabase.from as any).mockReturnValue({
       select: mockSelect,
-      order: mockOrder,
     });
 
     const { result } = renderHook(() => useProducts(), { wrapper: createWrapper() });
