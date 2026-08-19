@@ -65,7 +65,7 @@ describe("AuthPage Integration", () => {
         email: "test@example.com",
         password: "wrongpassword",
       });
-      expect(toast.error).toHaveBeenCalledWith("Invalid credentials");
+      expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument();
     });
   });
 
