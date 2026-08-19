@@ -86,7 +86,7 @@ const Store = () => {
   const couponCode = settings?.coupon_code || "PRIMEIRACOMPRA";
   const couponDiscount = settings?.coupon_discount || "5";
 
-  const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
+  const cartCount = useMemo(() => cartItems.reduce((s, i) => s + i.qty, 0), [cartItems]);
 
   const toProduct = useCallback((p: DBProduct) => ({
     id: parseInt(p.id.slice(0, 8), 16),
@@ -160,11 +160,11 @@ const Store = () => {
     }
   }, [dbProducts]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSelectedSizes([]);
     setSelectedPriceRange(null);
     setSelectedCategory(null);
-  };
+  }, []);
 
   if (view === "cart") {
     return <CartView cartItems={cartItems} onBack={() => setView("store")} onUpdateQty={updateQty} onRemove={removeItem} onClearAll={() => setCartItems([])} onCheckout={() => setView("checkout")} />;

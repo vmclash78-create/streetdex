@@ -5,7 +5,7 @@ export const useStoreSettings = () => {
   return useQuery({
     queryKey: ["store-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("store_settings").select("*");
+      const { data, error } = await supabase.from("store_settings").select("key, value");
       if (error) throw error;
       const map: Record<string, string> = {};
       (data as { key: string; value: string }[]).forEach((s) => (map[s.key] = s.value));

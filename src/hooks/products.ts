@@ -29,7 +29,7 @@ export const useProducts = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("id, name, price, old_price, img, img2, sizes, colors, free_shipping, category, stock, status, sort_order, created_at, updated_at")
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return data as unknown as DBProduct[];

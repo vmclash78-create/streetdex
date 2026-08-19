@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from "react"; from "react";
+import { useEffect, useState, memo } from "react";
 import { ShoppingCart, Search, Menu, MessageCircle, Truck, Heart, X, ChevronRight, Instagram, Sparkles, Tag } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import ThemeToggle from "./ThemeToggle";
