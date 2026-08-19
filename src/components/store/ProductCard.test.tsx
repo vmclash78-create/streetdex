@@ -20,7 +20,7 @@ vi.mock("@/hooks/useFavorites", () => ({
 }));
 
 const mockProduct = {
-  id: "1",
+  id: 1,
   name: "Street Dex T-Shirt",
   price: 100,
   oldPrice: 150,
