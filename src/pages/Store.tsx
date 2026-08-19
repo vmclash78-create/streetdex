@@ -393,7 +393,8 @@ const Store = () => {
                 key={p.id} 
                 productId={p.id}
                 product={toProduct(p)} 
-                onClick={useCallback(() => { setSelectedProduct(p); setView("product"); }, [p])} 
+                onClick={() => { setSelectedProduct(p); setView("product"); }}
+
 
               />
             ))}
