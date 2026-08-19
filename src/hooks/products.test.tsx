@@ -44,9 +44,15 @@ describe("useProducts", () => {
       { id: "2", name: "Product 2", price: 200, sort_order: 2 },
     ];
 
-    (supabase.from as any)().select().order.mockResolvedValue({
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockOrder = vi.fn().mockResolvedValue({
       data: mockProducts,
       error: null,
+    });
+
+    (supabase.from as any).mockReturnValue({
+      select: mockSelect,
+      order: mockOrder,
     });
 
     const { result } = renderHook(() => useProducts(), { wrapper: createWrapper() });
@@ -62,9 +68,15 @@ describe("useProducts", () => {
   it("handles fetch error", async () => {
     const mockError = { message: "Fetch failed" };
 
-    (supabase.from as any)().select().order.mockResolvedValue({
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockOrder = vi.fn().mockResolvedValue({
       data: null,
       error: mockError,
+    });
+
+    (supabase.from as any).mockReturnValue({
+      select: mockSelect,
+      order: mockOrder,
     });
 
     const { result } = renderHook(() => useProducts(), { wrapper: createWrapper() });

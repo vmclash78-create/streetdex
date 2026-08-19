@@ -21,5 +21,7 @@ export const pixPrice = (value: number, discountPercent = 2): string =>
   formatPrice(value * (1 - discountPercent / 100));
 
 /** Percentual inteiro de desconto entre preço antigo e atual. */
-export const discountPct = (oldPrice: number, currentPrice: number): number =>
-  Math.round(((oldPrice - currentPrice) / oldPrice) * 100);
+export const discountPct = (oldPrice: number, currentPrice: number): number => {
+  if (!oldPrice) return 0;
+  return Math.round(((oldPrice - currentPrice) / oldPrice) * 100);
+};
