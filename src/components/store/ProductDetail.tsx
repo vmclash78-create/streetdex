@@ -200,7 +200,7 @@ const ProductDetail = memo(({ product, onBack, onAddToCart, onGoToCart, cartCoun
       </DialogContent>
     </Dialog>
   );
-});
+};
 
 // ─── Shipping (CEP) calculator ──────────────────────────────────────────────
 type RegionCfg = { pac_price: number; pac_days: string; sedex_price: number; sedex_days: string };
