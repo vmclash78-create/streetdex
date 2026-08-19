@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Search, ArrowLeft, Package, MessageCircle } from "lucide-react";
-import DuarttLogo from "@/components/store/DuarttLogo";
+import StreetDexLogo from "@/components/store/StreetDexLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ const TrackOrder = () => {
         <Button variant="ghost" size="icon" asChild>
           <Link to="/"><ArrowLeft size={20} /></Link>
         </Button>
-        <div className="flex-1 flex justify-center"><DuarttLogo size="sm" /></div>
+        <div className="flex-1 flex justify-center"><StreetDexLogo size="sm" /></div>
         <div className="w-8" />
       </header>
 
