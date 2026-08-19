@@ -161,7 +161,7 @@ const Store = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {filteredProducts.map((p) => <ProductCard key={p.id} product={toProduct(p)} onOpen={() => { setSelectedProduct(p); setView("product"); }} onAddToCart={addToCart} />)}
+            {filteredProducts.map((p) => <ProductCard key={p.id} productId={p.id} product={toProduct(p)} onClick={() => { setSelectedProduct(p); setView("product"); }} />)}
           </div>
         )}
       </main>
@@ -171,7 +171,7 @@ const Store = () => {
       )}
 
       <FAQSection />
-      <StoreFooter />
+      <StoreFooter onNavigateHome={() => setView("store")} />
       <CookieConsent />
     </div>
   );

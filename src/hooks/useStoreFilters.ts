@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
-import { useProducts, useStoreSettings } from "@/hooks/useStoreData";
+import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
 import { PRICE_RANGES } from "@/constants/store";
-import { type DBProduct } from "@/components/store/storeData";
 
 export const useStoreFilters = (dbProducts: DBProduct[] | undefined, searchQuery: string, selectedCategory: string | null, selectedSizes: string[], selectedPriceRange: number | null) => {
   const filteredProducts = useMemo(() => {
