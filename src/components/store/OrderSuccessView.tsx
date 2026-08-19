@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, ExternalLink, Copy, CheckCheck, MessageCircle } from "lucide-react";
-import DuarttLogo from "./DuarttLogo";
+import StreetDexLogo from "./StreetDexLogo";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useStoreSettings } from "@/hooks/useStoreData";
@@ -32,7 +32,7 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-2xl mx-auto">
       <header className="bg-card border-b border-border sticky top-0 z-50 flex items-center justify-center px-4 h-14">
-        <DuarttLogo size="sm" />
+        <StreetDexLogo size="sm" />
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-5">
