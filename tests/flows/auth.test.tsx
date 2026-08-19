@@ -30,7 +30,9 @@ const createWrapper = () => {
   const queryClient = new QueryClient();
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>{children}</MemoryRouter>
+      <AuthProvider>
+        <MemoryRouter>{children}</MemoryRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
