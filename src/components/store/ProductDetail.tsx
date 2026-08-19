@@ -388,5 +388,6 @@ const ProductDescription = ({ description, measurements }: { description?: strin
       )}
     </div>
   );
+});
 
 export default ProductDetail;
