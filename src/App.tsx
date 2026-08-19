@@ -33,7 +33,7 @@ const RouteFallback = () => (
 );
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" storageKey="duartt-theme">
+  <ThemeProvider attribute="class" defaultTheme="dark" storageKey="streetdex-theme">
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
