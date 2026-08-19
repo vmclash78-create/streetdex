@@ -50,9 +50,9 @@ const ResetPasswordPage = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader className="flex flex-col items-center pb-2">
-          <Crown size={28} className="text-primary mb-2" strokeWidth={1.5} />
-          <span className="text-2xl font-light tracking-tight text-foreground font-serif">
-            duartt
+          <StreetDexLogo size="md" className="mb-2" />
+          <span className="text-2xl font-bold tracking-tighter text-foreground uppercase">
+            Street Dex
           </span>
           <p className="text-xs text-muted-foreground mt-1">Redefinir senha</p>
         </CardHeader>

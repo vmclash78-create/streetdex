@@ -1,31 +1,31 @@
-export const getWhatsAppLink = (number: any, message?: string) => {
+/**
+ * Gera um link para o WhatsApp com sanitização rigorosa do número.
+ */
+export const getWhatsAppLink = (number: string | number, message?: string) => {
   if (!number) return "https://wa.me";
   
-  // Extrai apenas os números para garantir um formato limpo
+  // Extrai apenas os números
   let cleaned = number.toString().replace(/\D/g, "");
   
-  // Se o número começar com 0 (ex: 088...), remove o zero inicial
+  // Previne injeção de caracteres no link
+  cleaned = cleaned.replace(/[^0-9]/g, "");
+
   if (cleaned.startsWith("0")) {
     cleaned = cleaned.substring(1);
   }
 
-  // Remove 55 duplicado (caso o usuário tenha digitado 55 no admin e o código adicione de novo ou ele mesmo duplicou)
   if (cleaned.startsWith("5555")) {
     cleaned = cleaned.substring(2);
   }
   
-  // Se o número tiver 10 ou 11 dígitos (DDD + número), adiciona o 55 do Brasil
   if ((cleaned.length === 10 || cleaned.length === 11) && !cleaned.startsWith("55")) {
     cleaned = `55${cleaned}`;
   }
   
-  // Construção do link wa.me (padrão oficial simplificado)
-  // Usamos a construção manual para garantir que não haja parâmetros vazios estranhos
-  let url = `https://wa.me/${cleaned}`;
-  
+  const url = new URL(`https://wa.me/${cleaned}`);
   if (message && message.trim().length > 0) {
-    url += `?text=${encodeURIComponent(message)}`;
+    url.searchParams.set("text", message);
   }
   
-  return url;
+  return url.toString();
 };

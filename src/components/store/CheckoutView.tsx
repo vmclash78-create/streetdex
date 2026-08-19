@@ -335,7 +335,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
 
       onOrderComplete(order.id, order.order_number);
 
-      // Abrir WhatsApp com resumo do pedido
+      // Abrir WhatsApp com resumo do pedido - Sanitização de PII
+      const sanitizedName = customer.name.replace(/[<>]/g, "");
       const itemsList = cartItems.map(i => `- ${i.qty}x ${i.product.name} (${i.size}): ${formatPrice(i.product.price)}`).join('\n');
       const addressInfo = `${address.street}, ${address.number}${address.complement ? ` - ${address.complement}` : ''}\n${address.neighborhood}, ${address.city}/${shippingLoc?.uf || ''}\nCEP: ${address.cep}`;
       const shippingInfo = selectedShipping ? `${selectedShipping.name} (${selectedShipping.days}): ${selectedShipping.free ? 'Grátis' : formatPrice(selectedShipping.price)}` : 'A combinar';
@@ -351,7 +352,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
       }
 
       const message = `*NOVO PEDIDO #${order.order_number}*\n\n` +
-        `*Cliente:* ${customer.name}\n` +
+        `*Cliente:* ${sanitizedName}\n` +
         `*WhatsApp:* ${customer.phone}\n\n` +
         `*Produtos:*\n${itemsList}\n\n` +
         `*Endereço de Entrega:*\n${addressInfo}\n\n` +
