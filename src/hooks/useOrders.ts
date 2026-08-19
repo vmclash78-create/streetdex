@@ -56,8 +56,9 @@ export const useOrders = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, customers(*)")
-        .order("created_at", { ascending: false });
+        .select("id, order_number, total, payment_method, status, created_at, customers(id, name, phone, email)")
+        .order("created_at", { ascending: false })
+        .limit(100);
       if (error) throw error;
       return data as (DBOrder & { customers: DBCustomer })[];
     },

@@ -16,7 +16,7 @@ export const useHeroBanners = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("hero_banners")
-        .select("*")
+        .select("id, img, cta, sort_order, active")
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return data as DBBanner[];
