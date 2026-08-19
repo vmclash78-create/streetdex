@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { ShoppingCart, Search, Menu, MessageCircle, Truck, Heart, X, ChevronRight, Instagram, Sparkles, Tag } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import ThemeToggle from "./ThemeToggle";
@@ -22,7 +22,7 @@ interface StoreHeaderProps {
   announcementText?: string;
 }
 
-const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, categories = [], selectedCategory, onCategoryChange, whatsapp, announcementText }: StoreHeaderProps) => {
+const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick, categories = [], selectedCategory, onCategoryChange, whatsapp, announcementText }: StoreHeaderProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
@@ -369,6 +369,6 @@ const StoreHeader = ({ cartCount, searchQuery, onSearchChange, onCartClick, cate
       </header>
     </>
   );
-};
+});
 
-export default StoreHeader;
+export default memo(StoreHeader);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X, Truck, Ruler, Info, ChevronDown } from "lucide-react";
 import { type Product, type CartItem, type Measurement, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
@@ -390,4 +390,4 @@ const ProductDescription = ({ description, measurements }: { description?: strin
   );
 };
 
-export default ProductDetail;
+export default memo(ProductDetail);
