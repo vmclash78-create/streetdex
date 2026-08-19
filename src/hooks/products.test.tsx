@@ -67,15 +67,14 @@ describe("useProducts", () => {
   it("handles fetch error", async () => {
     const mockError = { message: "Fetch failed" };
 
-    const mockSelect = vi.fn().mockReturnThis();
     const mockOrder = vi.fn().mockResolvedValue({
       data: null,
       error: mockError,
     });
+    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder });
 
     (supabase.from as any).mockReturnValue({
       select: mockSelect,
-      order: mockOrder,
     });
 
     const { result } = renderHook(() => useProducts(), { wrapper: createWrapper() });
