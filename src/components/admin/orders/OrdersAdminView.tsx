@@ -3,17 +3,17 @@ import {
   Volume2, Eye, Edit2, Trash2, Loader2, Save, ChevronRight 
 } from "lucide-react";
 import { 
-  useOrders, useOrderItems, useUpdateOrderStatus, useUpdateOrder, useDeleteOrder, useCreateSale 
+  useOrders, useOrderItems, useUpdateOrderStatus, useUpdateOrder, useDeleteOrder,
+  ORDER_STATUSES, getStatusInfo
 } from "@/hooks/useOrders";
+import { useCreateSale } from "@/hooks/useStoreData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
-import { getStatusInfo } from "@/utils/admin-helpers";
 import { 
   ADMIN_PAYMENT_METHODS as PAYMENT_METHODS, 
   PAYMENT_METHOD_LABELS as PAYMENT_LABELS 
 } from "@/constants/payments";
-import { ORDER_STATUSES } from "@/constants/admin";
 import { type DBOrder } from "@/types/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,7 +121,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
         <div className="flex items-center gap-3">
-          {!somLiberado && <Badge variant="warning" className="animate-pulse">Aguardando áudio</Badge>}
+          {!somLiberado && <Badge variant="outline" className="animate-pulse border-yellow-500 text-yellow-500">Aguardando áudio</Badge>}
           <Button variant="outline" size="sm" onClick={testarNotificacao} className="gap-2"><Volume2 size={14} /> Testar Alerta</Button>
         </div>
       </div>

@@ -7,7 +7,6 @@ import {
 } from "@/hooks/useStoreData";
 import { useToast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/format";
-import { type DBCoupon } from "@/types/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +21,18 @@ import {
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
+
+type DBCoupon = {
+  id: string;
+  code: string;
+  discount_value: number;
+  discount_type: 'percentage' | 'fixed';
+  min_purchase_amount?: number;
+  status: 'active' | 'inactive';
+  expires_at: string | null;
+  max_uses: number | null;
+  used_count: number;
+};
 
 /**
  * Visualização de cupons de desconto.
@@ -89,7 +100,7 @@ const CouponsView = () => {
                   <TableCell>{c.expires_at ? new Date(c.expires_at).toLocaleDateString("pt-BR") : "Nunca"}</TableCell>
                   <TableCell>{c.used_count}{c.max_uses ? ` / ${c.max_uses}` : ""}</TableCell>
                   <TableCell>
-                    <Badge variant={c.status === "active" ? "success" : "destructive"} className="capitalize">
+                    <Badge variant={c.status === "active" ? "secondary" : "destructive"} className="capitalize">
                       {c.status === "active" ? "Ativo" : "Inativo"}
                     </Badge>
                   </TableCell>

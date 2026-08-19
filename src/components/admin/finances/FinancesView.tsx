@@ -30,6 +30,17 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
 
+// Add missing types if needed, or import from elsewhere
+type DBOrder = {
+  id: string;
+  order_number: number;
+  total: number;
+  payment_method: string;
+  status: string;
+  sale_date: string;
+  customer_name?: string;
+};
+
 /**
  * Visualização de gestão financeira, receitas e despesas.
  */
