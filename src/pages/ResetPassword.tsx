@@ -22,14 +22,15 @@ const ResetPasswordPage = () => {
   useEffect(() => {
     // Supabase auto-consumes the recovery token from the URL hash and fires
     // PASSWORD_RECOVERY; we just need to make sure a session exists before submit.
+    let isMounted = true;
     const setup = async () => {
       const { supabase } = await import("@/integrations/supabase/client");
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "PASSWORD_RECOVERY" || session) setReady(true);
+        if (isMounted && (event === "PASSWORD_RECOVERY" || session)) setReady(true);
       });
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) setReady(true);
-      return () => subscription.unsubscribe();
+      if (session && isMounted) setReady(true);
+      return () => { isMounted = false; subscription.unsubscribe(); };
     };
     setup();
   }, []);

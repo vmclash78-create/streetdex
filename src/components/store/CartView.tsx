@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, ShoppingCart, X, Trash2, Minus, Plus, Truck, MessageCircle } from "lucide-react";
-import DuarttLogo from "./DuarttLogo";
+import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, formatPrice, pixPrice, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
       <div className="min-h-screen bg-background flex flex-col max-w-5xl mx-auto">
         <header className="bg-card border-b border-border sticky top-0 z-50 flex items-center px-4 h-14">
           <Button variant="ghost" size="icon" onClick={onBack}><ChevronLeft size={20} /></Button>
-          <div className="flex-1 flex justify-center"><DuarttLogo size="sm" /></div>
+          <div className="flex-1 flex justify-center"><StreetDexLogo size="sm" /></div>
           <div className="w-8" />
         </header>
         <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
@@ -49,7 +49,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
     <div className="min-h-screen bg-background flex flex-col max-w-5xl mx-auto">
       <header className="bg-card border-b border-border sticky top-0 z-50 flex items-center px-4 h-14">
         <Button variant="ghost" size="icon" onClick={onBack}><ChevronLeft size={20} /></Button>
-        <div className="flex-1 flex justify-center"><DuarttLogo size="sm" /></div>
+        <div className="flex-1 flex justify-center"><StreetDexLogo size="sm" /></div>
         <div className="w-8" />
       </header>
       <div className="flex-1 px-4 pt-3 pb-36">

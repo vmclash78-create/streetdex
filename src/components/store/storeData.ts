@@ -48,6 +48,6 @@ export const navLinks = [
   { label: "Perguntas Frequentes", key: "FAQ" },
 ];
 
-export const heroBanners: { img: string; cta: string }[] = [];
+export const heroBanners: { img: string; cta: string; active?: boolean }[] = [];
 
 export const infoStripImg = `${CDN}/themes/amazonas/2-img-833320502-1767889965-ce359877708e7ce7a3e777240d8b566e1767889965-240-0.webp?7172772863971010629`;

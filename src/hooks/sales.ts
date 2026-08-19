@@ -71,16 +71,19 @@ export const useCreateSale = () => {
       const { error: itemsError } = await supabase.from("sale_items").insert(itemsWithSaleId);
       if (itemsError) throw itemsError;
 
+      // Note: This manual stock update is not atomic with the sale insertion.
+      // In a high-concurrency environment, this should be handled by a database trigger or RPC.
       for (const item of payload.items) {
+        if (!item.product_id) continue;
         const { data: prod } = await supabase
           .from("products")
           .select("stock")
           .eq("id", item.product_id)
           .single();
-        if (prod) {
+        if (prod && typeof prod.stock === "number") {
           await supabase
             .from("products")
-            .update({ stock: Math.max(0, (prod.stock ?? 0) - item.quantity) })
+            .update({ stock: Math.max(0, prod.stock - item.quantity) })
             .eq("id", item.product_id);
         }
       }
