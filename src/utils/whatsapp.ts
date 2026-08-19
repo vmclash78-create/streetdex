@@ -100,8 +100,9 @@ export const getWhatsAppLink = (number: string | number, message?: string) => {
   
   const url = new URL(`https://wa.me/${cleaned}`);
   if (message && message.trim().length > 0) {
-    url.searchParams.set("text", message);
+    // Usar encodeURIComponent manualmente para garantir que caracteres especiais/emojis não sejam corrompidos
+    return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
   }
   
-  return url.toString();
+  return `https://wa.me/${cleaned}`;
 };
