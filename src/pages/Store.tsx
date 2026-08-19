@@ -171,7 +171,7 @@ const Store = () => {
       )}
 
       <FAQSection />
-      <StoreFooter onNavigateHome={() => setView("store")} />
+      <StoreFooter onNavigateHome={() => setView("store")} whatsapp={whatsapp} storeName={settings?.store_name} />
       <CookieConsent />
     </div>
   );

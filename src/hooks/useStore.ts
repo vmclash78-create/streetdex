@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { type CartItem, type AppView } from "@/components/store/storeData";
-import { type DBProduct } from "@/hooks/useStoreData";
-import { useProducts, useStoreSettings } from "@/hooks/useStoreData";
+import { useProducts, useStoreSettings, type DBProduct } from "@/hooks/useStoreData";
 
 export const useStore = () => {
   const [view, setView] = useState<AppView>(() => {
