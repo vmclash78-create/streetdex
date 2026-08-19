@@ -20,7 +20,7 @@ interface ProductDetailProps {
   cartCount: number;
 }
 
-const ProductDetail = memo(({ product, onBack, onAddToCart, onGoToCart, cartCount }: ProductDetailProps) => {
+const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: ProductDetailProps) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [imgIndex, setImgIndex] = useState(0);
   const [showWishlist, setShowWishlist] = useState(false);
@@ -388,6 +388,6 @@ const ProductDescription = ({ description, measurements }: { description?: strin
       )}
     </div>
   );
-});
+};
 
-export default ProductDetail;
+export default memo(ProductDetail);
