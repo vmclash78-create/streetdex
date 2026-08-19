@@ -16,17 +16,21 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
+  const { data: settings } = useStoreSettings();
 
   useEffect(() => {
     // Supabase auto-consumes the recovery token from the URL hash and fires
     // PASSWORD_RECOVERY; we just need to make sure a session exists before submit.
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY" || session) setReady(true);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const setup = async () => {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" || session) setReady(true);
+      });
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) setReady(true);
-    });
-    return () => data.subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    };
+    setup();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +56,7 @@ const ResetPasswordPage = () => {
         <CardHeader className="flex flex-col items-center pb-2">
           <StreetDexLogo size="md" className="mb-2" />
           <span className="text-2xl font-bold tracking-tighter text-foreground uppercase">
-            Street Dex
+            {settings?.store_name || "Street Dex"}
           </span>
           <p className="text-xs text-muted-foreground mt-1">Redefinir senha</p>
         </CardHeader>
