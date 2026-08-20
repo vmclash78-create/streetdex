@@ -370,7 +370,7 @@ const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick,
             ))}
           </div>
         )}
-      </header>
+      </motion.header>
     </>
   );
 });
