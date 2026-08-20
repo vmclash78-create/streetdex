@@ -31,7 +31,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
 
   const upsellProducts = allProducts 
     ? allProducts
-        .filter(p => p.status === "active" && !cartItems.some(item => item.product.id === p.id))
+        .filter(p => p.status === "active" && !cartItems.some(item => item.product.id.toString() === parseInt(p.id.slice(0, 8), 16).toString()))
         .slice(0, 4)
     : [];
 
