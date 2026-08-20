@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export type DBProduct = {
   id: string;
@@ -24,12 +25,35 @@ export type DBProduct = {
 };
 
 export const useProducts = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("public-products-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "products",
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["products"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, price, old_price, img, img2, sizes, colors, free_shipping, category, stock, status, sort_order, created_at, updated_at")
+        .select("id, name, price, old_price, img, img2, sizes, colors, free_shipping, category, stock, status, sort_order, created_at, updated_at, description, measurements, shipping_cost")
         .order("sort_order", { ascending: true });
       if (error) throw error;
       return data as unknown as DBProduct[];
@@ -38,6 +62,29 @@ export const useProducts = () => {
 };
 
 export const useAdminProducts = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-products-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "products",
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ["admin-products"],
     queryFn: async () => {
