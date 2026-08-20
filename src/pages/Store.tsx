@@ -23,6 +23,8 @@ import { ALL_SIZES, PRICE_RANGES } from "@/constants/store";
 import { useCallback } from "react";
 import { type DBProduct } from "@/hooks/useStoreData";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 const Store = () => {
   const {
     view, setView, searchQuery, setSearchQuery, cartItems, setCartItems,
@@ -160,9 +162,12 @@ const Store = () => {
             {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] w-full" />)}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <motion.div 
+            layout
+            className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+          >
             {filteredProducts.map((p) => <ProductCard key={p.id} productId={p.id} product={toProduct(p)} onClick={() => { setSelectedProduct(p); setView("product"); }} />)}
-          </div>
+          </motion.div>
         )}
       </main>
 

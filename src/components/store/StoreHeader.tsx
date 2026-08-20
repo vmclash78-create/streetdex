@@ -320,7 +320,7 @@ const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick,
             <Button variant="ghost" size="icon" onClick={onCartClick} className="relative">
               <ShoppingCart size={20} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-[9px] animate-pulse-neon">
+                <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-[9px] animate-pulse-neon bg-primary shadow-[0_0_10px_hsl(var(--primary))]">
                   {cartCount}
                 </Badge>
               )}

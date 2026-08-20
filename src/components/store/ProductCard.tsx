@@ -1,4 +1,5 @@
 import { useState, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { type Product, formatPrice, pixPrice, discountPct, fallbackImg } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -24,7 +25,11 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
   const favored = isFavorite(id);
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -82,21 +87,31 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
 
         {/* Hover overlay (hidden when sold out) */}
         {!soldOut && (
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-end pb-3 gap-2">
-            <div className="flex flex-wrap gap-1 justify-center px-2">
-              {product.sizes.map((s) => (
-                <span key={s} className="text-[0.6rem] font-bold text-foreground/80 bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
-                  {s}
-                </span>
-              ))}
-            </div>
-            <Button size="sm" className="text-xs font-bold px-6 tracking-wider uppercase neon-glow gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
-              <ShoppingCart size={13} /> Comprar
-            </Button>
-            <Button variant="ghost" size="sm" className="text-xs font-medium px-5 text-foreground/80 hover:text-foreground gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
-              <Eye size={13} /> Visualizar
-            </Button>
-          </div>
+          <AnimatePresence>
+            {hovered && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent flex flex-col items-center justify-end pb-3 gap-2"
+              >
+                <div className="flex flex-wrap gap-1 justify-center px-2">
+                  {product.sizes.map((s) => (
+                    <span key={s} className="text-[0.6rem] font-bold text-foreground/80 bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+                <Button size="sm" className="text-xs font-bold px-6 tracking-wider uppercase neon-glow gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
+                  <ShoppingCart size={13} /> Comprar
+                </Button>
+                <Button variant="ghost" size="sm" className="text-xs font-medium px-5 text-foreground/80 hover:text-foreground gap-1.5" onClick={(e) => { e.stopPropagation(); onClick(); }}>
+                  <Eye size={13} /> Visualizar
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
       </div>
 
@@ -124,7 +139,7 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 

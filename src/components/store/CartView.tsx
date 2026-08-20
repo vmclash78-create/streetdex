@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, ShoppingCart, X, Trash2, Minus, Plus, Truck, MessageCircle } from "lucide-react";
+import { useState, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight, ShoppingCart, X, Trash2, Minus, Plus, Truck, MessageCircle, Sparkles } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, formatPrice, pixPrice, fallbackImg, WHATSAPP } from "./storeData";
-import { useStoreSettings } from "@/hooks/useStoreData";
+import { useStoreSettings, useProducts } from "@/hooks/useStoreData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
