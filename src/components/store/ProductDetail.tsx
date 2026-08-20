@@ -1,4 +1,5 @@
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ShoppingCart, Heart, Check, Loader2, X, Truck, Ruler, Info, ChevronDown } from "lucide-react";
 import { type Product, type CartItem, type Measurement, formatPrice, pixPrice, discountPct, fallbackImg, WHATSAPP } from "./storeData";
 import { useStoreSettings } from "@/hooks/useStoreData";
@@ -134,17 +135,23 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
             {/* Buy and Wishlist buttons */}
             <div className="flex flex-col gap-2 mt-auto">
-              <Button
-                onClick={() => {
-                  if (!selectedSize) return;
-                  onAddToCart({ cartId: `${product.id}-${selectedSize}-${Date.now()}`, product, size: selectedSize, qty: 1 });
-                }}
-                disabled={!selectedSize}
-                className="w-full py-3 text-base font-bold tracking-wider uppercase neon-glow gap-2"
-                size="lg"
+              <motion.div
+                whileHover={selectedSize ? { scale: 1.02 } : {}}
+                whileTap={selectedSize ? { scale: 0.98 } : {}}
+                className="w-full"
               >
-                <ShoppingCart size={18} /> Comprar
-              </Button>
+                <Button
+                  onClick={() => {
+                    if (!selectedSize) return;
+                    onAddToCart({ cartId: `${product.id}-${selectedSize}-${Date.now()}`, product, size: selectedSize, qty: 1 });
+                  }}
+                  disabled={!selectedSize}
+                  className="w-full py-3 text-base font-bold tracking-wider uppercase neon-glow gap-2"
+                  size="lg"
+                >
+                  <ShoppingCart size={18} /> Comprar
+                </Button>
+              </motion.div>
               
               <Button
                 variant="outline"
@@ -156,10 +163,16 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </div>
 
             {/* WhatsApp */}
-            <a href={getWhatsAppLink(settings?.whatsapp_store || settings?.whatsapp || WHATSAPP)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors hover:bg-green-500/20 border border-green-500/20">
+            <motion.a 
+              whileHover={{ scale: 1.01, backgroundColor: "rgba(34, 197, 94, 0.15)" }}
+              href={getWhatsAppLink(settings?.whatsapp_store || settings?.whatsapp || WHATSAPP)} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors border border-green-500/20"
+            >
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
-            </a>
+            </motion.a>
 
             {/* Shipping (CEP) calculator */}
             <ShippingCalculator
