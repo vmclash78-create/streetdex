@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
+import { motion } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
@@ -56,16 +57,31 @@ const HeroCarousel = () => {
 
       {/* Hero content overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-16 px-4 z-10">
-        <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-foreground font-bold tracking-wider uppercase text-center leading-none mb-3">
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="font-display text-4xl md:text-6xl lg:text-7xl text-foreground font-bold tracking-wider uppercase text-center leading-none mb-3"
+        >
           STREET<span className="gradient-text">DEX</span>
-        </h1>
-        <p className="text-muted-foreground text-sm md:text-base tracking-[0.2em] uppercase mb-6 text-center">
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="text-muted-foreground text-sm md:text-base tracking-[0.2em] uppercase mb-6 text-center"
+        >
           Vista o que te define
-        </p>
-        <div className="flex justify-center w-full">
+        </motion.p>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.9, duration: 0.5 }}
+          className="flex justify-center w-full"
+        >
           <Button 
             size="lg" 
-            className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all"
+            className="text-sm font-bold tracking-wider uppercase px-8 neon-glow hover:neon-glow-strong transition-all relative group overflow-hidden"
             onClick={() => {
               const element = document.getElementById("best-sellers");
               if (element) {
@@ -73,9 +89,15 @@ const HeroCarousel = () => {
               }
             }}
           >
-            Ver Coleção
+            <span className="relative z-10">Ver Coleção</span>
+            <motion.div 
+              className="absolute inset-0 bg-primary/20"
+              initial={{ x: "-100%" }}
+              whileHover={{ x: "100%" }}
+              transition={{ duration: 0.6 }}
+            />
           </Button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Navigation arrows */}

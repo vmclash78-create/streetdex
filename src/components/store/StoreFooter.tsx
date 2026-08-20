@@ -1,4 +1,5 @@
-import { MessageCircle, Instagram, Mail, MapPin, Shield, Truck, CreditCard, Zap } from "lucide-react";
+import { MessageCircle, Instagram, Mail, MapPin, Shield, Truck, CreditCard, Zap, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import StreetDexLogo from "./StreetDexLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,31 +24,47 @@ const StoreFooter = ({ onNavigateHome, whatsapp, storeName }: StoreFooterProps) 
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary to-transparent neon-glow" />
 
       {/* CTA Band */}
-      <div className="relative border-b border-border/40 bg-gradient-to-r from-primary/10 via-card to-primary/10">
-        <div className="max-w-[1200px] mx-auto px-5 py-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <div>
-            <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase mb-1">Comunidade</p>
-            <h3 className="font-display text-2xl md:text-3xl font-bold uppercase tracking-wider text-foreground leading-tight">
-              Entre no grupo. <span className="text-primary">Sai na frente.</span>
+      <div className="relative border-b border-border/40 bg-gradient-to-r from-primary/10 via-card to-primary/10 overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="max-w-[1200px] mx-auto px-5 py-10 grid grid-cols-1 md:grid-cols-2 gap-6 items-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles size={12} className="text-primary animate-pulse" />
+              <p className="text-[0.65rem] text-primary font-bold tracking-[0.3em] uppercase">Comunidade Street</p>
+            </div>
+            <h3 className="font-display text-3xl md:text-4xl font-black uppercase tracking-tight text-foreground leading-[0.9] italic mb-3">
+              ENTRE NO GRUPO. <br/><span className="text-primary neon-text-glow">SAI NA FRENTE.</span>
             </h3>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Receba drops, cupons e lançamentos antes de todo mundo no nosso WhatsApp.
+            <p className="text-sm text-muted-foreground font-medium max-w-md">
+              Acesso exclusivo a drops limitados, cupons secretos e lançamentos antes de todo o mercado.
             </p>
-          </div>
-          <div className="flex w-full md:justify-end">
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="flex w-full md:justify-end"
+          >
             <Button
               asChild
-              className="h-12 px-8 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-wider text-sm neon-glow gap-2 w-full md:w-auto"
+              className="h-14 px-10 bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-wider text-sm neon-glow hover:neon-glow-strong transition-all duration-300 gap-3 w-full md:w-auto rounded-none skew-x-[-12deg]"
             >
               <a 
                 href={settings?.whatsapp_group_url || "#"} 
                 target="_blank" 
                 rel="noopener noreferrer"
+                className="inline-flex items-center justify-center"
               >
-                <MessageCircle size={18} /> Entrar no Grupo
+                <span className="skew-x-[12deg] flex items-center gap-2">
+                  <MessageCircle size={20} /> Entrar no Grupo VIP
+                </span>
               </a>
             </Button>
-          </div>
+          </motion.div>
         </div>
       </div>
 

@@ -8,7 +8,7 @@ import { getWhatsAppLink } from "@/utils/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 
 interface StoreHeaderProps {
   cartCount: number;
@@ -274,7 +274,11 @@ const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick,
       </div>
 
       {/* Fixed header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
+      <motion.header 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
+      >
         <div className="max-w-[1200px] mx-auto grid grid-cols-3 items-center px-4 h-16 relative">
           {/* Left: hamburger + logo */}
           <div className="flex items-center gap-3">
@@ -320,7 +324,7 @@ const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick,
             <Button variant="ghost" size="icon" onClick={onCartClick} className="relative">
               <ShoppingCart size={20} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-[9px] animate-pulse-neon">
+                <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 p-0 flex items-center justify-center text-[9px] animate-pulse-neon bg-primary shadow-[0_0_10px_hsl(var(--primary))]">
                   {cartCount}
                 </Badge>
               )}
@@ -366,7 +370,7 @@ const StoreHeader = memo(({ cartCount, searchQuery, onSearchChange, onCartClick,
             ))}
           </div>
         )}
-      </header>
+      </motion.header>
     </>
   );
 });

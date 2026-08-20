@@ -68,7 +68,7 @@
     --spacing: 0.25rem;
   }
   .dark {
-    --background: 270 20% 5%;
+    --background: 270 20% 4%;
     --foreground: 0 0% 96%;
     --card: 270 18% 8%;
     --card-foreground: 0 0% 96%;
