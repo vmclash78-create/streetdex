@@ -1,4 +1,4 @@
-import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X, Zap } from "lucide-react";
+import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X, Zap, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
 import HeroCarousel from "@/components/store/HeroCarousel";
@@ -119,9 +119,20 @@ const Store = () => {
 
       <HeroCarousel />
 
-      <div className="py-2 bg-primary text-primary-foreground text-center text-xs font-bold uppercase overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap">
-          Cupom: {couponCode} | Parcelamos até 12x | Enviamos para todo o Brasil | Frete Grátis acima de R$399,99
+      <div className="py-2.5 bg-primary text-primary-foreground text-center text-xs font-black uppercase overflow-hidden border-y border-white/10 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+        <div className="animate-marquee whitespace-nowrap flex items-center">
+          {[1, 2, 3].map((i) => (
+            <span key={i} className="inline-flex items-center">
+              <span className="mx-4">CUPOM: {couponCode}</span>
+              <Sparkles size={12} className="text-white/50" />
+              <span className="mx-4">PARCELAMOS ATÉ 12X</span>
+              <Zap size={12} className="text-white/50" />
+              <span className="mx-4">ENVIAMOS PARA TODO O BRASIL</span>
+              <Truck size={12} className="text-white/50" />
+              <span className="mx-4">FRETE GRÁTIS ACIMA DE R$399,99</span>
+              <Percent size={12} className="text-white/50" />
+            </span>
+          ))}
         </div>
       </div>
 
