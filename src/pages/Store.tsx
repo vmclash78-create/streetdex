@@ -125,6 +125,12 @@ const Store = () => {
 
       {!isLoading && <NewDropSection products={newDropProducts.map(toProduct)} onSelect={openProductById} />}
 
+      <div className="max-w-[1200px] mx-auto px-4 py-4 text-center">
+        <p className="text-primary font-bold uppercase tracking-widest text-xs animate-pulse">
+          Me fale como está o andamento do site
+        </p>
+      </div>
+
       <main className="max-w-[1200px] mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold uppercase">Best Sellers</h2>
