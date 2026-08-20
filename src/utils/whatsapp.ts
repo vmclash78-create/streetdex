@@ -36,12 +36,12 @@ export const formatWhatsAppOrderMessage = (data: {
   const paymentMethodLabel = data.payment.method.charAt(0).toUpperCase() + data.payment.method.slice(1).toLowerCase();
 
   const lines = [
-    `🏷️ *NOVO PEDIDO #${data.orderNumber}*`,
+    `🔥 *NOVO PEDIDO #${data.orderNumber}*`,
     "",
     `👤 *Cliente:* ${data.customer.name}`,
     `📱 *WhatsApp:* ${cleanPhone(data.customer.phone)}`,
     "",
-    `👕 *PRODUTO*`,
+    `📦 *PRODUTO*`,
     itemsList,
     "",
     `📍 *ENDEREÇO DE ENTREGA*`,
@@ -50,7 +50,7 @@ export const formatWhatsAppOrderMessage = (data: {
     `CEP: ${cleanCep(data.address.cep)}`,
     "",
     `🚚 *FRETE:* ${data.shipping.name}${data.shipping.days ? ` — ${data.shipping.days}` : ""}`,
-    `🚚 Frete: ${shippingText}`,
+    `💰 Frete: ${shippingText}`,
     "",
     `💳 *PAGAMENTO:* ${paymentMethodLabel}`,
   ];
@@ -61,12 +61,12 @@ export const formatWhatsAppOrderMessage = (data: {
 
   lines.push(
     "",
-    `✅ *TOTAL FINAL: ${formatMoney(data.total)}*`,
+    `💰 *TOTAL FINAL: ${formatMoney(data.total)}*`,
     "",
-    `💬 *OBSERVAÇÃO:* ${data.notes || "Nenhuma"}`,
+    `📝 *OBSERVAÇÃO:* ${data.notes || "Nenhuma"}`,
     "",
     "━━━━━━━━━━━━━━━━━━",
-    "🔥 *Street Dex*",
+    "✨ *Street Dex*",
     "Moda street para quem vive intensamente.",
     "━━━━━━━━━━━━━━━━━━"
   );
