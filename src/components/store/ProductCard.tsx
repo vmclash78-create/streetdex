@@ -124,7 +124,7 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
             ))}
           </div>
         )}
-        <p className="text-[0.8rem] text-foreground leading-snug line-clamp-2 mb-2 flex-1 font-medium">{product.name}</p>
+        <p className="text-[0.8rem] text-foreground leading-snug line-clamp-2 mb-2 flex-1 font-medium">{product.name} <!-- mude a cor do site de roxo para azul --></p>
         <div>
           {product.oldPrice && <p className="text-[0.65rem] text-muted-foreground line-through">{formatPrice(product.oldPrice)}</p>}
           <p className="text-base font-bold text-foreground">{formatPrice(product.price)}</p>
