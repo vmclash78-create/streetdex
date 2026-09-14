@@ -39,14 +39,14 @@ const HeroCarousel = () => {
       <div ref={emblaRef} className="overflow-hidden bg-black">
         <div className="flex">
           {banners.map((banner, i) => (
-            <div key={i} className="flex-[0_0_100%] min-w-0 relative bg-black flex items-center justify-center aspect-[16/9] sm:aspect-[21/9]">
+            <div key={i} className="flex-[0_0_100%] min-w-0 relative bg-black flex items-center justify-center aspect-[4/5] sm:aspect-[21/9]">
               <img
                 src={banner.img}
                 alt={`Carrossel ${i + 1}`}
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding={i === 0 ? "sync" : "async"}
-                className="block w-full h-full object-cover object-center"
+                className="block w-full h-full object-contain object-center sm:object-cover"
               />
               {/* Dark gradient overlay for text legibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent pointer-events-none" />
