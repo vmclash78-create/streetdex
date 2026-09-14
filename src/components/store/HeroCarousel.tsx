@@ -39,7 +39,7 @@ const HeroCarousel = () => {
       <div ref={emblaRef} className="overflow-hidden bg-black">
         <div className="flex">
           {banners.map((banner, i) => (
-            <div key={i} className="flex-[0_0_100%] min-w-0 relative bg-black flex items-center justify-center aspect-[16/9] sm:aspect-[21/9]">
+            <div key={i} className="flex-[0_0_100%] min-w-0 relative bg-black flex items-center justify-center aspect-[4/5] sm:aspect-[21/9]">
               <img
                 src={banner.img}
                 alt={`Carrossel ${i + 1}`}
