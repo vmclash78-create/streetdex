@@ -13,7 +13,7 @@ export type Step = 1 | 2 | 3 | 4;
 
 interface UseCheckoutProps {
   cartItems: CartItem[];
-  onOrderComplete: (orderId: string, orderNumber: number) => void;
+  onOrderComplete: (orderId: string, orderNumber: number, whatsappLink?: string) => void;
 }
 
 export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) => {
@@ -152,17 +152,22 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
     toast({ title: "Cupom aplicado!" });
   };
 
+  const handleNext = () => {
+    if (step === 1 && !validateStep1()) return;
+    if (step === 2 && !validateStep2()) return;
+    setStep((current) => Math.min(4, current + 1) as Step);
+  };
+
   const handleFinalize = async () => {
     try {
       if (!validateStep1() || !validateStep2()) return;
       const order = await createOrder.mutateAsync({
         customer: { name: customer.name.trim(), phone: customer.phone.trim(), email: customer.email.trim() || undefined },
         order: { total: finalTotal, payment_method: paymentMethod, address_cep: address.cep, address_street: address.street, address_number: address.number, address_neighborhood: address.neighborhood, address_city: address.city, address_complement: address.complement || undefined, notes: [selectedShipping ? `Frete: ${selectedShipping.name} - ${formatPrice(selectedShipping.price)}` : null, notes].filter(Boolean).join(" | ") || undefined },
-        items: cartItems.map((i) => ({ product_name: i.product.name, product_img: i.product.img, size: i.size, quantity: i.qty, price: i.product.price }))
+        coupon_code: appliedCoupon?.code,
+        items: cartItems.map((i) => ({ product_id: i.product.id, product_name: i.product.name, product_img: i.product.img, size: i.size, quantity: i.qty, price: i.product.price }))
       });
       if (!order?.id) throw new Error("Erro ao salvar o pedido.");
-      if (appliedCoupon) await supabase.rpc("redeem_coupon", { p_id: appliedCoupon.id });
-      onOrderComplete(order.id, order.order_number);
       
       const whatsapp = settings?.whatsapp_store || settings?.whatsapp;
       
@@ -202,11 +207,13 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
         notes: notes.trim() || undefined
       });
 
-      window.open(getWhatsAppLink(whatsapp || "", waMessage), '_blank');
+      const whatsappLink = whatsapp ? getWhatsAppLink(whatsapp, waMessage) : undefined;
+      onOrderComplete(order.id, order.order_number, whatsappLink);
+      if (whatsappLink) window.location.assign(whatsappLink);
 
       ["checkout_step", "checkout_customer", "checkout_address", "checkout_payment_method", "checkout_notes"].forEach(k => localStorage.removeItem(k));
-    } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      toast({ title: "Erro", description: err instanceof Error ? err.message : "Não foi possível concluir o pedido.", variant: "destructive" });
     }
   };
 
@@ -214,7 +221,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
     step, setStep, customer, setCustomer, address, setAddress, paymentMethod, setPaymentMethod, notes, setNotes,
     pixConfirmed, setPixConfirmed, shippingOptions, selectedShipping, setSelectedShipping, shippingLoc,
     couponCode, setCouponCode, appliedCoupon, setAppliedCoupon, isApplyingCoupon, isValidatingCep,
-    total, finalTotal, shippingCost, couponDiscountAmount, handleCepBlur, handleApplyCoupon, handleFinalize,
+    total, finalTotal, shippingCost, couponDiscountAmount, handleCepBlur, handleApplyCoupon, handleNext, handleFinalize,
     pixDiscount, cashDiscount, settings
   };
 };

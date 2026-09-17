@@ -10,10 +10,11 @@ import { getWhatsAppLink } from "@/utils/whatsapp";
 interface OrderSuccessViewProps {
   orderId: string;
   orderNumber: number;
+  whatsappLink?: string;
   onBackToStore: () => void;
 }
 
-const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessViewProps) => {
+const OrderSuccessView = ({ orderId, orderNumber, whatsappLink, onBackToStore }: OrderSuccessViewProps) => {
   const [copied, setCopied] = useState(false);
   const { data: settings } = useStoreSettings();
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
@@ -26,7 +27,7 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
 
   const sendOrderNumberToWhatsApp = () => {
     const msg = `Olá! Acabei de realizar o pedido #${orderNumber} no site. Aguardo confirmação!`;
-    window.open(getWhatsAppLink(whatsapp, msg), "_blank");
+    window.location.assign(whatsappLink || getWhatsAppLink(whatsapp, msg));
   };
 
   return (
@@ -49,10 +50,10 @@ const OrderSuccessView = ({ orderId, orderNumber, onBackToStore }: OrderSuccessV
             {copied ? <CheckCheck size={16} className="text-green-600" /> : <Copy size={16} />}
             {copied ? "Copiado!" : `Copiar nº do pedido: #${orderNumber}`}
           </Button>
-          <Button variant="outline" onClick={sendOrderNumberToWhatsApp} className="gap-2 text-green-600 border-green-600/50 hover:bg-green-500/10">
+          {whatsapp && <Button variant="outline" onClick={sendOrderNumberToWhatsApp} className="gap-2 text-green-600 border-green-600/50 hover:bg-green-500/10">
             <MessageCircle size={16} />
             Enviar número via WhatsApp
-          </Button>
+          </Button>}
         </div>
         <Button variant="link" asChild>
           <Link to={`/pedido/${orderId}`} className="gap-2">

@@ -30,10 +30,10 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -8, transition: { duration: 0.3 } }}
-      onClick={onClick}
+      onClick={soldOut ? undefined : onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group bg-card border border-border/50 overflow-hidden cursor-pointer relative flex flex-col rounded-lg card-glow transition-all duration-300"
+      className={`group bg-card border border-border/50 overflow-hidden relative flex flex-col rounded-lg card-glow transition-all duration-300 ${soldOut ? "cursor-not-allowed" : "cursor-pointer"}`}
     >
       {/* Image */}
       <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
@@ -50,12 +50,15 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
           )}
         </div>
 
-        <button
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={favored ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           onClick={(e) => {
             e.stopPropagation();
             toggleFavorite(id);
           }}
-          className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-background/40 backdrop-blur-md border border-white/10 hover:bg-background/60 transition-colors group/heart"
+            className="absolute top-2.5 right-2.5 z-20 h-8 w-8 rounded-full bg-background/40 backdrop-blur-md border border-border/50 hover:bg-background/60 transition-colors group/heart"
         >
           <Heart
             size={16}
@@ -63,7 +66,7 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
               favored ? "fill-primary text-primary scale-110" : "text-white group-hover/heart:scale-110"
             }`}
           />
-        </button>
+          </Button>
 
         <img
           src={hovered && product.img2 ? product.img2 : product.img}

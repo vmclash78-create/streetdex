@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, User, MapPin, CreditCard, Check, Loader2, Copy, Ticket, X, Truck } from "lucide-react";
+import { ChevronLeft, User, MapPin, CreditCard, Check, Loader2 } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
 import { type CartItem, fallbackImg } from "./storeData";
 import { formatPrice } from "@/lib/format";
@@ -14,10 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 interface CheckoutViewProps {
   cartItems: CartItem[];
   onBack: () => void;
-  onOrderComplete: (orderId: string, orderNumber: number) => void;
+  onOrderComplete: (orderId: string, orderNumber: number, whatsappLink?: string) => void;
 }
-
-const PIX_KEY = "Sua Chave PIX";
 
 const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps) => {
   const { toast } = useToast();
@@ -25,17 +23,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     step, setStep, customer, setCustomer, address, setAddress, paymentMethod, setPaymentMethod, notes, setNotes,
     pixConfirmed, setPixConfirmed, shippingOptions, selectedShipping, setSelectedShipping,
     couponCode, setCouponCode, appliedCoupon, setAppliedCoupon, isApplyingCoupon, isValidatingCep,
-    total, finalTotal, shippingCost, couponDiscountAmount, handleCepBlur, handleApplyCoupon, handleFinalize,
+    total, finalTotal, shippingCost, couponDiscountAmount, handleCepBlur, handleApplyCoupon, handleNext, handleFinalize,
     pixDiscount, cashDiscount, settings
   } = useCheckout({ cartItems, onOrderComplete });
-
-  const handleNext = () => {
-    // Basic validation handled by useCheckout would be better if we split steps into components
-    // for now we keep it simple to avoid breaking logic
-    if (step === 1) setStep(2);
-    else if (step === 2) setStep(3);
-    else if (step === 3) setStep(4);
-  };
 
   const stepLabels = ["Dados", "Endereço", "Pagamento", "Confirmar"];
 
@@ -153,7 +143,11 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             </div>
             {paymentMethod === "pix" && (
               <div className="p-4 bg-muted rounded-lg space-y-2">
-                <p className="text-sm font-bold">Chave PIX: {settings?.pix_api_key || PIX_KEY}</p>
+                {settings?.pix_api_key ? (
+                  <p className="text-sm font-bold">Chave PIX: {settings.pix_api_key}</p>
+                ) : (
+                  <p className="text-sm font-medium text-destructive">PIX indisponível. Escolha outra forma de pagamento.</p>
+                )}
                 <Button variant={pixConfirmed ? "default" : "secondary"} className="w-full" onClick={() => setPixConfirmed(!pixConfirmed)}>
                   {pixConfirmed ? "✓ Confirmado" : "Já paguei"}
                 </Button>
@@ -189,7 +183,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           <span>Total</span>
           <span>{formatPrice(finalTotal)}</span>
         </div>
-        <Button onClick={step === 4 ? handleFinalize : handleNext} className="w-full" size="lg">
+        <Button onClick={step === 4 ? handleFinalize : handleNext} disabled={paymentMethod === "pix" && !settings?.pix_api_key && step >= 3} className="w-full" size="lg">
           {step === 4 ? "Finalizar Pedido" : "Continuar"}
         </Button>
       </div>

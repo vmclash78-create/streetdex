@@ -54,7 +54,7 @@ const AuthPage = () => {
     if (result.error) {
       setError(result.error.message);
     } else {
-      setTimeout(() => navigate("/admin", { replace: true }), 500);
+      return;
     }
     setAuthLoading(false);
   };

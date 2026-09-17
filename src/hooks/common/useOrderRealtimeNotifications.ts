@@ -13,8 +13,6 @@ export const useOrderRealtimeNotifications = (onNewOrder?: () => void) => {
   const lastOrderRef = useRef<string | null>(null);
 
   useEffect(() => {
-    console.log("Configurando canal de notificações de pedidos...");
-    
     const channel = supabase
       .channel('admin-order-notifications-v2')
       .on(
@@ -25,10 +23,7 @@ export const useOrderRealtimeNotifications = (onNewOrder?: () => void) => {
           table: 'orders',
         },
         async (payload) => {
-          console.log('RECEBIDO: Novo pedido no banco de dados:', payload);
-          
           if (lastOrderRef.current === payload.new.id) {
-            console.log('Ignorando notificação duplicada para o ID:', payload.new.id);
             return;
           }
           lastOrderRef.current = payload.new.id;
@@ -58,12 +53,9 @@ export const useOrderRealtimeNotifications = (onNewOrder?: () => void) => {
           queryClient.invalidateQueries({ queryKey: ["order-items"] });
         }
       )
-      .subscribe((status) => {
-        console.log("Status da conexão Realtime:", status);
-      });
+      .subscribe();
 
     return () => {
-      console.log("Removendo canal de notificações");
       supabase.removeChannel(channel);
     };
   }, [toast, queryClient, onNewOrder]);

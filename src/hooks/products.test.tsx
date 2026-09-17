@@ -8,6 +8,11 @@ import React from "react";
 // Mock Supabase
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
+    channel: vi.fn(() => ({
+      on: vi.fn().mockReturnThis(),
+      subscribe: vi.fn().mockReturnThis(),
+    })),
+    removeChannel: vi.fn(),
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),

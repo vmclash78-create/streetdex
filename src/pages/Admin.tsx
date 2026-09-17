@@ -81,8 +81,6 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    console.log("Configurando canal de notificações de pedidos...");
-    
     const channel = supabase
       .channel('admin-order-notifications-v3')
       .on(
@@ -93,8 +91,6 @@ const Admin = () => {
           table: 'orders',
         },
         async (payload) => {
-          console.log('RECEBIDO: Novo pedido no banco de dados:', payload);
-          
           if (lastOrderRef.current === payload.new.id) return;
           lastOrderRef.current = payload.new.id;
 
