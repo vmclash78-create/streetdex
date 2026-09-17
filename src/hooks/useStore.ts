@@ -17,7 +17,7 @@ export const useStore = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [completedOrder, setCompletedOrder] = useState<{ id: string; number: number } | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<{ id: string; number: number; whatsappLink?: string } | null>(null);
 
   const { data: dbProducts, isLoading } = useProducts();
   const { data: settings } = useStoreSettings();
@@ -57,14 +57,17 @@ export const useStore = () => {
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {
       const existing = prev.find((i) => i.product.id === item.product.id && i.size === item.size);
-      if (existing) return prev.map((i) => i.cartId === existing.cartId ? { ...i, qty: i.qty + item.qty } : i);
+      if (existing) {
+        const maxStock = Math.max(0, item.product.stock ?? 0);
+        return prev.map((i) => i.cartId === existing.cartId ? { ...i, qty: Math.min(i.qty + item.qty, maxStock) } : i);
+      }
       return [...prev, item];
     });
   };
 
   const updateQty = (cartId: string, qty: number) => {
     if (qty < 1) setCartItems((prev) => prev.filter((i) => i.cartId !== cartId));
-    else setCartItems((prev) => prev.map((i) => i.cartId === cartId ? { ...i, qty } : i));
+    else setCartItems((prev) => prev.map((i) => i.cartId === cartId ? { ...i, qty: Math.min(qty, Math.max(0, i.product.stock ?? 0)) } : i));
   };
 
   const removeItem = (cartId: string) => setCartItems((prev) => prev.filter((i) => i.cartId !== cartId));

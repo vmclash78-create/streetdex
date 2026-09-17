@@ -124,7 +124,8 @@ export const useCreateOrder = () => {
         address_complement?: string;
         notes?: string;
       };
-      items: { product_id?: string; product_name: string; product_img?: string; size?: string; quantity: number; price: number }[];
+        coupon_code?: string;
+        items: { product_id: string; product_name: string; product_img?: string; size?: string; quantity: number; price: number }[];
     }) => {
       // Ensure items is an array and not empty
       if (!Array.isArray(payload.items) || payload.items.length === 0) {
@@ -144,10 +145,8 @@ export const useCreateOrder = () => {
         p_address_city: payload.order.address_city || "",
         p_address_complement: payload.order.address_complement || "",
         p_notes: payload.order.notes || "",
-        p_items: payload.items.map(item => ({
-          ...item,
-          product_id: typeof item.product_id === 'string' && item.product_id.length > 20 ? item.product_id : null
-        })),
+        p_items: payload.items,
+        p_coupon_code: payload.coupon_code || "",
       });
 
       if (error) throw error;

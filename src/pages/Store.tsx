@@ -1,4 +1,4 @@
-import { Search, MessageCircle, Percent, Truck, SlidersHorizontal, X, Zap, Sparkles } from "lucide-react";
+import { Percent, Truck, SlidersHorizontal, Zap, Sparkles } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoreHeader from "@/components/store/StoreHeader";
 import HeroCarousel from "@/components/store/HeroCarousel";
@@ -11,8 +11,7 @@ import CookieConsent from "@/components/store/CookieConsent";
 import StoreFooter from "@/components/store/StoreFooter";
 import FAQSection from "@/components/store/FAQSection";
 import NewDropSection from "@/components/store/NewDropSection";
-import { infoStripImg, WHATSAPP } from "@/components/store/storeData";
-import { getWhatsAppLink } from "@/utils/whatsapp";
+import { WHATSAPP } from "@/components/store/storeData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +43,7 @@ const Store = () => {
   const couponCode = settings?.coupon_code || "PRIMEIRACOMPRA";
 
   const toProduct = useCallback((p: DBProduct) => ({
-    id: parseInt(p.id.slice(0, 8), 16),
+    id: p.id,
     name: p.name,
     price: Number(p.price),
     oldPrice: p.old_price ? Number(p.old_price) : undefined,
@@ -53,13 +52,13 @@ const Store = () => {
     sizes: p.sizes,
     freeShipping: p.free_shipping,
     colors: p.colors || undefined,
-    description: (p as any).description || undefined,
-    measurements: (p as any).measurements || undefined,
+    description: p.description || undefined,
+    measurements: p.measurements || undefined,
     stock: typeof p.stock === "number" ? p.stock : undefined,
   }), []);
 
-  const openProductById = useCallback((pid: number) => {
-    const found = dbProducts?.find((p) => parseInt(p.id.slice(0, 8), 16) === pid);
+  const openProductById = useCallback((pid: string) => {
+    const found = dbProducts?.find((p) => p.id === pid);
     if (found) {
       setSelectedProduct(found);
       setView("product");
@@ -75,8 +74,8 @@ const Store = () => {
       <CheckoutView
         cartItems={cartItems}
         onBack={() => setView("cart")}
-        onOrderComplete={(id, num) => {
-          setCompletedOrder({ id, number: num });
+        onOrderComplete={(id, num, whatsappLink) => {
+          setCompletedOrder({ id, number: num, whatsappLink });
           setCartItems([]);
           setView("order-success");
         }}
@@ -89,6 +88,7 @@ const Store = () => {
       <OrderSuccessView
         orderId={completedOrder.id}
         orderNumber={completedOrder.number}
+        whatsappLink={completedOrder.whatsappLink}
         onBackToStore={() => { setCompletedOrder(null); setView("store"); }}
       />
     );

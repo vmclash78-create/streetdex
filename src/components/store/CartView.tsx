@@ -1,8 +1,8 @@
-import { useState, memo } from "react";
+import { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ShoppingCart, X, Trash2, Minus, Plus, Truck, MessageCircle, Sparkles } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
-import { type CartItem, formatPrice, pixPrice, fallbackImg, WHATSAPP } from "./storeData";
+import { type CartItem, formatPrice, fallbackImg } from "./storeData";
 import { useStoreSettings, useProducts } from "@/hooks/useStoreData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +18,7 @@ interface CartViewProps {
 }
 
 const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onCheckout }: CartViewProps) => {
-  const [note, setNote] = useState("");
+  const note = localStorage.getItem("checkout_notes") || "";
   const { data: settings } = useStoreSettings();
   const { data: allProducts } = useProducts();
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -31,7 +31,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
 
   const upsellProducts = allProducts 
     ? allProducts
-        .filter(p => p.status === "active" && !cartItems.some(item => item.product.id.toString() === parseInt(p.id.slice(0, 8), 16).toString()))
+        .filter(p => p.status === "active" && p.stock > 0 && !cartItems.some(item => item.product.id === p.id))
         .slice(0, 4)
     : [];
 
@@ -90,7 +90,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
                             <div className="flex items-center border border-border rounded-lg overflow-hidden bg-muted/30">
                               <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none" onClick={() => onUpdateQty(item.cartId, item.qty - 1)}><Minus size={12} /></Button>
                               <span className="text-xs font-bold px-1.5">{item.qty}</span>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none" onClick={() => onUpdateQty(item.cartId, item.qty + 1)}><Plus size={12} /></Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none" disabled={item.qty >= (item.product.stock ?? 0)} onClick={() => onUpdateQty(item.cartId, item.qty + 1)}><Plus size={12} /></Button>
                             </div>
                           </div>
                         </div>
@@ -110,7 +110,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
         </Button>
         <div className="mb-3">
           <h2 className="text-sm font-bold text-foreground mb-1.5">Observação</h2>
-          <Textarea className="resize-none" rows={2} maxLength={200} placeholder="Observação do pedido..." value={note} onChange={(e) => setNote(e.target.value)} />
+          <Textarea className="resize-none" rows={2} maxLength={200} placeholder="Observação do pedido..." defaultValue={note} onChange={(e) => localStorage.setItem("checkout_notes", e.target.value)} />
           <p className="text-[0.65rem] text-muted-foreground text-right mt-0.5">{note.length}/200</p>
         </div>
         <Card>

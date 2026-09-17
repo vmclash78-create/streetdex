@@ -33,6 +33,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
   const { toast } = useToast();
   const discount = Number(settings?.pix_discount || "0");
   const images = [product.img, product.img2 || product.img];
+  const soldOut = typeof product.stock === "number" && product.stock <= 0;
 
   const handleWishlistAction = async () => {
     if (!wishlistName || wishlistPhone.length < 10) {
@@ -45,7 +46,7 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
       const { error } = await supabase.from("wishlist").insert({
         customer_name: wishlistName,
         customer_phone: wishlistPhone,
-        product_id: typeof (product.id as any) === 'string' && (product.id as any).length > 20 ? (product.id as any) : null
+        product_id: product.id
       });
       if (error) throw error;
       toast({ title: "Adicionado!", description: "Você será notificado sobre promoções deste produto." });
@@ -142,14 +143,14 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
               >
                 <Button
                   onClick={() => {
-                    if (!selectedSize) return;
+                    if (!selectedSize || soldOut) return;
                     onAddToCart({ cartId: `${product.id}-${selectedSize}-${Date.now()}`, product, size: selectedSize, qty: 1 });
                   }}
-                  disabled={!selectedSize}
+                   disabled={!selectedSize || soldOut}
                   className="w-full py-3 text-base font-bold tracking-wider uppercase neon-glow gap-2"
                   size="lg"
                 >
-                  <ShoppingCart size={18} /> Comprar
+                   <ShoppingCart size={18} /> {soldOut ? "Esgotado" : "Comprar"}
                 </Button>
               </motion.div>
               

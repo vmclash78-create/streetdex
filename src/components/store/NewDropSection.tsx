@@ -5,7 +5,7 @@ import type { Product } from "./storeData";
 
 type Props = {
   products: Product[];
-  onSelect: (productId: number) => void;
+  onSelect: (productId: string) => void;
 };
 
 const NewDropSection = ({ products, onSelect }: Props) => {
@@ -33,7 +33,7 @@ const NewDropSection = ({ products, onSelect }: Props) => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((p) => (
-          <ProductCard key={p.id} product={p} productId={p.id.toString()} onClick={() => onSelect(p.id)} />
+          <ProductCard key={p.id} product={p} productId={p.id} onClick={() => onSelect(p.id)} />
         ))}
       </div>
     </motion.section>
