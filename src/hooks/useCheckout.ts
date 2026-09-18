@@ -155,6 +155,10 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
   const handleNext = () => {
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
+    if (step === 3 && paymentMethod === "pix" && !settings?.pix_api_key) {
+      toast({ title: "PIX indisponível", description: "Escolha dinheiro ou cartão na entrega.", variant: "destructive" });
+      return;
+    }
     setStep((current) => Math.min(4, current + 1) as Step);
   };
 
@@ -203,7 +207,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
                 ? { label: `Dinheiro ${cashDiscount * 100}%`, value: totalAfterCoupon * cashDiscount }
                 : undefined
         },
-        total: finalTotal,
+        total: Number(order.total),
         notes: notes.trim() || undefined
       });
 
