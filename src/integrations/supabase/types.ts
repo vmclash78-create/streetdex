@@ -690,26 +690,54 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_storefront_order: {
-        Args: {
-          p_address_cep?: string
-          p_address_city?: string
-          p_address_complement?: string
-          p_address_neighborhood?: string
-          p_address_number?: string
-          p_address_street?: string
-          p_customer_email?: string
-          p_customer_name: string
-          p_customer_phone: string
-          p_items?: Json
-          p_notes?: string
-          p_payment_method?: string
-          p_total?: number
-        }
-        Returns: {
-          id: string
-          order_number: number
-        }[]
+      create_storefront_order:
+        | {
+            Args: {
+              p_address_cep?: string
+              p_address_city?: string
+              p_address_complement?: string
+              p_address_neighborhood?: string
+              p_address_number?: string
+              p_address_street?: string
+              p_customer_email?: string
+              p_customer_name: string
+              p_customer_phone: string
+              p_items?: Json
+              p_notes?: string
+              p_payment_method?: string
+              p_total?: number
+            }
+            Returns: {
+              id: string
+              order_number: number
+            }[]
+          }
+        | {
+            Args: {
+              p_address_cep?: string
+              p_address_city?: string
+              p_address_complement?: string
+              p_address_neighborhood?: string
+              p_address_number?: string
+              p_address_street?: string
+              p_coupon_code?: string
+              p_customer_email?: string
+              p_customer_name: string
+              p_customer_phone: string
+              p_items?: Json
+              p_notes?: string
+              p_payment_method?: string
+              p_total?: number
+            }
+            Returns: {
+              id: string
+              order_number: number
+              total: number
+            }[]
+          }
+      find_storefront_order: {
+        Args: { p_customer_phone: string; p_order_number: number }
+        Returns: string
       }
       get_order_for_tracking: {
         Args: { p_order_id: string }

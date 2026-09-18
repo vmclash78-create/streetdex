@@ -13,7 +13,7 @@ const OrderTracking = () => {
   const { id } = useParams<{ id: string }>();
   const { data: order, isLoading, error } = useOrderById(id);
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "8899999999999";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "";
 
   if (isLoading) {
     return (
@@ -115,11 +115,11 @@ const OrderTracking = () => {
           </CardContent>
         </Card>
 
-        <Button asChild className="w-full gap-2 bg-green-600 hover:bg-green-500 h-12 text-white">
+        {whatsapp && <Button asChild className="w-full gap-2 bg-green-600 hover:bg-green-500 h-12 text-white">
           <a href={getWhatsAppLink(whatsapp, `Olá! Gostaria de informações sobre meu pedido #${order.order_number}`)} target="_blank" rel="noopener noreferrer">
             <MessageCircle size={20} /> Suporte via WhatsApp
           </a>
-        </Button>
+        </Button>}
       </div>
     </div>
   );

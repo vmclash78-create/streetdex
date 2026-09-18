@@ -11,28 +11,29 @@ import { getWhatsAppLink } from "@/utils/whatsapp";
 
 const TrackOrder = () => {
   const [orderNum, setOrderNum] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { data: settings } = useStoreSettings();
-  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "8899999999999";
+  const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "";
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const num = parseInt(orderNum.replace("#", "").trim(), 10);
     if (!num) { setError("Digite um número de pedido válido."); return; }
+    if (phone.replace(/\D/g, "").length < 10) { setError("Digite o telefone usado no pedido."); return; }
 
     setLoading(true);
     setError("");
-    const { data, error: err } = await supabase
-      .from("orders")
-      .select("id")
-      .eq("order_number", num)
-      .maybeSingle();
+    const { data, error: err } = await supabase.rpc("find_storefront_order", {
+      p_order_number: num,
+      p_customer_phone: phone,
+    });
 
     setLoading(false);
-    if (err || !data) { setError("Pedido não encontrado. Verifique o número e tente novamente."); return; }
-    navigate(`/pedido/${data.id}`);
+    if (err || !data) { setError("Pedido não encontrado. Confira o número e o telefone."); return; }
+    navigate(`/pedido/${data}`);
   };
 
   return (
@@ -50,7 +51,7 @@ const TrackOrder = () => {
           <Package size={32} className="text-primary" />
         </div>
         <h1 className="text-xl font-bold text-foreground">Rastrear pedido</h1>
-        <p className="text-sm text-muted-foreground">Digite o número do seu pedido para acompanhar o status.</p>
+        <p className="text-sm text-muted-foreground">Digite o número e o telefone usados no pedido.</p>
 
         <form onSubmit={handleSearch} className="w-full flex flex-col gap-3">
           <div className="relative">
@@ -64,6 +65,15 @@ const TrackOrder = () => {
               className="h-12 pl-10 pr-4 text-center text-lg font-semibold"
             />
           </div>
+          <Input
+            type="tel"
+            inputMode="numeric"
+            placeholder="Telefone do pedido"
+            value={phone}
+            onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setError(""); }}
+            maxLength={11}
+            className="h-12 text-center"
+          />
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -76,11 +86,11 @@ const TrackOrder = () => {
 
         <div className="pt-4 border-t border-border w-full mt-4">
           <p className="text-xs text-muted-foreground mb-3">Ainda com dúvidas?</p>
-          <Button variant="outline" asChild className="w-full gap-2 border-green-600/50 text-green-600 hover:bg-green-500/10">
+          {whatsapp && <Button variant="outline" asChild className="w-full gap-2 border-green-600/50 text-green-600 hover:bg-green-500/10">
             <a href={getWhatsAppLink(whatsapp)} target="_blank" rel="noopener noreferrer">
               <MessageCircle size={18} /> Chamar no WhatsApp
             </a>
-          </Button>
+          </Button>}
         </div>
       </div>
     </div>

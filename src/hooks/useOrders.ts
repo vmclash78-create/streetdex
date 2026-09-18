@@ -155,7 +155,7 @@ export const useCreateOrder = () => {
       if (!result || !result.id) {
         throw new Error("Erro ao processar o pedido no servidor: Retorno inválido.");
       }
-      return { id: result.id, order_number: result.order_number } as DBOrder;
+      return { id: result.id, order_number: result.order_number, total: Number(result.total) } as DBOrder;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });

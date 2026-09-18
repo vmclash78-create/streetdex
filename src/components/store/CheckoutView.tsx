@@ -68,12 +68,10 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
               <Label>WhatsApp (Telefone) *</Label>
               <Input value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value.replace(/\D/g, "") })} placeholder="85999999999" maxLength={11} className="mt-1" />
             </div>
-            {customer.email && (
-              <div>
-                <Label>Email (opcional)</Label>
-                <Input value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} placeholder="seuemail@exemplo.com" type="email" className="mt-1" />
-              </div>
-            )}
+            <div>
+              <Label>Email (opcional)</Label>
+              <Input value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} placeholder="seuemail@exemplo.com" type="email" className="mt-1" />
+            </div>
           </div>
         )}
 
@@ -126,7 +124,9 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><CreditCard size={20} className="text-primary" /> Pagamento</h2>
             <div className="space-y-3">
               {PAYMENT_METHODS.map((method) => (
-                <Card key={method.value} className={`cursor-pointer ${paymentMethod === method.value ? "border-primary bg-primary/5" : ""}`} onClick={() => setPaymentMethod(method.value)}>
+                <Card key={method.value} className={`${method.value === "pix" && !settings?.pix_api_key ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${paymentMethod === method.value ? "border-primary bg-primary/5" : ""}`} onClick={() => {
+                  if (method.value !== "pix" || settings?.pix_api_key) setPaymentMethod(method.value);
+                }}>
                   <CardContent className="p-4">
                     <p className="text-sm font-semibold">{method.label}</p>
                     <p className="text-xs text-muted-foreground">{method.description}</p>
