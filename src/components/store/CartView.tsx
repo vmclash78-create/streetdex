@@ -23,7 +23,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
   const { data: allProducts } = useProducts();
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
   
-  const pixDiscount = Number(settings?.pix_discount || "0");
+  const pixDiscount = settings?.pix_api_key ? Number(settings?.pix_discount || "0") : 0;
   const cashDiscount = Number(settings?.cash_discount || "0");
   
   const pixTotal = total * (1 - pixDiscount / 100);
@@ -152,7 +152,9 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
         <div className="flex flex-col text-right mb-1.5">
           {(pixDiscount > 0 || cashDiscount > 0) && (
             <p className="text-xs text-green-600 font-semibold">
-              {formatPrice(Math.min(pixTotal, cashTotal))} no PIX ou Dinheiro
+              {pixDiscount > 0 && cashDiscount > 0
+                ? `${formatPrice(Math.min(pixTotal, cashTotal))} no PIX ou Dinheiro`
+                : `${formatPrice(pixDiscount > 0 ? pixTotal : cashTotal)} no ${pixDiscount > 0 ? "PIX" : "Dinheiro"}`}
             </p>
           )}
         </div>

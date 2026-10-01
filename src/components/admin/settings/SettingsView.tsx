@@ -36,6 +36,15 @@ const SettingsView = () => {
   const handleSave = async () => {
     const entries = Object.entries(localSettings);
     if (entries.length === 0) return;
+    const whatsapp = getValue("whatsapp_store").replace(/\D/g, "");
+    if (whatsapp.length !== 12 && whatsapp.length !== 13) {
+      toast({ title: "WhatsApp inválido", description: "Informe o número da loja com 55, DDD e telefone.", variant: "destructive" });
+      return;
+    }
+    if (getValue("pix_discount") && (Number(getValue("pix_discount")) < 0 || Number(getValue("pix_discount")) > 100)) {
+      toast({ title: "Desconto inválido", description: "Use um valor entre 0 e 100%.", variant: "destructive" });
+      return;
+    }
     
     try {
       for (const [key, value] of entries) {
@@ -133,6 +142,11 @@ const SettingsView = () => {
             <div>
               <Label>Link do Grupo/Comunidade</Label>
               <Input value={getValue("whatsapp_group_url")} onChange={(e) => setLocalSettings({ ...localSettings, whatsapp_group_url: e.target.value })} placeholder="https://chat.whatsapp.com/..." />
+            </div>
+            <div>
+              <Label>Chave Pix para receber pagamentos</Label>
+              <Input value={getValue("pix_api_key")} onChange={(e) => setLocalSettings({ ...localSettings, pix_api_key: e.target.value })} placeholder="Cadastre a chave para disponibilizar Pix" />
+              {!getValue("pix_api_key") && <p className="text-xs text-destructive mt-1">Pix está indisponível na loja até configurar a chave.</p>}
             </div>
           </div>
 

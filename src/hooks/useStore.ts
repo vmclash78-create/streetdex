@@ -39,8 +39,8 @@ export const useStore = () => {
       const current = previous.flatMap((item) => {
         const product = dbProducts.find((candidate) => candidate.id === item.product.id && candidate.status === "active");
         if (!product || product.stock <= 0) return [];
-        const matching = previous.filter((entry) => entry.product.id === product.id);
-        const otherSizes = matching.filter((entry) => entry.cartId < item.cartId).reduce((sum, entry) => sum + entry.qty, 0);
+        const previousEntries = previous.slice(0, previous.indexOf(item)).filter((entry) => entry.product.id === product.id);
+        const otherSizes = previousEntries.reduce((sum, entry) => sum + entry.qty, 0);
         const qty = Math.min(item.qty, Math.max(0, product.stock - otherSizes));
         if (qty === 0) return [];
         return [{ ...item, qty, product: { ...item.product, price: Number(product.price), stock: product.stock, name: product.name, img: product.img } }];
