@@ -739,25 +739,45 @@ export type Database = {
         Args: { p_customer_phone: string; p_order_number: number }
         Returns: string
       }
-      get_order_for_tracking: {
-        Args: { p_order_id: string }
-        Returns: {
-          address_cep: string
-          address_city: string
-          address_complement: string
-          address_neighborhood: string
-          address_number: string
-          address_street: string
-          created_at: string
-          id: string
-          notes: string
-          order_items: Json
-          order_number: number
-          payment_method: string
-          status: string
-          total: number
-        }[]
-      }
+      get_order_for_tracking:
+        | {
+            Args: { p_order_id: string }
+            Returns: {
+              address_cep: string
+              address_city: string
+              address_complement: string
+              address_neighborhood: string
+              address_number: string
+              address_street: string
+              created_at: string
+              id: string
+              notes: string
+              order_items: Json
+              order_number: number
+              payment_method: string
+              status: string
+              total: number
+            }[]
+          }
+        | {
+            Args: { p_customer_phone: string; p_order_id: string }
+            Returns: {
+              address_cep: string
+              address_city: string
+              address_complement: string
+              address_neighborhood: string
+              address_number: string
+              address_street: string
+              created_at: string
+              id: string
+              notes: string
+              order_items: Json
+              order_number: number
+              payment_method: string
+              status: string
+              total: number
+            }[]
+          }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
