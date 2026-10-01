@@ -75,6 +75,13 @@ const Store = () => {
         cartItems={cartItems}
         onBack={() => setView("cart")}
         onOrderComplete={(id, num, whatsappLink) => {
+          const savedCustomer = localStorage.getItem("checkout_customer");
+          if (savedCustomer) {
+            try {
+              const customer = JSON.parse(savedCustomer) as { phone?: string };
+              if (customer.phone) sessionStorage.setItem(`tracking-phone:${id}`, customer.phone);
+            } catch { /* Tracking will request the phone again. */ }
+          }
           setCompletedOrder({ id, number: num, whatsappLink });
           setCartItems([]);
           setView("order-success");

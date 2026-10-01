@@ -24,7 +24,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
     pixConfirmed, setPixConfirmed, shippingOptions, selectedShipping, setSelectedShipping,
     couponCode, setCouponCode, appliedCoupon, setAppliedCoupon, isApplyingCoupon, isValidatingCep,
     total, finalTotal, shippingCost, couponDiscountAmount, handleCepBlur, handleApplyCoupon, handleNext, handleFinalize,
-    pixDiscount, cashDiscount, settings
+    pixDiscount, cashDiscount, settings, isSubmitting
   } = useCheckout({ cartItems, onOrderComplete });
 
   const stepLabels = ["Dados", "Endereço", "Pagamento", "Confirmar"];
@@ -183,8 +183,8 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
           <span>Total</span>
           <span>{formatPrice(finalTotal)}</span>
         </div>
-        <Button onClick={step === 4 ? handleFinalize : handleNext} disabled={paymentMethod === "pix" && !settings?.pix_api_key && step >= 3} className="w-full" size="lg">
-          {step === 4 ? "Finalizar Pedido" : "Continuar"}
+        <Button onClick={step === 4 ? handleFinalize : handleNext} disabled={isSubmitting || (paymentMethod === "pix" && !settings?.pix_api_key && step >= 3)} className="w-full" size="lg">
+          {isSubmitting ? "Registrando pedido..." : step === 4 ? "Finalizar Pedido" : "Continuar"}
         </Button>
       </div>
     </div>
