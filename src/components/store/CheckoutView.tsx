@@ -82,7 +82,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
               <div className="col-span-2 sm:col-span-1 relative">
                 <Label>CEP *</Label>
                 <div className="relative">
-                  <Input value={address.cep} onChange={(e) => setAddress({ ...address, cep: e.target.value.replace(/\D/g, "") })} onBlur={handleCepBlur} placeholder="60000000" maxLength={8} className="mt-1" />
+                  <Input value={address.cep} onChange={(e) => { setAddress({ ...address, cep: e.target.value.replace(/\D/g, "") }); setSelectedShipping(null); }} onBlur={handleCepBlur} placeholder="60000000" maxLength={8} className="mt-1" />
                   {isValidatingCep && <Loader2 size={16} className="animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />}
                 </div>
               </div>

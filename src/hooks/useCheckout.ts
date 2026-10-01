@@ -121,6 +121,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
   const handleCepBlur = async () => {
     const cep = address.cep.replace(/\D/g, "");
     if (cep.length === 8) {
+      setSelectedShipping(null);
       setIsValidatingCep(true);
       const validation = await validateCEP(cep);
       setIsValidatingCep(false);
@@ -178,6 +179,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
         customer: { name: customer.name.trim(), phone: customer.phone.trim(), email: customer.email.trim() || undefined },
         order: { total: finalTotal, payment_method: paymentMethod, address_cep: address.cep, address_street: address.street, address_number: address.number, address_neighborhood: address.neighborhood, address_city: address.city, address_complement: address.complement || undefined, notes: [selectedShipping ? `Frete: ${selectedShipping.name} - ${formatPrice(selectedShipping.price)}` : null, notes].filter(Boolean).join(" | ") || undefined },
         coupon_code: appliedCoupon?.code,
+        shipping_service: selectedShipping?.name || "PAC",
         items: cartItems.map((i) => ({ product_id: i.product.id, product_name: i.product.name, product_img: i.product.img, size: i.size, quantity: i.qty, price: i.product.price }))
       });
       if (!order?.id) throw new Error("Erro ao salvar o pedido.");
