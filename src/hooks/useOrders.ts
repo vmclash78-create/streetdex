@@ -80,13 +80,13 @@ export const useOrderItems = (orderId?: string) => {
   });
 };
 
-export const useOrderById = (orderId?: string) => {
+export const useOrderById = (orderId?: string, phone?: string) => {
   return useQuery({
-    queryKey: ["order", orderId],
-    enabled: !!orderId,
+    queryKey: ["order", orderId, phone],
+    enabled: !!orderId && !!phone,
     queryFn: async () => {
       const { data, error } = await supabase
-        .rpc("get_order_for_tracking", { p_order_id: orderId! })
+        .rpc("get_order_for_tracking", { p_order_id: orderId ?? "", p_customer_phone: phone ?? "" })
         .maybeSingle();
       if (error) throw error;
       return data as unknown as (DBOrder & { order_items: DBOrderItem[] }) | null;

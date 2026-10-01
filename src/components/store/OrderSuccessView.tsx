@@ -43,7 +43,7 @@ const OrderSuccessView = ({ orderId, orderNumber, whatsappLink, onBackToStore }:
         <h1 className="text-2xl font-bold text-foreground">Pedido realizado!</h1>
         <p className="text-muted-foreground text-sm max-w-sm">
           Seu pedido <span className="font-semibold text-foreground">#{orderNumber}</span> foi registrado com sucesso.
-          Você será notificado sobre atualizações do status.
+          Envie os detalhes pelo WhatsApp para confirmar com a loja.
         </p>
         <div className="flex flex-col gap-2 w-full max-w-xs">
           <Button variant="outline" onClick={copyOrderNumber} className="gap-2">
@@ -52,7 +52,7 @@ const OrderSuccessView = ({ orderId, orderNumber, whatsappLink, onBackToStore }:
           </Button>
           {whatsapp && <Button variant="outline" onClick={sendOrderNumberToWhatsApp} className="gap-2 text-green-600 border-green-600/50 hover:bg-green-500/10">
             <MessageCircle size={16} />
-            Enviar número via WhatsApp
+             Enviar pedido pelo WhatsApp
           </Button>}
         </div>
         <Button variant="link" asChild>

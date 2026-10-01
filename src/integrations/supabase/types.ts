@@ -735,29 +735,73 @@ export type Database = {
               total: number
             }[]
           }
+        | {
+            Args: {
+              p_address_cep?: string
+              p_address_city?: string
+              p_address_complement?: string
+              p_address_neighborhood?: string
+              p_address_number?: string
+              p_address_street?: string
+              p_coupon_code?: string
+              p_customer_email?: string
+              p_customer_name: string
+              p_customer_phone: string
+              p_items?: Json
+              p_notes?: string
+              p_payment_method?: string
+              p_shipping_service?: string
+              p_total?: number
+            }
+            Returns: {
+              id: string
+              order_number: number
+              total: number
+            }[]
+          }
       find_storefront_order: {
         Args: { p_customer_phone: string; p_order_number: number }
         Returns: string
       }
-      get_order_for_tracking: {
-        Args: { p_order_id: string }
-        Returns: {
-          address_cep: string
-          address_city: string
-          address_complement: string
-          address_neighborhood: string
-          address_number: string
-          address_street: string
-          created_at: string
-          id: string
-          notes: string
-          order_items: Json
-          order_number: number
-          payment_method: string
-          status: string
-          total: number
-        }[]
-      }
+      get_order_for_tracking:
+        | {
+            Args: { p_order_id: string }
+            Returns: {
+              address_cep: string
+              address_city: string
+              address_complement: string
+              address_neighborhood: string
+              address_number: string
+              address_street: string
+              created_at: string
+              id: string
+              notes: string
+              order_items: Json
+              order_number: number
+              payment_method: string
+              status: string
+              total: number
+            }[]
+          }
+        | {
+            Args: { p_customer_phone: string; p_order_id: string }
+            Returns: {
+              address_cep: string
+              address_city: string
+              address_complement: string
+              address_neighborhood: string
+              address_number: string
+              address_street: string
+              created_at: string
+              id: string
+              notes: string
+              order_items: Json
+              order_number: number
+              payment_method: string
+              status: string
+              total: number
+            }[]
+          }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

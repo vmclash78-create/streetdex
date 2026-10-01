@@ -33,6 +33,7 @@ const TrackOrder = () => {
 
     setLoading(false);
     if (err || !data) { setError("Pedido não encontrado. Confira o número e o telefone."); return; }
+    sessionStorage.setItem(`tracking-phone:${data}`, phone);
     navigate(`/pedido/${data}`);
   };
 

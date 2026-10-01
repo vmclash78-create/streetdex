@@ -111,7 +111,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
       toast({ title: "Número faltando", description: "Por favor, informe o número da residência.", variant: "destructive" });
       return false;
     }
-    if (!selectedShipping) {
+    if (!selectedShipping && !allItemsFreeShipping) {
       toast({ title: "Selecione o frete", description: "Confirme o CEP para calcular o frete.", variant: "destructive" });
       return false;
     }
@@ -165,6 +165,15 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
   const handleFinalize = async () => {
     try {
       if (!validateStep1() || !validateStep2()) return;
+      if (createOrder.isPending) return;
+      if (!settings?.whatsapp_store && !settings?.whatsapp) {
+        toast({ title: "Loja indisponível", description: "O contato da loja ainda não está configurado.", variant: "destructive" });
+        return;
+      }
+      if (paymentMethod === "pix" && !settings?.pix_api_key) {
+        toast({ title: "PIX indisponível", description: "Escolha outra forma de pagamento.", variant: "destructive" });
+        return;
+      }
       const order = await createOrder.mutateAsync({
         customer: { name: customer.name.trim(), phone: customer.phone.trim(), email: customer.email.trim() || undefined },
         order: { total: finalTotal, payment_method: paymentMethod, address_cep: address.cep, address_street: address.street, address_number: address.number, address_neighborhood: address.neighborhood, address_city: address.city, address_complement: address.complement || undefined, notes: [selectedShipping ? `Frete: ${selectedShipping.name} - ${formatPrice(selectedShipping.price)}` : null, notes].filter(Boolean).join(" | ") || undefined },
@@ -213,7 +222,6 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
 
       const whatsappLink = whatsapp ? getWhatsAppLink(whatsapp, waMessage) : undefined;
       onOrderComplete(order.id, order.order_number, whatsappLink);
-      if (whatsappLink) window.location.assign(whatsappLink);
 
       ["checkout_step", "checkout_customer", "checkout_address", "checkout_payment_method", "checkout_notes"].forEach(k => localStorage.removeItem(k));
     } catch (err: unknown) {
@@ -226,6 +234,6 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
     pixConfirmed, setPixConfirmed, shippingOptions, selectedShipping, setSelectedShipping, shippingLoc,
     couponCode, setCouponCode, appliedCoupon, setAppliedCoupon, isApplyingCoupon, isValidatingCep,
     total, finalTotal, shippingCost, couponDiscountAmount, handleCepBlur, handleApplyCoupon, handleNext, handleFinalize,
-    pixDiscount, cashDiscount, settings
+    pixDiscount, cashDiscount, settings, isSubmitting: createOrder.isPending
   };
 };

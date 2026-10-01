@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import { useOrderById, getStatusInfo, ORDER_STATUSES } from "@/hooks/useOrders";
 import { ShoppingBag, Check, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
 import StreetDexLogo from "@/components/store/StreetDexLogo";
 import { formatPrice, fallbackImg } from "@/components/store/storeData";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useStoreSettings } from "@/hooks/useStoreData";
@@ -11,9 +13,30 @@ import { getWhatsAppLink } from "@/utils/whatsapp";
 
 const OrderTracking = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: order, isLoading, error } = useOrderById(id);
+  const [phone, setPhone] = useState(() => id ? sessionStorage.getItem(`tracking-phone:${id}`) || "" : "");
+  const [phoneInput, setPhoneInput] = useState("");
+  const { data: order, isLoading, error } = useOrderById(id, phone);
   const { data: settings } = useStoreSettings();
   const whatsapp = settings?.whatsapp_store || settings?.whatsapp || "";
+
+  if (!phone) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-4">
+        <ShoppingBag size={48} className="text-primary" />
+        <h1 className="text-xl font-bold text-foreground">Acompanhar pedido</h1>
+        <p className="text-sm text-muted-foreground text-center">Confirme o telefone usado na compra.</p>
+        <form className="w-full max-w-sm space-y-3" onSubmit={(event) => {
+          event.preventDefault();
+          if (phoneInput.length < 10) return;
+          setPhone(phoneInput);
+          if (id) sessionStorage.setItem(`tracking-phone:${id}`, phoneInput);
+        }}>
+          <Input type="tel" inputMode="numeric" value={phoneInput} maxLength={11} placeholder="Telefone do pedido" aria-label="Telefone do pedido" onChange={(event) => setPhoneInput(event.target.value.replace(/\D/g, ""))} />
+          <Button type="submit" className="w-full" disabled={phoneInput.length < 10}>Ver pedido</Button>
+        </form>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
