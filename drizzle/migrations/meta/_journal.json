@@ -15,6 +15,13 @@
       "when": 1790854369118,
       "tag": "0001_require_phone_for_order_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790854417410,
+      "tag": "0002_server_priced_shipping_and_public_payment_key",
+      "breakpoints": true
     }
   ]
 }
