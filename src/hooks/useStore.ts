@@ -10,7 +10,13 @@ export const useStore = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem("store_cart");
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try {
+      const parsed: unknown = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed.filter((item): item is CartItem =>
+        typeof item?.product?.id === "string" && typeof item?.qty === "number" && item.qty > 0
+      ) : [];
+    } catch { return []; }
   });
   const [selectedProduct, setSelectedProduct] = useState<DBProduct | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -26,6 +32,22 @@ export const useStore = () => {
   useEffect(() => {
     localStorage.setItem("store_cart", JSON.stringify(cartItems));
   }, [cartItems]);
+
+  useEffect(() => {
+    if (!dbProducts) return;
+    setCartItems((previous) => {
+      const current = previous.flatMap((item) => {
+        const product = dbProducts.find((candidate) => candidate.id === item.product.id && candidate.status === "active");
+        if (!product || product.stock <= 0) return [];
+        const matching = previous.filter((entry) => entry.product.id === product.id);
+        const otherSizes = matching.filter((entry) => entry.cartId < item.cartId).reduce((sum, entry) => sum + entry.qty, 0);
+        const qty = Math.min(item.qty, Math.max(0, product.stock - otherSizes));
+        if (qty === 0) return [];
+        return [{ ...item, qty, product: { ...item.product, price: Number(product.price), stock: product.stock, name: product.name, img: product.img } }];
+      });
+      return JSON.stringify(previous) === JSON.stringify(current) ? previous : current;
+    });
+  }, [dbProducts]);
 
   useEffect(() => {
     if (view !== "order-success") {
@@ -59,15 +81,21 @@ export const useStore = () => {
       const existing = prev.find((i) => i.product.id === item.product.id && i.size === item.size);
       if (existing) {
         const maxStock = Math.max(0, item.product.stock ?? 0);
-        return prev.map((i) => i.cartId === existing.cartId ? { ...i, qty: Math.min(i.qty + item.qty, maxStock) } : i);
+        const inOtherSizes = prev.filter((i) => i.product.id === item.product.id && i.cartId !== existing.cartId).reduce((sum, i) => sum + i.qty, 0);
+        return prev.map((i) => i.cartId === existing.cartId ? { ...i, qty: Math.min(i.qty + item.qty, Math.max(0, maxStock - inOtherSizes)) } : i);
       }
-      return [...prev, item];
+      const alreadyInCart = prev.filter((i) => i.product.id === item.product.id).reduce((sum, i) => sum + i.qty, 0);
+      return alreadyInCart < (item.product.stock ?? 0) ? [...prev, item] : prev;
     });
   };
 
   const updateQty = (cartId: string, qty: number) => {
     if (qty < 1) setCartItems((prev) => prev.filter((i) => i.cartId !== cartId));
-    else setCartItems((prev) => prev.map((i) => i.cartId === cartId ? { ...i, qty: Math.min(qty, Math.max(0, i.product.stock ?? 0)) } : i));
+    else setCartItems((prev) => prev.map((i) => {
+      if (i.cartId !== cartId) return i;
+      const inOtherSizes = prev.filter((other) => other.product.id === i.product.id && other.cartId !== cartId).reduce((sum, other) => sum + other.qty, 0);
+      return { ...i, qty: Math.min(qty, Math.max(1, (i.product.stock ?? 0) - inOtherSizes)) };
+    }));
   };
 
   const removeItem = (cartId: string) => setCartItems((prev) => prev.filter((i) => i.cartId !== cartId));

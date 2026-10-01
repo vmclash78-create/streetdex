@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ShoppingCart, X, Trash2, Minus, Plus, Truck, MessageCircle, Sparkles } from "lucide-react";
 import StreetDexLogo from "./StreetDexLogo";
@@ -18,7 +18,7 @@ interface CartViewProps {
 }
 
 const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onCheckout }: CartViewProps) => {
-  const note = localStorage.getItem("checkout_notes") || "";
+  const [note, setNote] = useState(() => localStorage.getItem("checkout_notes") || "");
   const { data: settings } = useStoreSettings();
   const { data: allProducts } = useProducts();
   const total = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -110,7 +110,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
         </Button>
         <div className="mb-3">
           <h2 className="text-sm font-bold text-foreground mb-1.5">Observação</h2>
-          <Textarea className="resize-none" rows={2} maxLength={200} placeholder="Observação do pedido..." defaultValue={note} onChange={(e) => localStorage.setItem("checkout_notes", e.target.value)} />
+          <Textarea className="resize-none" rows={2} maxLength={200} placeholder="Observação do pedido..." value={note} onChange={(e) => { setNote(e.target.value); localStorage.setItem("checkout_notes", e.target.value); }} />
           <p className="text-[0.65rem] text-muted-foreground text-right mt-0.5">{note.length}/200</p>
         </div>
         <Card>

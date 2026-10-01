@@ -125,6 +125,7 @@ export const useCreateOrder = () => {
         notes?: string;
       };
         coupon_code?: string;
+        shipping_service?: string;
         items: { product_id: string; product_name: string; product_img?: string; size?: string; quantity: number; price: number }[];
     }) => {
       // Ensure items is an array and not empty
@@ -147,6 +148,7 @@ export const useCreateOrder = () => {
         p_notes: payload.order.notes || "",
         p_items: payload.items,
         p_coupon_code: payload.coupon_code || "",
+        p_shipping_service: payload.shipping_service || "PAC",
       });
 
       if (error) throw error;
