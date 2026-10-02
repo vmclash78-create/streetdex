@@ -111,7 +111,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
       toast({ title: "Número faltando", description: "Por favor, informe o número da residência.", variant: "destructive" });
       return false;
     }
-    if (!selectedShipping && !allItemsFreeShipping) {
+    if (!selectedShipping || shippingOptions.length === 0) {
       toast({ title: "Selecione o frete", description: "Confirme o CEP para calcular o frete.", variant: "destructive" });
       return false;
     }
@@ -123,7 +123,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
     if (cep.length === 8) {
       setSelectedShipping(null);
       setIsValidatingCep(true);
-      const validation = await validateCEP(cep);
+       const validation = await validateCEP(cep);
       setIsValidatingCep(false);
       if (!validation.isValid) {
         toast({ title: "CEP inválido", description: validation.error, variant: "destructive" });
@@ -177,16 +177,17 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
       }
       const order = await createOrder.mutateAsync({
         customer: { name: customer.name.trim(), phone: customer.phone.trim(), email: customer.email.trim() || undefined },
-        order: { total: finalTotal, payment_method: paymentMethod, address_cep: address.cep, address_street: address.street, address_number: address.number, address_neighborhood: address.neighborhood, address_city: address.city, address_complement: address.complement || undefined, notes: [selectedShipping ? `Frete: ${selectedShipping.name} - ${formatPrice(selectedShipping.price)}` : null, notes].filter(Boolean).join(" | ") || undefined },
+         order: { total: finalTotal, payment_method: paymentMethod, address_cep: address.cep, address_street: address.street, address_number: address.number, address_neighborhood: address.neighborhood, address_city: address.city, address_complement: address.complement || undefined, notes: notes.trim() || undefined },
         coupon_code: appliedCoupon?.code,
         shipping_service: selectedShipping?.name || "PAC",
         items: cartItems.map((i) => ({ product_id: i.product.id, product_name: i.product.name, product_img: i.product.img, size: i.size, quantity: i.qty, price: i.product.price }))
       });
-      if (!order?.id) throw new Error("Erro ao salvar o pedido.");
+       if (!order?.id) throw new Error("Erro ao salvar o pedido.");
       
       const whatsapp = settings?.whatsapp_store || settings?.whatsapp;
       
-      const waMessage = formatWhatsAppOrderMessage({
+       const chargedShipping = Math.round((Number(order.total) - (totalAfterCoupon * (paymentMethod === "pix" ? 1 - pixDiscount : paymentMethod === "dinheiro" ? 1 - cashDiscount : 1))) * 100) / 100;
+       const waMessage = formatWhatsAppOrderMessage({
         orderNumber: order.order_number,
         customer: { name: customer.name.trim(), phone: customer.phone.trim() },
         items: cartItems.map((i) => ({ 
@@ -205,7 +206,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
         },
         shipping: { 
           name: selectedShipping?.name || "Padrão", 
-          price: shippingCost,
+           price: Math.max(0, chargedShipping),
           days: selectedShipping?.days
         },
         payment: { 
