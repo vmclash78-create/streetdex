@@ -31,7 +31,8 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
   const { data: settings } = useStoreSettings();
   const { toast } = useToast();
-  const discount = Number(settings?.pix_discount || "0");
+  const discount = settings?.pix_api_key ? Number(settings?.pix_discount || "0") : 0;
+  const contact = settings?.whatsapp_store || settings?.whatsapp || WHATSAPP;
   const images = [product.img, product.img2 || product.img];
   const soldOut = typeof product.stock === "number" && product.stock <= 0;
 
@@ -107,10 +108,10 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             <div className="mb-5">
               {product.oldPrice && <p className="text-muted-foreground text-sm line-through">{formatPrice(product.oldPrice)}</p>}
               <p className="text-3xl font-bold text-foreground">{formatPrice(product.price)}</p>
-              <p className="text-sm mt-1">
+              {settings?.pix_api_key && <p className="text-sm mt-1">
                 <span className="text-green-500 font-bold">{pixPrice(product.price, discount)}</span>{" "}
                 <span className="text-muted-foreground">com Pix</span>
-              </p>
+              </p>}
               <p className="text-xs text-muted-foreground mt-1">
                 ou até <span className="text-foreground font-semibold">2x de {formatPrice(product.price / 2)}</span> sem juros
               </p>
@@ -164,16 +165,16 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
             </div>
 
             {/* WhatsApp */}
-            <motion.a 
+            {contact && <motion.a 
               whileHover={{ scale: 1.01, backgroundColor: "rgba(34, 197, 94, 0.15)" }}
-              href={getWhatsAppLink(settings?.whatsapp_store || settings?.whatsapp || WHATSAPP)} 
+              href={getWhatsAppLink(contact)} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="flex items-center gap-3 bg-green-500/10 rounded-xl px-4 py-3 mt-4 transition-colors border border-green-500/20"
             >
               <MessageCircle size={18} className="text-green-500 flex-shrink-0" />
               <p className="text-sm text-foreground font-medium">Dúvidas? <span className="text-green-500 font-bold">WhatsApp</span></p>
-            </motion.a>
+            </motion.a>}
 
             {/* Shipping (CEP) calculator */}
             <ShippingCalculator

@@ -85,7 +85,8 @@ export const useStore = () => {
         return prev.map((i) => i.cartId === existing.cartId ? { ...i, qty: Math.min(i.qty + item.qty, Math.max(0, maxStock - inOtherSizes)) } : i);
       }
       const alreadyInCart = prev.filter((i) => i.product.id === item.product.id).reduce((sum, i) => sum + i.qty, 0);
-      return alreadyInCart < (item.product.stock ?? 0) ? [...prev, item] : prev;
+      const remaining = Math.max(0, (item.product.stock ?? 0) - alreadyInCart);
+      return remaining > 0 ? [...prev, { ...item, qty: Math.min(item.qty, remaining) }] : prev;
     });
   };
 

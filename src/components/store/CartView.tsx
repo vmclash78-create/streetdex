@@ -90,7 +90,7 @@ const CartView = ({ cartItems, onBack, onUpdateQty, onRemove, onClearAll, onChec
                             <div className="flex items-center border border-border rounded-lg overflow-hidden bg-muted/30">
                               <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none" onClick={() => onUpdateQty(item.cartId, item.qty - 1)}><Minus size={12} /></Button>
                               <span className="text-xs font-bold px-1.5">{item.qty}</span>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none" disabled={item.qty >= (item.product.stock ?? 0)} onClick={() => onUpdateQty(item.cartId, item.qty + 1)}><Plus size={12} /></Button>
+                               <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none" disabled={cartItems.filter((entry) => entry.product.id === item.product.id).reduce((sum, entry) => sum + entry.qty, 0) >= (item.product.stock ?? 0)} onClick={() => onUpdateQty(item.cartId, item.qty + 1)}><Plus size={12} /></Button>
                             </div>
                           </div>
                         </div>

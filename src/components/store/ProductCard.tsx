@@ -17,7 +17,7 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
   const [hovered, setHovered] = useState(false);
   const { data: settings } = useStoreSettings();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const discount = Number(settings?.pix_discount || "0");
+  const discount = settings?.pix_api_key ? Number(settings?.pix_discount || "0") : 0;
   const soldOut = typeof product.stock === "number" && product.stock <= 0;
   const installments = product.price >= 30 ? 12 : 0;
   
@@ -131,10 +131,10 @@ const ProductCard = memo(({ product, onClick, productId }: ProductCardProps) => 
         <div>
           {product.oldPrice && <p className="text-[0.65rem] text-muted-foreground line-through">{formatPrice(product.oldPrice)}</p>}
           <p className="text-base font-bold text-foreground">{formatPrice(product.price)}</p>
-          <p className="text-[0.65rem] mt-0.5">
+          {settings?.pix_api_key && <p className="text-[0.65rem] mt-0.5">
             <span className="text-green-500 font-bold">{pixPrice(product.price, discount)}</span>{" "}
             <span className="text-muted-foreground">com Pix</span>
-          </p>
+          </p>}
           {installments > 0 && (
             <p className="text-[0.65rem] text-muted-foreground mt-0.5">
               ou <span className="text-foreground font-semibold">{installments}x de {formatPrice(product.price / installments)}</span> sem juros
