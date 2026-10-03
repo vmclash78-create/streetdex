@@ -45,11 +45,11 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
     setIsSubmittingWishlist(true);
     try {
-      const { error } = await supabase.rpc("add_to_wishlist" as never, {
+      const { error } = await supabase.rpc("add_to_wishlist", {
         p_name: wishlistName,
         p_phone: wishlistPhone,
         p_product_id: product.id
-      } as never);
+      });
       if (error) throw error;
       toast({ title: "Adicionado!", description: "Você será notificado sobre promoções deste produto." });
       setShowWishlist(false);
