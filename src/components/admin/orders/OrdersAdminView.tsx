@@ -113,12 +113,12 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
         </div>
       </div>
 
-      <Card className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4 bg-card/50">
-        <div>
+      <Card className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 bg-card/50">
+        <div className="min-w-0">
           <Label className="text-xs uppercase font-bold text-muted-foreground">Período</Label>
-          <div className="flex gap-2 mt-1">
-            <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-9" />
-            <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-9" />
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            <Input type="date" aria-label="De" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-9 min-w-0 px-2" />
+            <Input type="date" aria-label="Até" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-9 min-w-0 px-2" />
           </div>
         </div>
         <div>
