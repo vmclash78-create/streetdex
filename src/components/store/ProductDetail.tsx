@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { estimateShippingOptions, fetchViaCep, parseShippingConfig } from "@/lib/shipping";
 
 
 interface ProductDetailProps {
@@ -218,22 +219,6 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 };
 
 // ─── Shipping (CEP) calculator ──────────────────────────────────────────────
-type RegionCfg = { pac_price: number; pac_days: string; sedex_price: number; sedex_days: string };
-const DEFAULT_SHIPPING: Record<string, RegionCfg> = {
-  NE: { pac_price: 19.9, pac_days: "5 a 8", sedex_price: 34.9, sedex_days: "2 a 4" },
-  SE: { pac_price: 24.9, pac_days: "6 a 9", sedex_price: 39.9, sedex_days: "3 a 5" },
-  S:  { pac_price: 29.9, pac_days: "8 a 11", sedex_price: 49.9, sedex_days: "4 a 6" },
-  CO: { pac_price: 27.9, pac_days: "7 a 10", sedex_price: 44.9, sedex_days: "3 a 5" },
-  N:  { pac_price: 34.9, pac_days: "10 a 15", sedex_price: 59.9, sedex_days: "5 a 8" },
-};
-const ufToRegion = (uf: string): keyof typeof DEFAULT_SHIPPING => {
-  if (["CE","PE","BA","MA","PI","RN","PB","AL","SE"].includes(uf)) return "NE";
-  if (["SP","RJ","MG","ES"].includes(uf)) return "SE";
-  if (["PR","SC","RS"].includes(uf)) return "S";
-  if (["GO","MT","MS","DF"].includes(uf)) return "CO";
-  return "N";
-};
-
 const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping: boolean; shippingConfigRaw?: string }) => {
   const [cep, setCep] = useState("");
   const [loading, setLoading] = useState(false);
@@ -241,11 +226,6 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
   const [error, setError] = useState("");
   
   
-
-  let cfg: Record<string, RegionCfg> = DEFAULT_SHIPPING;
-  if (shippingConfigRaw) {
-    try { cfg = { ...DEFAULT_SHIPPING, ...JSON.parse(shippingConfigRaw) }; } catch { /* ignore */ }
-  }
 
   const formatCep = (v: string) => {
     const d = v.replace(/\D/g, "").slice(0, 8);
@@ -260,17 +240,10 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
     setLoading(true);
 
     try {
-      // Fallback manual via ViaCEP + Config da loja
-      const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-      const data = await r.json();
-      if (data.erro) { setError("CEP não encontrado."); return; }
-      
-      const uf = data.uf;
-      const region = cfg[ufToRegion(uf)] || DEFAULT_SHIPPING.SE;
-      const options = [
-        { name: "PAC", days: `${region.pac_days} dias úteis`, price: freeShipping ? "Grátis" : formatPrice(region.pac_price) },
-        { name: "SEDEX", days: `${region.sedex_days} dias úteis`, price: formatPrice(region.sedex_price) },
-      ];
+      const data = await fetchViaCep(digits);
+      if (!data) { setError("CEP não encontrado."); return; }
+      const options = estimateShippingOptions(data.uf, parseShippingConfig(shippingConfigRaw), freeShipping)
+        .map(option => ({ name: option.name, days: option.days, price: option.free ? "Grátis" : formatPrice(option.price) }));
 
       setResult({ city: data.localidade, state: data.uf, options });
     } catch {
