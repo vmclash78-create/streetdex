@@ -75,8 +75,8 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
         ]);
         toast({ title: "Sucesso", description: "Pedido entregue e registrado em Vendas!" });
         return;
-      } catch (error: any) {
-        toast({ title: "Erro ao concluir", description: error.message, variant: "destructive" });
+      } catch (error: unknown) {
+        toast({ title: "Erro ao concluir", description: error instanceof Error ? error.message : "Tente novamente.", variant: "destructive" });
         return;
       }
     }

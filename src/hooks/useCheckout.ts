@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type CartItem } from "@/components/store/storeData";
 import { useToast } from "@/hooks/use-toast";
 import { validatePhone, validateCEP } from "@/utils/validation";
@@ -20,20 +20,24 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
   const { data: settings } = useStoreSettings();
   const { toast } = useToast();
   const createOrder = useCreateOrder();
+  const finalizing = useRef(false);
 
   const [step, setStep] = useState<Step>(() => {
     const saved = localStorage.getItem("checkout_step");
-    return saved ? (Number(saved) as Step) : 1;
+    const step = Number(saved);
+    return step >= 1 && step <= 4 ? step as Step : 1;
   });
 
   const [customer, setCustomer] = useState(() => {
     const saved = localStorage.getItem("checkout_customer");
-    return saved ? JSON.parse(saved) : { name: "", phone: "", email: "" };
+    try { return saved ? JSON.parse(saved) : { name: "", phone: "", email: "" }; }
+    catch { return { name: "", phone: "", email: "" }; }
   });
 
   const [address, setAddress] = useState(() => {
     const saved = localStorage.getItem("checkout_address");
-    return saved ? JSON.parse(saved) : { cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" };
+    try { return saved ? JSON.parse(saved) : { cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" }; }
+    catch { return { cep: "", street: "", number: "", neighborhood: "", city: "", complement: "" }; }
   });
 
   const [officialStreet, setOfficialStreet] = useState<string | null>(null);
@@ -154,6 +158,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
   };
 
   const handleNext = () => {
+    if (cartItems.length === 0) { toast({ title: "Carrinho vazio", variant: "destructive" }); return; }
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
     if (step === 3 && paymentMethod === "pix" && !settings?.pix_api_key) {
@@ -164,9 +169,10 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
   };
 
   const handleFinalize = async () => {
+    if (finalizing.current || createOrder.isPending) return;
     try {
+      if (cartItems.length === 0) { toast({ title: "Carrinho vazio", variant: "destructive" }); return; }
       if (!validateStep1() || !validateStep2()) return;
-      if (createOrder.isPending) return;
       if (!settings?.whatsapp_store && !settings?.whatsapp) {
         toast({ title: "Loja indisponível", description: "O contato da loja ainda não está configurado.", variant: "destructive" });
         return;
@@ -175,6 +181,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
         toast({ title: "PIX indisponível", description: "Escolha outra forma de pagamento.", variant: "destructive" });
         return;
       }
+      finalizing.current = true;
       const order = await createOrder.mutateAsync({
         customer: { name: customer.name.trim(), phone: customer.phone.trim(), email: customer.email.trim() || undefined },
          order: { total: finalTotal, payment_method: paymentMethod, address_cep: address.cep, address_street: address.street, address_number: address.number, address_neighborhood: address.neighborhood, address_city: address.city, address_complement: address.complement || undefined, notes: notes.trim() || undefined },
@@ -182,12 +189,11 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
         shipping_service: selectedShipping?.name || "PAC",
         items: cartItems.map((i) => ({ product_id: i.product.id, product_name: i.product.name, product_img: i.product.img, size: i.size, quantity: i.qty, price: i.product.price }))
       });
-       if (!order?.id) throw new Error("Erro ao salvar o pedido.");
+      if (!order?.id) throw new Error("Erro ao salvar o pedido.");
       
       const whatsapp = settings?.whatsapp_store || settings?.whatsapp;
       
-       const chargedShipping = Math.round((Number(order.total) - (totalAfterCoupon * (paymentMethod === "pix" ? 1 - pixDiscount : paymentMethod === "dinheiro" ? 1 - cashDiscount : 1))) * 100) / 100;
-       const waMessage = formatWhatsAppOrderMessage({
+      const waMessage = formatWhatsAppOrderMessage({
         orderNumber: order.order_number,
         customer: { name: customer.name.trim(), phone: customer.phone.trim() },
         items: cartItems.map((i) => ({ 
@@ -206,7 +212,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
         },
         shipping: { 
           name: selectedShipping?.name || "Padrão", 
-           price: Math.max(0, chargedShipping),
+          price: shippingCost,
           days: selectedShipping?.days
         },
         payment: { 
@@ -229,6 +235,8 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
       ["checkout_step", "checkout_customer", "checkout_address", "checkout_payment_method", "checkout_notes"].forEach(k => localStorage.removeItem(k));
     } catch (err: unknown) {
       toast({ title: "Erro", description: err instanceof Error ? err.message : "Não foi possível concluir o pedido.", variant: "destructive" });
+    } finally {
+      finalizing.current = false;
     }
   };
 

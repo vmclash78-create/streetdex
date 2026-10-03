@@ -56,7 +56,7 @@ export const useOrders = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, order_number, total, payment_method, status, created_at, customers(id, name, phone, email)")
+        .select("id, order_number, total, payment_method, status, created_at, address_cep, address_street, address_number, address_neighborhood, address_city, address_complement, notes, customers(id, name, phone, email)")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
