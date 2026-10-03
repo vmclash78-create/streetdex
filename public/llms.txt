@@ -1,0 +1,10 @@
+# Street Dex
+
+> Loja online de streetwear autêntico, com camisas e acessórios exclusivos e envio para todo o Brasil.
+
+Pedidos são finalizados pelo WhatsApp, com pagamento via Pix, dinheiro ou cartão.
+
+## Pages
+
+- [Loja](/): Catálogo de produtos, novidades e perguntas frequentes.
+- [Rastrear pedido](/rastrear): Acompanhe seu pedido com o número e o telefone.
