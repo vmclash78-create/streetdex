@@ -29,6 +29,13 @@
       "when": 1791001330040,
       "tag": "0003_complete_delivered_order_atomically",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791037166273,
+      "tag": "0004_wishlist_rpc_and_settings_cleanup",
+      "breakpoints": true
     }
   ]
 }

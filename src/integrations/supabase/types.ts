@@ -690,6 +690,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_to_wishlist: {
+        Args: { p_name: string; p_phone: string; p_product_id: string }
+        Returns: undefined
+      }
       complete_delivered_order: {
         Args: { p_order_id: string }
         Returns: undefined
