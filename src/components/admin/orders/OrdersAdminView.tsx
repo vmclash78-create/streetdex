@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { 
   Volume2, Eye, Edit2, Trash2, Loader2, Save, ChevronRight 
 } from "lucide-react";
@@ -6,7 +7,6 @@ import {
   useOrders, useOrderItems, useUpdateOrderStatus, useUpdateOrder, useDeleteOrder,
   ORDER_STATUSES, getStatusInfo
 } from "@/hooks/useOrders";
-import { useCreateSale } from "@/hooks/useStoreData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
@@ -43,7 +43,7 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
   const updateStatus = useUpdateOrderStatus();
   const updateOrder = useUpdateOrder();
   const deleteOrder = useDeleteOrder();
-  const createSale = useCreateSale();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -68,7 +68,11 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
       try {
         const { error } = await supabase.rpc("complete_delivered_order", { p_order_id: orderId });
         if (error) throw error;
-        await updateStatus.mutateAsync({ id: orderId, status });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["orders"] }),
+          queryClient.invalidateQueries({ queryKey: ["sales"] }),
+          queryClient.invalidateQueries({ queryKey: ["all-sale-items"] }),
+        ]);
         toast({ title: "Sucesso", description: "Pedido entregue e registrado em Vendas!" });
         return;
       } catch (error: any) {
