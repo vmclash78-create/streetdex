@@ -149,7 +149,7 @@ const CheckoutView = ({ cartItems, onBack, onOrderComplete }: CheckoutViewProps)
                   <p className="text-sm font-medium text-destructive">PIX indisponível. Escolha outra forma de pagamento.</p>
                 )}
                 <Button variant={pixConfirmed ? "default" : "secondary"} className="w-full" onClick={() => setPixConfirmed(!pixConfirmed)}>
-                  {pixConfirmed ? "✓ Confirmado" : "Já paguei"}
+                  {pixConfirmed ? "✓ Vou enviar o comprovante no WhatsApp" : "Já fiz o Pix (enviarei o comprovante)"}
                 </Button>
               </div>
             )}

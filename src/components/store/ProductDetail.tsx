@@ -45,11 +45,11 @@ const ProductDetail = ({ product, onBack, onAddToCart, onGoToCart, cartCount }: 
 
     setIsSubmittingWishlist(true);
     try {
-      const { error } = await supabase.from("wishlist").insert({
-        customer_name: wishlistName,
-        customer_phone: wishlistPhone,
-        product_id: product.id
-      });
+      const { error } = await supabase.rpc("add_to_wishlist" as never, {
+        p_name: wishlistName,
+        p_phone: wishlistPhone,
+        p_product_id: product.id
+      } as never);
       if (error) throw error;
       toast({ title: "Adicionado!", description: "Você será notificado sobre promoções deste produto." });
       setShowWishlist(false);
@@ -242,7 +242,7 @@ const ShippingCalculator = ({ freeShipping, shippingConfigRaw }: { freeShipping:
     try {
       const data = await fetchViaCep(digits);
       if (!data) { setError("CEP não encontrado."); return; }
-      const options = estimateShippingOptions(data.uf, parseShippingConfig(shippingConfigRaw), freeShipping)
+      const options = estimateShippingOptions(digits, parseShippingConfig(shippingConfigRaw), freeShipping)
         .map(option => ({ name: option.name, days: option.days, price: option.free ? "Grátis" : formatPrice(option.price) }));
 
       setResult({ city: data.localidade, state: data.uf, options });

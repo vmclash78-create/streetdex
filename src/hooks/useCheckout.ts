@@ -137,7 +137,7 @@ export const useCheckout = ({ cartItems, onOrderComplete }: UseCheckoutProps) =>
       setAddress(prev => ({ ...prev, street: data.logradouro || prev.street, neighborhood: data.bairro || prev.neighborhood, city: data.localidade || prev.city }));
       setOfficialStreet(data.logradouro || null);
       const cfg = parseShippingConfig(settings?.shipping_config);
-      const opts = estimateShippingOptions(data.uf, cfg, allItemsFreeShipping);
+      const opts = estimateShippingOptions(cep, cfg, allItemsFreeShipping);
       setShippingOptions(opts);
       setSelectedShipping(opts[0] || null);
       setShippingLoc({ city: data.localidade, uf: data.uf });

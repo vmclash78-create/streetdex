@@ -28,6 +28,17 @@ export const ufToRegion = (uf: string): RegionCode => {
   return "N";
 };
 
+// Mesma regra usada no servidor ao criar o pedido (faixas de CEP).
+export const cepToRegion = (cep: string): RegionCode => {
+  const n = parseInt(cep.replace(/\D/g, ""), 10) || 0;
+  if (n >= 1000000 && n <= 39999999) return "SE";
+  if (n >= 40000000 && n <= 65999999) return "NE";
+  if ((n >= 66000000 && n <= 69999999) || (n >= 76800000 && n <= 77999999)) return "N";
+  if ((n >= 70000000 && n <= 76799999) || (n >= 78000000 && n <= 79999999)) return "CO";
+  if (n >= 80000000 && n <= 99999999) return "S";
+  return "NE";
+};
+
 export const parseShippingConfig = (raw?: string | null): Record<string, RegionCfg> => {
   if (!raw) return DEFAULT_SHIPPING;
   try {
@@ -45,11 +56,11 @@ export type ShippingOption = {
 };
 
 export const estimateShippingOptions = (
-  uf: string,
+  cep: string,
   cfg: Record<string, RegionCfg>,
   allFree: boolean
 ): ShippingOption[] => {
-  const r = cfg[ufToRegion(uf)] || DEFAULT_SHIPPING.SE;
+  const r = cfg[cepToRegion(cep)] || DEFAULT_SHIPPING.SE;
   return [
     { name: "PAC", days: `${r.pac_days} dias úteis`, price: allFree ? 0 : r.pac_price, free: allFree },
     { name: "SEDEX", days: `${r.sedex_days} dias úteis`, price: r.sedex_price, free: false },
