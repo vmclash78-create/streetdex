@@ -66,29 +66,8 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
 
     if (status === "entregue") {
       try {
-        const itemsRes = await supabase.from("order_items").select("*").eq("order_id", orderId);
-        if (itemsRes.error) throw itemsRes.error;
-
-        const saleData = {
-          sale_date: new Date().toISOString().split("T")[0],
-          customer_name: order.customers?.name || null,
-          payment_method: order.payment_method,
-          discount: 0,
-          total: Number(order.total),
-          notes: order.notes,
-          order_number: order.order_number
-        };
-
-        const saleItems = itemsRes.data.map(item => ({
-          product_id: item.product_id,
-          product_name: item.product_name,
-          quantity: item.quantity,
-          unit_price: Number(item.price),
-          unit_cost: 0, 
-          size: item.size
-        }));
-
-        await createSale.mutateAsync({ sale: saleData as any, items: saleItems as any });
+        const { error } = await supabase.rpc("complete_delivered_order", { p_order_id: orderId });
+        if (error) throw error;
         await updateStatus.mutateAsync({ id: orderId, status });
         toast({ title: "Sucesso", description: "Pedido entregue e registrado em Vendas!" });
         return;
@@ -98,7 +77,11 @@ const OrdersAdminView = ({ somLiberado, testarNotificacao }: OrdersAdminViewProp
       }
     }
 
-    await updateStatus.mutateAsync({ id: orderId, status });
+    try {
+      await updateStatus.mutateAsync({ id: orderId, status });
+    } catch (error: unknown) {
+      toast({ title: "Erro ao atualizar pedido", description: error instanceof Error ? error.message : "Tente novamente.", variant: "destructive" });
+    }
   };
 
   const filteredOrders = useMemo(() => {
