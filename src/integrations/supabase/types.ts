@@ -690,6 +690,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_delivered_order: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
       create_storefront_order:
         | {
             Args: {
